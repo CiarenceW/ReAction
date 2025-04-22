@@ -1,4 +1,4 @@
-# ReInput
+# ReAction
 
 ## Alternative input system for s&box
 
@@ -21,7 +21,7 @@ This is built using raw input, via `Input.Keyboard`.
 ## How to use <a name="howtouse"></a>
 
 ### Basics <a name="basics"></a>
-Under the "View" tab in the editor, you enable the suspiciously familiar ReInput Actions window.  
+Under the "View" tab in the editor, you enable the suspiciously familiar ReAction Actions window.  
 Then, you define a new action, you give it a name, a KeyCode, and an activation condition.  
   
 This activation condition can be one of the following:  
@@ -50,23 +50,31 @@ You can give you action any, and all of these modifiers:
 - RShift (also called RWin)  
 - RCtrl  
 
-Instead of `Input.Down`, `Pressed`, or `Released`, you use `ReInput.ActionTriggered`.  
+Instead of `Input.Down`, `Pressed`, or `Released`, you use `ReAction.ActionTriggered`.  
 
-The inputs are polled via the ReInputSystem, which is a GameObjectSystem that activates at the beginning of each frame.
+If you really really reallyyyyyyyyyyyy miss those methods, you can use `ReAction.KeyDown`, `ReAction.KeyPressed` or `ReAction.KeyReleased` respectively. They're basically the `Input.Keyboard` methods, but you don't have to remember the source bind names.
+
+The inputs are polled via the ReActionSystem, which is a GameObjectSystem that activates at the beginning of each frame.
 
 To save the configured actions, click the Save Actions button, this will save the actions locally, only for you. If you want to have the configured actions be the project's default, click the Set As New Game Default.
 
 ### Extra features <a name="extra"></a>
-You can check if an action would be triggered with a different conditional by doing `ReInput.ActionConditionsValid(string or int, Conditional)`  
+You can check if an action would be triggered with a different conditional by doing `ReAction.ActionConditionsValid(string or int, Conditional)`  
 
 If your action has an analog GamepadInput, you can check its value with the `Analog` property  
-Each action also has a configurable PositiveAxis property boolean, again, for analog inputs.
+Each action also has a configurable PositiveAxis property boolean, again, for analog inputs.  
 
-There's a button to export the indices of your actions to `public int consts`, or `public static readonly ints` in ReInputConsts.cs file, that will be placed alongside your code, this is good for preventing typos and such :) :) :)
+There's a button to export the indices of your actions to `public int consts`, or `public static readonly ints` in ReActionConsts.cs file, that will be placed alongside your code, this is good for preventing typos and such :) :) :)  
+
+You can use the `ReAction_debug` command line to enable/disable the ReAction overlay, it's not a cheat by default, is that bad?  
 
 ## WIP stuff: <a name="wip"></a>  
 Gamepad support is still wip, I don't even think it works, lol  
 
 TODO:  
 there's stuff on the [Bind](https://developer.valvesoftware.com/wiki/Bind) page on the valve developer wiki that probably could be used, like the joy14 and joy13 shtuff :) :) :)  
-being able to switch context, basically have different sets of bindings, ie. one for walking, one for driving, one for flying a plane
+being able to switch context, basically have different sets of bindings, ie. one for walking, one for driving, one for flying a plane  
+wish very very hard for facepunch to add the SDL_GameControllerGetTouchpadFinger method :)  
+One could probably port this to Unity? I heard the Input system they have is dogshit, lol  
+Find a way to maybe properly handle different keyboard layouts? I have an azerty keyboard and because everyone who's working at facepunch is racist I couldn't rebind my forward key when I was playing sandbox (as in the game). The main problem is checking the current keyboard layout, you can use Windows.Forms.Input or something like that to get it, but A: only available on windows, and I want this to be cross-platform (s&box linux version coming tomorrow, trust) and B: I don't think it's in the whitelist :(  
+It would be nice if s&box had a SANDBOX_STANDALONE constant, that way one could do non-whitelisted stuff without having to make an entirely new version :(
