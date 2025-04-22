@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
+#if UNITY_EDITOR
+using UnityEditor;
+using UnityEngine;
+#endif
 
 namespace ReAction
 {
@@ -17,6 +19,7 @@ namespace ReAction
 
 		internal static void GetSavedActionData()
 		{
+			#if SANDBOX
 			FileSystem.Data.CreateDirectory("ReAction");
 			if (FileSystem.Data.FileExists(FileSystem.NormalizeFilename(filePath)))
 			{
@@ -36,6 +39,7 @@ namespace ReAction
 			{
 				ReActionLogger.Warning("Could not find a default actions file");
 			}
+			#endif
 		}
 
 		public static HashSet<ReAction.Action> DefaultActions
@@ -46,7 +50,12 @@ namespace ReAction
 			new ReAction.Action(
 	"Forward",
 	0,
-	KeyCode.KEY_W,
+#if SANDBOX
+	KeyCode.KEY_W
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.W
+#endif
+				,
 	GamepadInput.LeftStickY,
 	true,
 	Modifiers.None,
@@ -56,7 +65,12 @@ namespace ReAction
   new ReAction.Action(
 	"Backward",
 	1,
-	KeyCode.KEY_S,
+#if SANDBOX
+	KeyCode.KEY_S
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.S
+				#endif
+	  ,
 	GamepadInput.LeftStickY,
 	false,
 	Modifiers.None,
@@ -66,7 +80,12 @@ namespace ReAction
   new ReAction.Action(
 	"Left",
 	2,
-	KeyCode.KEY_A,
+#if SANDBOX
+	KeyCode.KEY_A
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.A
+				#endif
+	,
 	GamepadInput.LeftStickX,
 	true,
 	Modifiers.None,
@@ -76,7 +95,12 @@ namespace ReAction
   new ReAction.Action(
 	"Right",
 	3,
-	KeyCode.KEY_D,
+#if SANDBOX
+	KeyCode.KEY_D
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.D
+				#endif
+	,
 	GamepadInput.LeftStickX,
 	false,
 	Modifiers.None,
@@ -86,7 +110,12 @@ namespace ReAction
   new ReAction.Action(
 	"Jump",
 	4,
-	KeyCode.KEY_SPACE,
+#if SANDBOX
+	KeyCode.KEY_SPACE
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Space
+				#endif
+	  ,
 	GamepadInput.A,
 	Modifiers.None,
 	Conditional.Press,
@@ -95,7 +124,12 @@ namespace ReAction
   new ReAction.Action(
 	"Run",
 	5,
-	KeyCode.KEY_LSHIFT,
+#if SANDBOX
+	KeyCode.KEY_LSHIFT
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.LeftShift
+				#endif
+	  ,
 	GamepadInput.LeftJoystickButton,
 	Modifiers.None,
 	Conditional.Press,
@@ -104,7 +138,12 @@ namespace ReAction
   new ReAction.Action(
 	"Walk",
 	6,
-	KeyCode.KEY_LALT,
+#if SANDBOX
+	KeyCode.KEY_LALT
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.LeftAlt
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -113,7 +152,12 @@ namespace ReAction
   new ReAction.Action(
 	"Duck",
 	7,
-	KeyCode.KEY_LCONTROL,
+#if SANDBOX
+	KeyCode.KEY_LCONTROL
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.LeftControl
+				#endif
+	  ,
 	GamepadInput.B,
 	Modifiers.None,
 	Conditional.Press,
@@ -122,7 +166,12 @@ namespace ReAction
   new ReAction.Action(
 	"Attack1",
 	8,
-	KeyCode.MouseLeft,
+#if SANDBOX
+	KeyCode.MouseLeft
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Mouse0
+				#endif
+	  ,
 	GamepadInput.RightTrigger,
 	Modifiers.None,
 	Conditional.Press,
@@ -131,7 +180,12 @@ namespace ReAction
   new ReAction.Action(
 	"Attack2",
 	9,
-	KeyCode.MouseRight,
+#if SANDBOX
+	KeyCode.MouseRight
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Mouse1
+				#endif
+	  ,
 	GamepadInput.LeftTrigger,
 	Modifiers.None,
 	Conditional.Press,
@@ -140,7 +194,12 @@ namespace ReAction
   new ReAction.Action(
 	"Reload",
 	10,
-	KeyCode.KEY_R,
+#if SANDBOX
+	KeyCode.KEY_R
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.R
+				#endif
+	  ,
 	GamepadInput.X,
 	Modifiers.None,
 	Conditional.Press,
@@ -149,7 +208,12 @@ namespace ReAction
   new ReAction.Action(
 	"Use",
 	11,
-	KeyCode.KEY_E,
+#if SANDBOX
+	KeyCode.KEY_E
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.E
+				#endif
+	,
 	GamepadInput.Y,
 	Modifiers.None,
 	Conditional.Press,
@@ -158,7 +222,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot1",
 	12,
-	KeyCode.KEY_1,
+#if SANDBOX
+	KeyCode.KEY_1
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha1
+				#endif
+	  ,
 	GamepadInput.DpadWest,
 	Modifiers.None,
 	Conditional.Press,
@@ -167,7 +236,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot2",
 	13,
-	KeyCode.KEY_2,
+#if SANDBOX
+	KeyCode.KEY_2
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha2
+				#endif
+	  ,
 	GamepadInput.DpadEast,
 	Modifiers.None,
 	Conditional.Press,
@@ -176,7 +250,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot3",
 	14,
-	KeyCode.KEY_3,
+#if SANDBOX
+	KeyCode.KEY_3
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha3
+				#endif
+	,
 	GamepadInput.DpadSouth,
 	Modifiers.None,
 	Conditional.Press,
@@ -185,7 +264,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot4",
 	15,
-	KeyCode.KEY_4,
+#if SANDBOX
+	KeyCode.KEY_4
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha4
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -194,7 +278,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot5",
 	16,
-	KeyCode.KEY_5,
+#if SANDBOX
+	KeyCode.KEY_5
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha5
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -203,7 +292,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot6",
 	17,
-	KeyCode.KEY_6,
+#if SANDBOX
+	KeyCode.KEY_6
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha6
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -212,7 +306,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot7",
 	18,
-	KeyCode.KEY_7,
+#if SANDBOX
+	KeyCode.KEY_7
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha7
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -221,7 +320,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot8",
 	19,
-	KeyCode.KEY_8,
+#if SANDBOX
+	KeyCode.KEY_8
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha8
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -230,7 +334,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot9",
 	20,
-	KeyCode.KEY_9,
+#if SANDBOX
+	KeyCode.KEY_9
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha9
+				#endif
+	,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -239,7 +348,12 @@ namespace ReAction
   new ReAction.Action(
 	"Slot0",
 	21,
-	KeyCode.KEY_0,
+#if SANDBOX
+	KeyCode.KEY_0
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Alpha9
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -248,7 +362,12 @@ namespace ReAction
   new ReAction.Action(
 	"SlotPrev",
 	22,
-	KeyCode.MouseBack,
+#if SANDBOX
+	KeyCode.MouseBack
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Mouse3
+				#endif
+	  ,
 	GamepadInput.SwitchLeftBumper,
 	Modifiers.None,
 	Conditional.Press,
@@ -257,7 +376,12 @@ namespace ReAction
   new ReAction.Action(
 	"SlotNext",
 	23,
-	KeyCode.MouseForward,
+#if SANDBOX
+	KeyCode.MouseForward
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Mouse4
+				#endif
+	  ,
 	GamepadInput.SwitchRightBumper,
 	Modifiers.None,
 	Conditional.Press,
@@ -266,7 +390,12 @@ namespace ReAction
   new ReAction.Action(
 	"View",
 	24,
-	KeyCode.KEY_C,
+#if SANDBOX
+	KeyCode.KEY_C
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.C
+				#endif
+	  ,
 	GamepadInput.RightJoystickButton,
 	Modifiers.None,
 	Conditional.Press,
@@ -275,7 +404,12 @@ namespace ReAction
   new ReAction.Action(
 	"Voice",
 	25,
-	KeyCode.KEY_V,
+#if SANDBOX
+	KeyCode.KEY_V
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.V
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -284,7 +418,12 @@ namespace ReAction
   new ReAction.Action(
 	"Drop",
 	26,
-	KeyCode.KEY_G,
+#if SANDBOX
+	KeyCode.KEY_G
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.G
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -293,7 +432,12 @@ namespace ReAction
   new ReAction.Action(
 	"Flashlight",
 	27,
-	KeyCode.KEY_F,
+#if SANDBOX
+	KeyCode.KEY_F
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.F
+				#endif
+	  ,
 	GamepadInput.DpadNorth,
 	Modifiers.None,
 	Conditional.Press,
@@ -302,7 +446,12 @@ namespace ReAction
   new ReAction.Action(
 	"Score",
 	28,
-	KeyCode.KEY_TAB,
+#if SANDBOX
+	KeyCode.KEY_TAB
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Tab
+				#endif
+	  ,
 	GamepadInput.SwitchLeftMenu,
 	Modifiers.None,
 	Conditional.Press,
@@ -311,7 +460,12 @@ namespace ReAction
   new ReAction.Action(
 	"Menu",
 	29,
-	KeyCode.KEY_Q,
+#if SANDBOX
+	KeyCode.KEY_Q
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Q
+				#endif
+	  ,
 	GamepadInput.SwitchRightMenu,
 	Modifiers.None,
 	Conditional.Press,
@@ -320,7 +474,12 @@ namespace ReAction
   new ReAction.Action(
 	"Chat",
 	30,
-	KeyCode .KEY_ENTER,
+#if SANDBOX
+	KeyCode.KEY_ENTER
+#elif UNITY_STANDALONE || UNITYEDITOR
+	KeyCode.Return
+				#endif
+	  ,
 	GamepadInput.None,
 	Modifiers.None,
 	Conditional.Press,
@@ -341,7 +500,10 @@ namespace ReAction
 		public static bool IsRShiftDown => (currentlyActivatedModifiers & Modifiers.RShift) != 0;
 		public static bool IsRCtrlDown => (currentlyActivatedModifiers & Modifiers.RCtrl) != 0;
 
+
+#if SANDBOX
 		[ConVar(Name = "ReAction_debug", Flags = ConVarFlags.Saved, Saved = true, Max = 1, Min = 0, Help = "Enable ReAction debug overlay")]
+#endif
 		public static bool DebugInput { get; internal set; } = false;
 
 		[System.Flags]
@@ -360,19 +522,75 @@ namespace ReAction
 
 		static void ReacquiReActionIfNeeded()
 		{
-			if (Time.Now == lastTime)
+			if (
+#if SANDBOX
+				Time.Now
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Time.time
+#endif
+				== lastTime)
 				return;
 
 			currentlyActivatedModifiers =
 				(Modifiers)
-				(((byte)KeyDown(KeyCode.KEY_LSHIFT).GetHashCode() << 7)  | //this is the same as Convert.ToByte() btw, I refuse to use it, especially when a bool is literally just a byte!!!! let me fucking use it!!!!!!!!!!!!!!!! fuck you
-				((byte)KeyDown(KeyCode.KEY_LCONTROL).GetHashCode() << 6) |
-				((byte)KeyDown(KeyCode.KEY_LWIN).GetHashCode() << 5)     |
-				((byte)KeyDown(KeyCode.KEY_LALT).GetHashCode() << 4)     |
-				((byte)KeyDown(KeyCode.KEY_RALT).GetHashCode() << 3)     |
-				((byte)KeyDown(KeyCode.KEY_RWIN).GetHashCode() << 2)     |
-				((byte)KeyDown(KeyCode.KEY_RSHIFT).GetHashCode() << 1)   |
-				((byte)KeyDown(KeyCode.KEY_RCONTROL).GetHashCode()));
+				(((byte)
+#if SANDBOX
+				KeyDown(KeyCode.KEY_LSHIFT)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.LeftShift)
+#endif
+				.GetHashCode() << 7)  | //this is the same as Convert.ToByte() btw, I refuse to use it, especially when a bool is literally just a byte!!!! let me fucking use it!!!!!!!!!!!!!!!! fuck you
+				((byte)
+
+#if SANDBOX
+				KeyDown(KeyCode.KEY_LCONTROL)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.LeftControl)
+# endif
+				.GetHashCode() << 6) |
+				((byte)
+#if SANDBOX
+				KeyDown(KeyCode.KEY_LWIN)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.LeftMeta)
+#endif
+				.GetHashCode() << 5)     |
+				((byte)
+#if SANDBOX
+				KeyDown(KeyCode.KEY_LALT)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.LeftAlt)
+#endif
+				.GetHashCode() << 4)     |
+				((byte)
+#if SANDBOX
+				KeyDown(KeyCode.KEY_RALT)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.RightAlt)
+#endif
+				.GetHashCode() << 3)     |
+				((byte)
+
+#if SANDBOX
+				KeyDown(KeyCode.KEY_RWIN)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.RightMeta)
+# endif
+				.GetHashCode() << 2)     |
+				((byte)
+#if SANDBOX
+				KeyDown(KeyCode.KEY_RSHIFT)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.RightShift)
+#endif
+				.GetHashCode() << 1)   |
+				((byte)
+#if SANDBOX
+				KeyDown(KeyCode.KEY_RCONTROL)
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKey(KeyCode.RightControl)
+# endif
+				.GetHashCode()));
 		}
 
 		public static HashSet<Action> Actions
@@ -424,23 +642,53 @@ namespace ReAction
 		{
 			get
 			{
-				Vector3 analogMove = Vector3.Zero;
+				Vector3 analogMove =
+#if SANDBOX
+					Vector3.Zero
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Vector3.zero
+				#endif
+					;
 
 				if (ReAction.ActionTriggered("Forward", false))
 				{
-					analogMove += Vector3.Forward;
+					analogMove +=
+#if SANDBOX
+						Vector3.Forward
+#elif UNITY_STANDALONE || UNITYEDITOR
+						Vector3.forward
+# endif
+						;
 				}
 				if (ReAction.ActionTriggered("Backward", false))
 				{
-					analogMove += Vector3.Backward;
+					analogMove +=
+#if SANDBOX
+						Vector3.Backward
+#elif UNITY_STANDALONE || UNITYEDITOR
+						Vector3.back
+# endif
+						;
 				}
 				if (ReAction.ActionTriggered("Left", false))
 				{
-					analogMove += Vector3.Left;
+					analogMove += 
+#if SANDBOX
+					Vector3.Left
+#elif UNITY_STANDALONE || UNITYEDITOR
+						Vector3.left
+#endif
+						;
 				}
 				if (ReAction.ActionTriggered("Right", false))
 				{
-					analogMove += Vector3.Right;
+					analogMove += 
+#if SANDBOX
+						Vector3.Right
+#elif UNITY_STANDALONE || UNITYEDITOR
+						Vector3.right
+#endif
+						;
 				}
 
 				float moveX = 0f, moveY = 0f;
@@ -455,7 +703,13 @@ namespace ReAction
 				}
 
 				analogMove += new Vector3(moveY, moveX, 0f);
+
+#if SANDBOX
 				return analogMove.ClampLength(1f);
+#elif UNITY_STANDALONE || UNITYEDITOR
+				return Vector3.ClampMagnitude(analogMove, 1f);
+				#endif
+
 			}
 		}
 
@@ -480,7 +734,13 @@ namespace ReAction
 
 			RemoveTimedOutKeysFromLists();
 
-			lastTime = Time.Now;
+			lastTime =
+#if SANDBOX
+					Time.Now 
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+					;
 
 			DrawDebugOverlay();
 		}
@@ -496,12 +756,24 @@ namespace ReAction
 				var key = action.Key;
 				var secondaryKey = action.SecondaryKey;
 
-				if (ReAction.KeyPressed(key))
+				if (
+#if SANDBOX
+					ReAction.KeyPressed
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Input.GetKeyDown
+#endif
+					(key))
 				{
 					OnKeyPressed(key);
 				}
 
-				if (ReAction.KeyPressed(secondaryKey))
+				if (
+#if SANDBOX
+					ReAction.KeyPressed
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Input.GetKeyDown
+# endif
+					(secondaryKey))
 				{
 					OnKeyPressed(secondaryKey);
 				}
@@ -513,28 +785,64 @@ namespace ReAction
 				{
 					keysUpSince.Remove(key);
 
-					if (Time.Now - time <= DoubleTapTimeOut && time != Time.Now)
+					if (
+				#if SANDBOX
+					Time.Now 
+				#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+				#endif
+					- time <= DoubleTapTimeOut && time !=
+#if SANDBOX
+					Time.Now 
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+					)
 					{
 						validDoubleTapKeyCodes.Add(key);
 					}
 				}
 				else
 				{
-					keysUpSince.Add(key, Time.Now);
+					keysUpSince.Add(key,
+#if SANDBOX
+					Time.Now 
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+					);
 				}
 
 				if (!keysHeldSince.ContainsKey(key))
 				{
-					keysHeldSince.Add(key, Time.Now);
+					keysHeldSince.Add(key,
+#if SANDBOX
+					Time.Now 
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+					);
 				}
 
 				if (!keysPressedSince.ContainsKey(key))
 				{
-					keysPressedSince.Add(key, Time.Now);
+					keysPressedSince.Add(key,
+#if SANDBOX
+					Time.Now 
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+					);
 				}
 				else
 				{
-					keysPressedSince[key] = Time.Now;
+					keysPressedSince[key] =
+#if SANDBOX
+					Time.Now 
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+					;
 					mashedKeyCodes.Add(key);
 				}
 			}
@@ -547,7 +855,13 @@ namespace ReAction
 
 			foreach (var key in keysHeldSince)
 			{
-				if (!ReAction.KeyDown(key.Key))
+				if (!
+#if SANDBOX
+					ReAction.KeyDown
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Input.GetKey
+# endif
+					(key.Key))
 				{
 					keysHeldSinceLocal.Remove(key.Key);
 				}
@@ -560,7 +874,13 @@ namespace ReAction
 
 			foreach (var key in keysUpSince)
 			{
-				if (Time.Now - key.Value > DoubleTapTimeOut) //wow!!!! key is above the max timeout threshold, and the key isn't being held, yeet that shit
+				if (
+				#if SANDBOX
+					Time.Now 
+				#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+				#endif
+					- key.Value > DoubleTapTimeOut) //wow!!!! key is above the max timeout threshold, and the key isn't being held, yeet that shit
 				{
 					keysUpSinceLocal.Remove(key.Key);
 				}
@@ -573,7 +893,13 @@ namespace ReAction
 
 			foreach (var key in keysPressedSince)
 			{
-				if (Time.Now - key.Value > MashTimeOut)
+				if (
+					#if SANDBOX 
+					Time.Now 
+					#elif UNITY_STANDALONE || UNITYEDITOR 
+					Time.time
+					#endif
+					- key.Value > MashTimeOut)
 				{
 					keysPressedSinceLocal.Remove(key.Key);
 				}
@@ -586,6 +912,7 @@ namespace ReAction
 		{
 			if (DebugInput)
 			{
+#if SANDBOX
 				if (Game.ActiveScene != null && Game.ActiveScene.Camera != null)
 				{
 					var pixels = new Vector2(Screen.Width, Screen.Height);
@@ -628,6 +955,7 @@ namespace ReAction
 						upKeycount++;
 					}
 				}
+#endif
 			}
 		}
 
@@ -762,10 +1090,46 @@ namespace ReAction
 		{
 			return conditional switch
 			{
-				Conditional.Press => ReAction.KeyPressed(action.Key) || ReAction.KeyPressed(action.SecondaryKey),
+				Conditional.Press =>
+#if SANDBOX
+				ReAction.KeyPressed
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKeyDown
+# endif
+				(action.Key) ||
+#if SANDBOX
+				ReAction.KeyPressed
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKeyDown
+# endif
+				(action.SecondaryKey),
 				Conditional.LongPress => (keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut) || (keysHeldSince.TryGetValue(action.SecondaryKey, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
-				Conditional.Continuous => ReAction.KeyDown(action.Key) || ReAction.KeyDown(action.SecondaryKey),
-				Conditional.Release => ReAction.KeyReleased(action.Key) || ReAction.KeyReleased(action.SecondaryKey),
+				Conditional.Continuous =>
+#if SANDBOX
+				ReAction.KeyDown
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKeyDown
+# endif
+				(action.Key) ||
+#if SANDBOX
+				ReAction.KeyDown
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKeyDown
+# endif
+				(action.SecondaryKey),
+				Conditional.Release =>
+#if SANDBOX
+				ReAction.KeyReleased
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKeyUp
+# endif
+				(action.Key) ||
+#if SANDBOX
+				ReAction.KeyReleased
+#elif UNITY_STANDALONE || UNITYEDITOR
+				Input.GetKeyUp
+# endif
+				(action.SecondaryKey),
 				Conditional.DoubleTap => validDoubleTapKeyCodes.Contains(action.Key) || validDoubleTapKeyCodes.Contains(action.SecondaryKey),
 				Conditional.Toggle => toggledKeyCodes.Contains(action.Key) || toggledKeyCodes.Contains(action.SecondaryKey),
 				Conditional.Mash => mashedKeyCodes.Contains(action.Key) || mashedKeyCodes.Contains(action.SecondaryKey),
@@ -1303,7 +1667,9 @@ namespace ReAction
 			/// <summary>
 			/// You can get this action's analog value with this, if the <see cref="GamepadInput"/>'s assigned button isn't analog, it'll be 1f if the action is currently triggered, and 0f if it's not
 			/// </summary>
+#if SANDBOX
 			[JsonIgnore]
+#endif
 			public float Analog
 			{
 				get
@@ -1322,6 +1688,7 @@ namespace ReAction
 
 		public static float GetGamepadCodeAnalog(GamepadInput gamepadInput)
 		{
+#if SANDBOX
 			switch (gamepadInput)
 			{
 				case GamepadInput.LeftStickY:
@@ -1339,9 +1706,13 @@ namespace ReAction
 				default:
 					return 0f;
 			}
+#endif
+
+#warning TODO: make this interact with SDL
+			return 1f;
 		}
 
-		#if SANDBOX
+#if SANDBOX
 		/// <summary>
 		/// Allows to bind individual axes to actions, this is just <see cref="GamepadCode"/> combined with <see cref="InputAnalog"/>
 		/// </summary>
@@ -1377,9 +1748,46 @@ namespace ReAction
 			LeftStickX,
 			LeftStickY
 		}
-		# elif UNITY_EDITOR || UNITY_STANDALONE
-		// for unity, should I use SDL? I wanted to use it for controllers, but turns out uh, it also does keyboard input, lol
-		#endif
+#elif UNITY_EDITOR || UNITY_STANDALONE
+		//Holy fucking shit Unity has fucking awful Gamepad support, what the fuck
+		//Let's just use SDL, fuck it
+
+		/// <summary>
+		/// These are just the Joystick1Buttons from <see cref="KeyCode"/> but in more human readable form, supposedly they're correct for XB1 controllers on Windows 10
+		/// </summary>
+		public enum GamepadInput
+		{
+			None = -1,
+			A = 0,
+			B = 1,
+			X = 2,
+			Y = 3,
+			SwitchLeftMenu = 4,
+			Guide = 5,
+			SwitchRightMenu = 6,
+			LeftJoystickButton = 7,
+			RightJoystickButton = 8,
+			SwitchLeftBumper = 9,
+			SwitchRightBumper = 10,
+			DpadNorth = 11,
+			DpadSouth = 12,
+			DpadWest = 13,
+			DpadEast = 14,
+			Misc1 = 15,
+			Paddle1 = 16,
+			Paddle2 = 17,
+			Paddle3 = 18,
+			Paddle4 = 19,
+			Touchpad = 20,
+			BUTTONS_MAX = 21,
+			LeftTrigger = 100,
+			RightTrigger = 101,
+			RightStickX,
+			RightStickY,
+			LeftStickX,
+			LeftStickY
+		}
+#endif
 
 		public enum Conditional : byte //why did I make it a byte, idk
 		{
@@ -1413,7 +1821,7 @@ namespace ReAction
 			Mash
 		}
 
-		#if SANDBOX
+#if SANDBOX
 		//taken from NativeEngine.ButtonCode, as it's an internal enum :(
 		public enum KeyCode
 		{
@@ -1776,6 +2184,6 @@ namespace ReAction
 			KEY_XSTICK2_DOWN,
 			KEY_XSTICK2_UP
 		}
-		#endif
+#endif
 	}
 }

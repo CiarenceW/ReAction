@@ -1,6 +1,9 @@
-﻿#if SANDBOX
+﻿using System;
+using UnityEngine;
+
 namespace ReAction
 {
+#if SANDBOX
 	public class ReActionLog() : Sandbox.Diagnostics.Logger("ReAction")
 	{
 		/// <summary>
@@ -25,5 +28,18 @@ namespace ReAction
 			get;
 		} = new ReActionLog();
     }
-}
+#elif UNITY_EDITOR || UNITY_STANDALONE
+	public static class ReActionLogger
+	{
+		public static void Warning(object info)
+		{
+			Debug.LogWarning("ReAction: " + info);
+		}
+
+		public static void Info(object info)
+		{
+			Debug.Log("ReAction: " + info);
+		}
+	}
 #endif
+}
