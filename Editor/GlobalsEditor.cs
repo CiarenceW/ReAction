@@ -1,4 +1,6 @@
-﻿global using Sandbox;
+﻿#if SANDBOX
+global using Sandbox;
 global using Editor;
-global using ReInput;
-global using static ReInput.GlobalReInputLog;
+global using ReAction;
+global using static ReAction.GlobalReActionLog;
+#endif

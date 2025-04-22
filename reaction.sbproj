@@ -1,7 +1,7 @@
 {
-  "Title": "ReInput",
+  "Title": "ReAction",
   "Type": "library",
   "Org": "local",
-  "Ident": "reinput",
+  "Ident": "reaction",
   "Schema": 1
 }

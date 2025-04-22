@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if SANDBOX
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,12 +7,12 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Editor;
 using Microsoft.CodeAnalysis;
-using ReInput.Editor;
+using ReAction.Editor;
 
-namespace ReInput
+namespace ReAction
 {
-	[Dock("Editor", "ReInput Actions", "view_list")]
-    public class ReInputActionsWidget : Widget
+	[Dock("Editor", "ReAction Actions", "view_list")]
+    public class ReActionActionsWidget : Widget
     {
 		private Widget ActionsTree { get; set; }
 
@@ -19,14 +20,14 @@ namespace ReInput
 
 		private Checkbox exportAsConsts;
 
-		public const string filePath = "ReInput/actions.json";
-		public const string defaultFilePath = "ReInput/defaultActions.json";
+		public const string filePath = "ReAction/actions.json";
+		public const string defaultFilePath = "ReAction/defaultActions.json";
 
-		public ReInputActionsWidget(Widget parent) : base(parent, false)
+		public ReActionActionsWidget(Widget parent) : base(parent, false)
 		{
 			Layout = Layout.Column();
 
-			Name = "ReInputActions";
+			Name = "ReActionActions";
 
 			Layout.Margin = 4;
 			Layout.Spacing = 4;
@@ -87,7 +88,7 @@ namespace ReInput
 
 			saveActionsAsDefaultGameActionsButton.ToolTip = "Sets the current actions as the game's default keybinds";
 
-			exportIndexConstsButton.ToolTip = "Exports all actions' indices to a .cs file, for use with ReInput.ActionTriggered(int)";
+			exportIndexConstsButton.ToolTip = "Exports all actions' indices to a .cs file, for use with ReAction.ActionTriggered(int)";
 
 			exportAsConsts.ToolTip = "If true, the indices will be public const ints, instead of public static readonly ints";
 
@@ -110,45 +111,45 @@ namespace ReInput
 		[Event("scene.saved")]
 		void Save(Scene _)
 		{
-			Sandbox.FileSystem.Data.CreateDirectory("ReInput");
+			Sandbox.FileSystem.Data.CreateDirectory("ReAction");
 
-			if (!Project.Current.Config.TryGetMeta<ReInputActionSettings>("ReInputActions", out var meta))
+			if (!Project.Current.Config.TryGetMeta<ReActionSettings>("ReActionActions", out var meta))
 			{
-				meta = new ReInputActionSettings();
+				meta = new ReActionSettings();
 			}
 
-			meta.Actions = ReInput.Actions;
+			meta.Actions = ReAction.Actions;
 
 			Sandbox.FileSystem.Data.WriteJson(filePath, meta.Serialize());
 		}
 
 		void SaveActionsAsNewDefault()
 		{
-			global::Editor.FileSystem.ProjectSettings.CreateDirectory("ReInput");
-			if (!Project.Current.Config.TryGetMeta<ReInputActionSettings>("ReInputActions", out var meta))
+			global::Editor.FileSystem.ProjectSettings.CreateDirectory("ReAction");
+			if (!Project.Current.Config.TryGetMeta<ReActionSettings>("ReActionActions", out var meta))
 			{
-				meta = new ReInputActionSettings();
+				meta = new ReActionSettings();
 			}
 
-			meta.Actions = ReInput.Actions;
+			meta.Actions = ReAction.Actions;
 
-			global::Editor.FileSystem.ProjectSettings.WriteJson(ReInput.defaultFilePath, meta.Serialize());
+			global::Editor.FileSystem.ProjectSettings.WriteJson(ReAction.defaultFilePath, meta.Serialize());
 
-			Project.Current.Config.SetMeta("ReInputActions", null);
+			Project.Current.Config.SetMeta("ReActionActions", null);
 		}
 
 		void ExportIndexToFile()
 		{
-			using (FileStream fs = new FileStream(Path.Combine(Project.Current.GetCodePath(), "ReInputConsts.cs"), FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+			using (FileStream fs = new FileStream(Path.Combine(Project.Current.GetCodePath(), "ReActionConsts.cs"), FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
 			{
 				using (StreamWriter sw = new StreamWriter(fs))
 				{
 					sw.AutoFlush = false;
-					sw.WriteLine("namespace ReInput.Consts");
+					sw.WriteLine("namespace ReAction.Consts");
 					sw.WriteLine("{");
-					sw.WriteLine("\tpublic static class ReInputConsts");
+					sw.WriteLine("\tpublic static class ReActionConsts");
 					sw.WriteLine("\t{");
-					foreach (var action in ReInput.Actions)
+					foreach (var action in ReAction.Actions)
 					{
 						sw.WriteLine($"\t \t{(exportAsConsts.Value ? $"public const int {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}" : $"public static readonly int {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}")} = {action.Index};");
 					}
@@ -161,53 +162,53 @@ namespace ReInput
 
 		void CreateDefaultActions(bool toDefault = false)
 		{
-			if (ReInput.Actions.Count > 0)
+			if (ReAction.Actions.Count > 0)
 				return;
 
 			if (!toDefault)
 			{
 				if (Sandbox.FileSystem.Data.FileExists(filePath))
 				{
-					ReInputLogger.Info("Found locally saved set, applying to the thing, yeah");
+					ReActionLogger.Info("Found locally saved set, applying to the thing, yeah");
 
-					var settings = new ReInputActionSettings();
+					var settings = new ReActionSettings();
 					settings.Deserialize(Sandbox.FileSystem.Data.ReadAllText(filePath));
 
-					ReInput.Actions = settings.Actions;
+					ReAction.Actions = settings.Actions;
 
 
-					foreach (var action in ReInput.Actions)
+					foreach (var action in ReAction.Actions)
 					{
-						ReInputLogger.Info($"{action.Name}: {action.Index}");
+						ReActionLogger.Info($"{action.Name}: {action.Index}");
 					}
 					return;
 				}
 				else
 				{
-					ReInputLogger.Info("Couldn't find locally saved set");
+					ReActionLogger.Info("Couldn't find locally saved set");
 				}
 			}
 
-			if (global::Editor.FileSystem.ProjectSettings.DirectoryExists("ReInput") && global::Editor.FileSystem.ProjectSettings.FileExists(defaultFilePath))
+			if (global::Editor.FileSystem.ProjectSettings.DirectoryExists("ReAction") && global::Editor.FileSystem.ProjectSettings.FileExists(defaultFilePath))
 			{
-				if (ProjectSettings.Get<ReInputActionSettings>(defaultFilePath) != null)
+				if (ProjectSettings.Get<ReActionSettings>(defaultFilePath) != null)
 				{
-					ReInputLogger.Info("Found default set, applying " + global::Editor.FileSystem.ProjectSettings.GetFullPath(defaultFilePath));
+					ReActionLogger.Info("Found default set, applying " + global::Editor.FileSystem.ProjectSettings.GetFullPath(defaultFilePath));
 
-					ReInput.Actions = new(ProjectSettings.Get<ReInputActionSettings>(defaultFilePath).Actions);
+					ReAction.Actions = new(ProjectSettings.Get<ReActionSettings>(defaultFilePath).Actions);
 
-					foreach (var action in ReInput.Actions)
+					foreach (var action in ReAction.Actions)
 					{
-						ReInputLogger.Info($"{action.Name}: {action.Index}");
+						ReActionLogger.Info($"{action.Name}: {action.Index}");
 					}
 
 					return;
 				}
 			}
 
-			ReInputLogger.Info("Action list is null, populating with defaults");
+			ReActionLogger.Info("Action list is null, populating with defaults");
 
-			ReInput.Actions = new HashSet<ReInput.Action>(ReInput.DefaultActions);
+			ReAction.Actions = new HashSet<ReAction.Action>(ReAction.DefaultActions);
 		}
 
 		public void UpdateActionList()
@@ -215,7 +216,7 @@ namespace ReInput
 			ActionsTree.Layout.Clear(true);
 
 			string lastGroup = null;
-			foreach (var group in ReInput.Actions.GroupBy(x => x.Category))
+			foreach (var group in ReAction.Actions.GroupBy(x => x.Category))
 			{
 				var collapsibleCategory = ActionsTree.Layout.Add(new CollapsibleCategory(null, group.Key) { Name = $"Group {group.First().Category}"});
 
@@ -238,8 +239,8 @@ namespace ReInput
 
 			var add = () =>
 			{
-				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {ReInput.Actions.Count}" : entry.Text;
-				AddAction(new ReInput.Action(name, ReInput.Actions.Count, ReInput.KeyCode.KEY_NONE, ReInput.GamepadInput.None, ReInput.Modifiers.None, ReInput.Conditional.Press, lastGroup ?? "Other"), updateDisplay: true);
+				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {ReAction.Actions.Count}" : entry.Text;
+				AddAction(new ReAction.Action(name, ReAction.Actions.Count, ReAction.KeyCode.KEY_NONE, ReAction.GamepadInput.None, ReAction.Modifiers.None, ReAction.Conditional.Press, lastGroup ?? "Other"), updateDisplay: true);
 			};
 
 			entry.ReturnPressed += add;
@@ -265,17 +266,17 @@ namespace ReInput
 			};
 		}
 
-		public void AddAction(ReInput.Action action, bool updateDisplay = true)
+		public void AddAction(ReAction.Action action, bool updateDisplay = true)
 		{
-			ReInput.Actions.Add(action);
+			ReAction.Actions.Add(action);
 
 			if (updateDisplay)
 				UpdateActionList();
 		}
 
-		public void RemoveAction(ReInput.Action action)
+		public void RemoveAction(ReAction.Action action)
 		{
-			ReInput.Actions.Remove(action);
+			ReAction.Actions.Remove(action);
 
 			UpdateActionList();
 		}
@@ -284,7 +285,7 @@ namespace ReInput
 		{
 			Log.Info("Clearing actions");
 
-			ReInput.Actions.Clear();
+			ReAction.Actions.Clear();
 		}
 
 		[EditorEvent.Hotload]
@@ -295,3 +296,4 @@ namespace ReInput
 		}
 	}
 }
+#endif

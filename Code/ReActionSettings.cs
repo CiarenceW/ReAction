@@ -1,15 +1,16 @@
-﻿using System;
+﻿#if SANDBOX
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ReInput.ReInput;
+using static ReAction.ReAction;
 
-namespace ReInput
+namespace ReAction
 {
-	public class ReInputActionSettings : ConfigData
+	public class ReActionSettings : ConfigData
 	{
-		public ReInputActionSettings()
+		public ReActionSettings()
 		{
 			this.Actions = new();
 			InitDefault();
@@ -18,13 +19,14 @@ namespace ReInput
 		public void InitDefault()
 		{
 			this.Actions?.Clear();
-			this.Actions = ReInput.DefaultActions;
+			this.Actions = ReAction.DefaultActions;
 		}
 
-		public HashSet<ReInput.Action> Actions
+		public HashSet<ReAction.Action> Actions
 		{
 			get;
 			set;
 		}
 	}
 }
+#endif

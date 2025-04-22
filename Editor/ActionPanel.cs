@@ -1,22 +1,23 @@
-﻿using System.Linq;
+﻿#if SANDBOX
+using System.Linq;
 
-namespace ReInput.Editor;
+namespace ReAction.Editor;
 
 partial class ActionPanel : Widget
 {
-	private ReInput.Action Action
+	private ReAction.Action Action
 	{
 		get; set;
 	}
 
-	private ReInputActionsWidget Page
+	private ReActionActionsWidget Page
 	{
 		get; set;
 	}
 
 	int Index { get; set; } = -1;
 
-	public ActionPanel(ReInput.Action action, ReInputActionsWidget page) : base(null)
+	public ActionPanel(ReAction.Action action, ReActionActionsWidget page) : base(null)
 	{
 		Page = page;
 		Action = action;
@@ -24,16 +25,16 @@ partial class ActionPanel : Widget
 		Cursor = CursorShape.Finger;
 	}
 
-	private string GetFriendlyGamepadInput(ReInput.GamepadInput value)
+	private string GetFriendlyGamepadInput(ReAction.GamepadInput value)
 	{
-		return DisplayInfo.ForEnumValues<ReInput.GamepadInput>()
+		return DisplayInfo.ForEnumValues<ReAction.GamepadInput>()
 			.FirstOrDefault(x => x.value.Equals(value))
 			.info.Name;
 	}
 
-	private string GetFriendlyKeyCode(ReInput.KeyCode value)
+	private string GetFriendlyKeyCode(ReAction.KeyCode value)
 	{
-		return DisplayInfo.ForEnumValues<ReInput.KeyCode>()
+		return DisplayInfo.ForEnumValues<ReAction.KeyCode>()
 			.FirstOrDefault(x => x.value.Equals(value))
 			.info.Name;
 	}
@@ -82,7 +83,7 @@ partial class ActionPanel : Widget
 		var width = DrawTextWithIcon(r, GetFriendlyKeyCode(Action.Key), "keyboard");
 		r.Right -= width - 8;
 
-		if (Action.GamepadInput != ReInput.GamepadInput.None)
+		if (Action.GamepadInput != ReAction.GamepadInput.None)
 		{
 			width = DrawTextWithIcon(r, GetFriendlyGamepadInput(Action.GamepadInput), "sports_esports");
 			r.Right -= width - 8;
@@ -103,7 +104,7 @@ partial class ActionPanel : Widget
 
 			m.AddOption("Duplicate", "file_copy", () =>
 			{
-				Page.AddAction(new ReInput.Action(Action));
+				Page.AddAction(new ReAction.Action(Action));
 			});
 
 			m.AddOption("Delete", "delete", () =>
@@ -140,3 +141,4 @@ partial class ActionPanel : Widget
 		d.Show();
 	}
 }
+#endif

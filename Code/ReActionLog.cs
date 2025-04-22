@@ -1,6 +1,7 @@
-﻿namespace ReInput
+﻿#if SANDBOX
+namespace ReAction
 {
-	public class ReInputLog() : Sandbox.Diagnostics.Logger("ReInput")
+	public class ReActionLog() : Sandbox.Diagnostics.Logger("ReAction")
 	{
 		/// <summary>
 		/// Shorthand for calling <see cref="Sandbox.Diagnostics.Logger.Info(object)"/> with <code>$"{fieldName}: {field}</code>
@@ -17,11 +18,12 @@
 		}
 	}
 
-	public static class GlobalReInputLog
+	public static class GlobalReActionLog
     {
-		public static ReInputLog ReInputLogger
+		public static ReActionLog ReActionLogger
 		{
 			get;
-		} = new ReInputLog();
+		} = new ReActionLog();
     }
 }
+#endif

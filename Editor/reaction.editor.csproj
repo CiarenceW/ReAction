@@ -3,8 +3,8 @@
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<AssemblyName>reinput.editor</AssemblyName>
-		<PackageId>reinput.editor</PackageId>
+		<AssemblyName>reaction.editor</AssemblyName>
+		<PackageId>reaction.editor</PackageId>
 		<LangVersion>13</LangVersion>
 		<NoWarn>1701;1702;1591;</NoWarn>
 		<WarningsAsErrors></WarningsAsErrors>
@@ -38,7 +38,7 @@
 
   <PropertyGroup>
 	<OutputPath>G:\SteamLibrary\steamapps\common\sbox/.vs/output/</OutputPath>
-	<DocumentationFile>G:\SteamLibrary\steamapps\common\sbox/.vs/output/reinput.editor.xml</DocumentationFile>
+	<DocumentationFile>G:\SteamLibrary\steamapps\common\sbox/.vs/output/reaction.editor.xml</DocumentationFile>
 	<RootNamespace>Sandbox</RootNamespace>
 	<Nullable>disable</Nullable>
   </PropertyGroup>
@@ -64,7 +64,7 @@
 		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\editor\ActionGraph\Code\actiongraph.csproj" />
 		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\editor\Hammer\Code\hammer.csproj" />
 		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\addons\tools\Code\Base Editor Library.csproj" />
-		<ProjectReference Include="J:\Documents\s&amp;box projects\enlocked\Libraries\ReInput\Code\reinput.csproj" />
+		<ProjectReference Include="J:\Documents\s&amp;box projects\enlocked\Libraries\ReAction\Code\reaction.csproj" />
 		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\editor\ShaderGraph\Code\shadergraph.csproj" />
 
   </ItemGroup>

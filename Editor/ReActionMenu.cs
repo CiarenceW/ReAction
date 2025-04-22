@@ -1,39 +1,40 @@
+#if SANDBOX
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace ReInput
+namespace ReAction
 {
-	public static class ReInputMenu
+	public static class ReActionMenu
 	{
-		[Menu("Editor", "ReInput/RegenerateKeyCodeThing")]
+		[Menu("Editor", "ReAction/RegenerateKeyCodeThing")]
 		public static void OpenMyMenu()
 		{
 			Regenerate();
 		}
 
-		[Menu("Editor", "ReInput/ConvertS&BoxActionsToReInputActions")]
+		[Menu("Editor", "ReAction/ConvertS&BoxActionsToReActionActions")]
 		public static void ConvertActions()
 		{
 			//this is a fucking hackjob lmao, but it works!! whatever!!!
 
-			Sandbox.FileSystem.Data.CreateDirectory("ReInput");
+			Sandbox.FileSystem.Data.CreateDirectory("ReAction");
 
-			HashSet<ReInput.Action> convertedActions = new();
+			HashSet<ReAction.Action> convertedActions = new();
 
 			var actions = Sandbox.Input.GetActions();
 
 			InputAction action;
 
-			var flippedDic = new Dictionary<string, ReInput.KeyCode>();
+			var flippedDic = new Dictionary<string, ReAction.KeyCode>();
 
-			foreach (var keyVal in ReInput.keyCodeToString)
+			foreach (var keyVal in ReAction.keyCodeToString)
 			{
 				if (keyVal.Value == null)
 				{
-					ReInputLogger.Info($"{keyVal.Key}'s value is null");
+					ReActionLogger.Info($"{keyVal.Key}'s value is null");
 				}
 				else
 				if (!flippedDic.ContainsKey(keyVal.Value.ToUpperInvariant()))
@@ -46,11 +47,11 @@ namespace ReInput
 			{
 				action = actions.ElementAt(actionIndex);
 
-				var convertedAction = new ReInput.Action(action.Name, actionIndex, flippedDic[action.KeyboardCode.ToUpperInvariant()], (ReInput.GamepadInput)action.GamepadCode, true, ReInput.Modifiers.None, ReInput.Conditional.Press, action.GroupName);
+				var convertedAction = new ReAction.Action(action.Name, actionIndex, flippedDic[action.KeyboardCode.ToUpperInvariant()], (ReAction.GamepadInput)action.GamepadCode, true, ReAction.Modifiers.None, ReAction.Conditional.Press, action.GroupName);
 				convertedActions.Add(convertedAction);
 			}
 
-			Sandbox.FileSystem.Data.WriteJson("ReInput/convertedActions.json", convertedActions);
+			Sandbox.FileSystem.Data.WriteJson("ReAction/convertedActions.json", convertedActions);
 		}
 
 		private static void Regenerate()
@@ -70,7 +71,7 @@ namespace ReInput
 
 					foreach (var value in enumValuesArray)
 					{
-						if (value.ToString() == ReInput.KeyCode.KEY_LAST.ToString() || value.GetHashCode() > 313)
+						if (value.ToString() == ReAction.KeyCode.KEY_LAST.ToString() || value.GetHashCode() > 313)
 						{
 							continue;
 						}
@@ -85,3 +86,4 @@ namespace ReInput
 		}
 	}
 }
+#endif

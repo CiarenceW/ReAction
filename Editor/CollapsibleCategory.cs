@@ -1,4 +1,5 @@
-﻿namespace ReInput.Editor;
+﻿#if SANDBOX
+namespace ReAction.Editor;
 
 internal partial class CollapsibleCategory : Widget
 {
@@ -96,4 +97,4 @@ internal partial class CollapsibleCategory : Widget
 		}
 	}
 }
-
+#endif

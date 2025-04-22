@@ -3,47 +3,47 @@ using System.Globalization;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace ReInput
+namespace ReAction
 {
-	public static class ReInput
+	public static class ReAction
 	{
 		public const string fileName = "actions.json";
 
-		public const string filePath = "ReInput/" + fileName;
+		public const string filePath = "ReAction/" + fileName;
 
 		public const string defaultFileName = "defaultActions.json";
 
-		public const string defaultFilePath = "ReInput/" + defaultFileName;
+		public const string defaultFilePath = "ReAction/" + defaultFileName;
 
 		internal static void GetSavedActionData()
 		{
-			FileSystem.Data.CreateDirectory("ReInput");
+			FileSystem.Data.CreateDirectory("ReAction");
 			if (FileSystem.Data.FileExists(FileSystem.NormalizeFilename(filePath)))
 			{
-				ReInputLogger.Info("Found saved local actions, applying");
+				ReActionLogger.Info("Found saved local actions, applying");
 
-				var settings = new ReInputActionSettings();
+				var settings = new ReActionSettings();
 				settings.Deserialize(FileSystem.Data.ReadAllText(filePath));
 
 				Actions = settings.Actions;
 			}
-			else if (ProjectSettings.Get<ReInputActionSettings>("ReInput/defaultActions.json") != null)
+			else if (ProjectSettings.Get<ReActionSettings>("ReAction/defaultActions.json") != null)
 			{
-				ReInputLogger.Info("No saved actions, using default actions");
-				Actions = new(ProjectSettings.Get<ReInputActionSettings>("ReInput/defaultActions.json").Actions);
+				ReActionLogger.Info("No saved actions, using default actions");
+				Actions = new(ProjectSettings.Get<ReActionSettings>("ReAction/defaultActions.json").Actions);
 			}
 			else
 			{
-				ReInputLogger.Warning("Could not find a default actions file");
+				ReActionLogger.Warning("Could not find a default actions file");
 			}
 		}
 
-		public static HashSet<ReInput.Action> DefaultActions
+		public static HashSet<ReAction.Action> DefaultActions
 		{
 			get;
 		} = new()
 		{
-			new ReInput.Action(
+			new ReAction.Action(
 	"Forward",
 	0,
 	KeyCode.KEY_W,
@@ -53,7 +53,7 @@ namespace ReInput
 	Conditional.Continuous,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Backward",
 	1,
 	KeyCode.KEY_S,
@@ -63,7 +63,7 @@ namespace ReInput
 	Conditional.Continuous,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Left",
 	2,
 	KeyCode.KEY_A,
@@ -73,7 +73,7 @@ namespace ReInput
 	Conditional.Continuous,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Right",
 	3,
 	KeyCode.KEY_D,
@@ -83,7 +83,7 @@ namespace ReInput
 	Conditional.Continuous,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Jump",
 	4,
 	KeyCode.KEY_SPACE,
@@ -92,7 +92,7 @@ namespace ReInput
 	Conditional.Press,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Run",
 	5,
 	KeyCode.KEY_LSHIFT,
@@ -101,7 +101,7 @@ namespace ReInput
 	Conditional.Press,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Walk",
 	6,
 	KeyCode.KEY_LALT,
@@ -110,7 +110,7 @@ namespace ReInput
 	Conditional.Press,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Duck",
 	7,
 	KeyCode.KEY_LCONTROL,
@@ -119,7 +119,7 @@ namespace ReInput
 	Conditional.Press,
 	"Movement"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Attack1",
 	8,
 	KeyCode.MouseLeft,
@@ -128,7 +128,7 @@ namespace ReInput
 	Conditional.Press,
 	"Actions"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Attack2",
 	9,
 	KeyCode.MouseRight,
@@ -137,7 +137,7 @@ namespace ReInput
 	Conditional.Press,
 	"Actions"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Reload",
 	10,
 	KeyCode.KEY_R,
@@ -146,7 +146,7 @@ namespace ReInput
 	Conditional.Press,
 	"Actions"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Use",
 	11,
 	KeyCode.KEY_E,
@@ -155,7 +155,7 @@ namespace ReInput
 	Conditional.Press,
 	"Actions"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot1",
 	12,
 	KeyCode.KEY_1,
@@ -164,7 +164,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot2",
 	13,
 	KeyCode.KEY_2,
@@ -173,7 +173,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot3",
 	14,
 	KeyCode.KEY_3,
@@ -182,7 +182,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot4",
 	15,
 	KeyCode.KEY_4,
@@ -191,7 +191,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot5",
 	16,
 	KeyCode.KEY_5,
@@ -200,7 +200,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot6",
 	17,
 	KeyCode.KEY_6,
@@ -209,7 +209,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot7",
 	18,
 	KeyCode.KEY_7,
@@ -218,7 +218,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot8",
 	19,
 	KeyCode.KEY_8,
@@ -227,7 +227,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot9",
 	20,
 	KeyCode.KEY_9,
@@ -236,7 +236,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Slot0",
 	21,
 	KeyCode.KEY_0,
@@ -245,7 +245,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"SlotPrev",
 	22,
 	KeyCode.MouseBack,
@@ -254,7 +254,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"SlotNext",
 	23,
 	KeyCode.MouseForward,
@@ -263,7 +263,7 @@ namespace ReInput
 	Conditional.Press,
 	"Inventory"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"View",
 	24,
 	KeyCode.KEY_C,
@@ -272,7 +272,7 @@ namespace ReInput
 	Conditional.Press,
 	"Other"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Voice",
 	25,
 	KeyCode.KEY_V,
@@ -281,7 +281,7 @@ namespace ReInput
 	Conditional.Press,
 	"Other"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Drop",
 	26,
 	KeyCode.KEY_G,
@@ -290,7 +290,7 @@ namespace ReInput
 	Conditional.Press,
 	"Other"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Flashlight",
 	27,
 	KeyCode.KEY_F,
@@ -299,7 +299,7 @@ namespace ReInput
 	Conditional.Press,
 	"Other"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Score",
 	28,
 	KeyCode.KEY_TAB,
@@ -308,7 +308,7 @@ namespace ReInput
 	Conditional.Press,
 	"Other"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Menu",
 	29,
 	KeyCode.KEY_Q,
@@ -317,7 +317,7 @@ namespace ReInput
 	Conditional.Press,
 	"Other"
   ),
-  new ReInput.Action(
+  new ReAction.Action(
 	"Chat",
 	30,
 	KeyCode .KEY_ENTER,
@@ -341,7 +341,7 @@ namespace ReInput
 		public static bool IsRShiftDown => (currentlyActivatedModifiers & Modifiers.RShift) != 0;
 		public static bool IsRCtrlDown => (currentlyActivatedModifiers & Modifiers.RCtrl) != 0;
 
-		[ConVar(Name = "reinput_debug", Flags = ConVarFlags.Saved, Saved = true, Max = 1, Min = 0, Help = "Enable ReInput debug overlay")]
+		[ConVar(Name = "ReAction_debug", Flags = ConVarFlags.Saved, Saved = true, Max = 1, Min = 0, Help = "Enable ReAction debug overlay")]
 		public static bool DebugInput { get; internal set; } = false;
 
 		[System.Flags]
@@ -358,7 +358,7 @@ namespace ReInput
 			RCtrl = 1 << (8 - 8),
 		}
 
-		static void ReacquireInputIfNeeded()
+		static void ReacquiReActionIfNeeded()
 		{
 			if (Time.Now == lastTime)
 				return;
@@ -426,30 +426,30 @@ namespace ReInput
 			{
 				Vector3 analogMove = Vector3.Zero;
 
-				if (ReInput.ActionTriggered("Forward", false))
+				if (ReAction.ActionTriggered("Forward", false))
 				{
 					analogMove += Vector3.Forward;
 				}
-				if (ReInput.ActionTriggered("Backward", false))
+				if (ReAction.ActionTriggered("Backward", false))
 				{
 					analogMove += Vector3.Backward;
 				}
-				if (ReInput.ActionTriggered("Left", false))
+				if (ReAction.ActionTriggered("Left", false))
 				{
 					analogMove += Vector3.Left;
 				}
-				if (ReInput.ActionTriggered("Right", false))
+				if (ReAction.ActionTriggered("Right", false))
 				{
 					analogMove += Vector3.Right;
 				}
 
 				float moveX = 0f, moveY = 0f;
 
-				if (ReInput.TryGetAction("Forward", out var forward))
+				if (ReAction.TryGetAction("Forward", out var forward))
 				{
 					moveX = forward.Analog;
 				}
-				if (ReInput.TryGetAction("Left", out var left))
+				if (ReAction.TryGetAction("Left", out var left))
 				{
 					moveY = left.Analog;
 				}
@@ -464,17 +464,17 @@ namespace ReInput
 		/// </summary>
 		public static void Init()
 		{
-			ReInputLogger.Info("Initialising ReInput");
+			ReActionLogger.Info("Initialising ReAction");
 
 			GetSavedActionData();
 		}
 
 		/// <summary>
-		/// This is where the Input gets polled, view this as the Update() method for ReInput, you probably don't need to call it, the <see cref="ReInputSystem"/> should take care of it
+		/// This is where the Input gets polled, view this as the Update() method for ReAction, you probably don't need to call it, the <see cref="ReActionSystem"/> should take care of it
 		/// </summary>
 		public static void PollInput()
 		{
-			ReacquireInputIfNeeded();
+			ReacquiReActionIfNeeded();
 
 			PopulateActionsLists();
 
@@ -495,7 +495,7 @@ namespace ReInput
 			{
 				var key = action.Key;
 
-				if (ReInput.KeyPressed(key))
+				if (ReAction.KeyPressed(key))
 				{
 					if (keysUpSince.TryGetValue(key, out var time))
 					{
@@ -536,7 +536,7 @@ namespace ReInput
 
 			foreach (var key in keysHeldSince)
 			{
-				if (!ReInput.KeyDown(key.Key))
+				if (!ReAction.KeyDown(key.Key))
 				{
 					keysHeldSinceLocal.Remove(key.Key);
 				}
@@ -573,15 +573,15 @@ namespace ReInput
 
 		static void DrawDebugOverlay()
 		{
-			if (bool.TryParse(ConsoleSystem.GetValue("reinput_debug", "false"), out var result) && result)
+			if (bool.TryParse(ConsoleSystem.GetValue("ReAction_debug", "false"), out var result) && result)
 			{
 				if (Game.ActiveScene != null && Game.ActiveScene.Camera != null)
 				{
 					var pixels = new Vector2(Screen.Width, Screen.Height);
 
 					var hud = Game.ActiveScene.Camera.Hud;
-					hud.DrawText(new TextRendering.Scope("ReInput state:", Color.Yellow, 32), new Rect(0, 0, pixels.x, pixels.y), TextFlag.LeftTop);
-					hud.DrawText(new TextRendering.Scope($"Modifiers: {ReInput.currentlyActivatedModifiers.ToString()}", Color.Yellow, 32), new Rect(0, pixels.y * 0.05f, pixels.x, pixels.y), TextFlag.LeftTop);
+					hud.DrawText(new TextRendering.Scope("ReAction state:", Color.Yellow, 32), new Rect(0, 0, pixels.x, pixels.y), TextFlag.LeftTop);
+					hud.DrawText(new TextRendering.Scope($"Modifiers: {ReAction.currentlyActivatedModifiers.ToString()}", Color.Yellow, 32), new Rect(0, pixels.y * 0.05f, pixels.x, pixels.y), TextFlag.LeftTop);
 
 					if (validDoubleTapKeyCodes.Count > 0)
 					{
@@ -676,7 +676,7 @@ namespace ReInput
 			}
 
 			if (complainOnMissing)
-				ReInputLogger.Warning($"Could not find Action with index {index}");
+				ReActionLogger.Warning($"Could not find Action with index {index}");
 
 			return false;
 		}
@@ -701,7 +701,7 @@ namespace ReInput
 			}
 
 			if (complainOnMissing)
-				ReInputLogger.Warning($"Could not find Action with name {name}");
+				ReActionLogger.Warning($"Could not find Action with name {name}");
 
 			return false;
 		}
@@ -751,16 +751,18 @@ namespace ReInput
 		{
 			return conditional switch
 			{
-				Conditional.Press => ReInput.KeyPressed(action.Key),
+				Conditional.Press => ReAction.KeyPressed(action.Key),
 				Conditional.LongPress => keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut,//I guess I could have a nullref somehow if there's a race condition with the component's updates?
-				Conditional.Continuous => ReInput.KeyDown(action.Key),
-				Conditional.Release => ReInput.KeyReleased(action.Key),
+				Conditional.Continuous => ReAction.KeyDown(action.Key),
+				Conditional.Release => ReAction.KeyReleased(action.Key),
 				Conditional.DoubleTap => validDoubleTapKeyCodes.Contains(action.Key),
 				Conditional.Toggle => toggledKeyCodes.Contains(action.Key),
+				Conditional.Mash => mashedKeyCodes.Contains(action.Key),
 				_ => false,
 			};
 		}
 
+#if SANDBOX
 		/// <summary>
 		/// Like <see cref="Input.Keyboard.Down(string)"/> but you don't have to guess the key name
 		/// </summary>
@@ -1118,6 +1120,8 @@ namespace ReInput
 			{ KeyCode.MouseForward, "mouse5" }
 		};
 
+#endif
+
 		public class Action
 		{
 			public Action(string name, int index, KeyCode key, GamepadInput gamepadInput, Modifiers modifiers, Conditional conditional, string category = "Default")
@@ -1156,14 +1160,14 @@ namespace ReInput
 
 			public Action() 
 			{
-				Index = ReInput.Actions.Count;
+				Index = ReAction.Actions.Count;
 				Name = $"New action {Index}";
 			}
 
 			public Action(Action other)
 			{
 				this.Name = other.Name;
-				this.Index = ReInput.Actions.Count;
+				this.Index = ReAction.Actions.Count;
 				this.Key = other.Key;
 				this.GamepadInput = other.GamepadInput;
 				this.PositiveAxis = other.PositiveAxis;
@@ -1260,7 +1264,7 @@ namespace ReInput
 				{
 					if (GamepadInput < GamepadInput.LeftTrigger)
 					{
-						return ReInput.ActionTriggered(this) ? 1f : 0f;
+						return ReAction.ActionTriggered(this) ? 1f : 0f;
 					}
 					else
 					{
@@ -1291,6 +1295,7 @@ namespace ReInput
 			}
 		}
 
+		#if SANDBOX
 		/// <summary>
 		/// Allows to bind individual axes to actions, this is just <see cref="GamepadCode"/> combined with <see cref="InputAnalog"/>
 		/// </summary>
@@ -1326,6 +1331,9 @@ namespace ReInput
 			LeftStickX,
 			LeftStickY
 		}
+		# elif UNITY_EDITOR || UNITY_STANDALONE
+		// for unity, should I use SDL? I wanted to use it for controllers, but turns out uh, it also does keyboard input, lol
+		#endif
 
 		public enum Conditional : byte //why did I make it a byte, idk
 		{
@@ -1358,7 +1366,8 @@ namespace ReInput
 			/// </summary>
 			Mash
 		}
-		
+
+		#if SANDBOX
 		//taken from NativeEngine.ButtonCode, as it's an internal enum :(
 		public enum KeyCode
 		{
@@ -1721,5 +1730,6 @@ namespace ReInput
 			KEY_XSTICK2_DOWN,
 			KEY_XSTICK2_UP
 		}
+		#endif
 	}
 }
