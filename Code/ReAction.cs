@@ -445,11 +445,11 @@ namespace ReAction
 
 				float moveX = 0f, moveY = 0f;
 
-				if (ReAction.TryGetAction("Forward", out var forward))
+				if (ReAction.TryGetAction("Forward", out var forward) && forward.GamepadInput != GamepadInput.None)
 				{
 					moveX = forward.Analog;
 				}
-				if (ReAction.TryGetAction("Left", out var left))
+				if (ReAction.TryGetAction("Left", out var left) && left.GamepadInput != GamepadInput.None)
 				{
 					moveY = left.Analog;
 				}
@@ -460,7 +460,7 @@ namespace ReAction
 		}
 
 		/// <summary>
-		/// Place this in your singleton's Awake() method
+		/// This is kind of the Awake() method for this, probably don't need to call it, the <see cref="ReActionSystem"/> should take care of it
 		/// </summary>
 		public static void Init()
 		{
@@ -470,9 +470,9 @@ namespace ReAction
 		}
 
 		/// <summary>
-		/// This is where the Input gets polled, view this as the Update() method for ReAction, you probably don't need to call it, the <see cref="ReActionSystem"/> should take care of it
+		/// This is where the Input gets queried, view this as the Update() method for ReAction, you probably don't need to call it, the <see cref="ReActionSystem"/> should take care of it
 		/// </summary>
-		public static void PollInput()
+		public static void QueryInput()
 		{
 			ReacquiReActionIfNeeded();
 
@@ -494,37 +494,48 @@ namespace ReAction
 			foreach (var action in Actions)
 			{
 				var key = action.Key;
+				var secondaryKey = action.SecondaryKey;
 
 				if (ReAction.KeyPressed(key))
 				{
-					if (keysUpSince.TryGetValue(key, out var time))
-					{
-						keysUpSince.Remove(key);
+					OnKeyPressed(key);
+				}
 
-						if (Time.Now - time <= DoubleTapTimeOut && time != Time.Now)
-						{
-							validDoubleTapKeyCodes.Add(key);
-						}
-					}
-					else
-					{
-						keysUpSince.Add(key, Time.Now);
-					}
+				if (ReAction.KeyPressed(secondaryKey))
+				{
+					OnKeyPressed(secondaryKey);
+				}
+			}
 
-					if (!keysHeldSince.ContainsKey(key))
-					{
-						keysHeldSince.Add(key, Time.Now);
-					}
+			static void OnKeyPressed(KeyCode key)
+			{
+				if (keysUpSince.TryGetValue(key, out var time))
+				{
+					keysUpSince.Remove(key);
 
-					if (!keysPressedSince.ContainsKey(key))
+					if (Time.Now - time <= DoubleTapTimeOut && time != Time.Now)
 					{
-						keysPressedSince.Add(key, Time.Now);
+						validDoubleTapKeyCodes.Add(key);
 					}
-					else
-					{
-						keysPressedSince[key] = Time.Now;
-						mashedKeyCodes.Add(key);
-					}
+				}
+				else
+				{
+					keysUpSince.Add(key, Time.Now);
+				}
+
+				if (!keysHeldSince.ContainsKey(key))
+				{
+					keysHeldSince.Add(key, Time.Now);
+				}
+
+				if (!keysPressedSince.ContainsKey(key))
+				{
+					keysPressedSince.Add(key, Time.Now);
+				}
+				else
+				{
+					keysPressedSince[key] = Time.Now;
+					mashedKeyCodes.Add(key);
 				}
 			}
 		}
@@ -573,7 +584,7 @@ namespace ReAction
 
 		static void DrawDebugOverlay()
 		{
-			if (bool.TryParse(ConsoleSystem.GetValue("ReAction_debug", "false"), out var result) && result)
+			if (DebugInput)
 			{
 				if (Game.ActiveScene != null && Game.ActiveScene.Camera != null)
 				{
@@ -751,13 +762,13 @@ namespace ReAction
 		{
 			return conditional switch
 			{
-				Conditional.Press => ReAction.KeyPressed(action.Key),
-				Conditional.LongPress => keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut,//I guess I could have a nullref somehow if there's a race condition with the component's updates?
-				Conditional.Continuous => ReAction.KeyDown(action.Key),
-				Conditional.Release => ReAction.KeyReleased(action.Key),
-				Conditional.DoubleTap => validDoubleTapKeyCodes.Contains(action.Key),
-				Conditional.Toggle => toggledKeyCodes.Contains(action.Key),
-				Conditional.Mash => mashedKeyCodes.Contains(action.Key),
+				Conditional.Press => ReAction.KeyPressed(action.Key) || ReAction.KeyPressed(action.SecondaryKey),
+				Conditional.LongPress => (keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut) || (keysHeldSince.TryGetValue(action.SecondaryKey, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
+				Conditional.Continuous => ReAction.KeyDown(action.Key) || ReAction.KeyDown(action.SecondaryKey),
+				Conditional.Release => ReAction.KeyReleased(action.Key) || ReAction.KeyReleased(action.SecondaryKey),
+				Conditional.DoubleTap => validDoubleTapKeyCodes.Contains(action.Key) || validDoubleTapKeyCodes.Contains(action.SecondaryKey),
+				Conditional.Toggle => toggledKeyCodes.Contains(action.Key) || toggledKeyCodes.Contains(action.SecondaryKey),
+				Conditional.Mash => mashedKeyCodes.Contains(action.Key) || mashedKeyCodes.Contains(action.SecondaryKey),
 				_ => false,
 			};
 		}
@@ -1176,6 +1187,32 @@ namespace ReAction
 				this.Category = other.Category;
 			}
 
+			public Action(string name, int index, KeyCode key, KeyCode secondaryKey, Modifiers modifiers, Conditional conditional, string category = "Default")
+			{
+				this.Name = name;
+				this.Index = index;
+				this.Key = key;
+				this.SecondaryKey = secondaryKey;
+				this.Modifiers = modifiers;
+				this.Conditional = conditional;
+				this.Category = category;
+			}
+
+			public Action(string name, int index, KeyCode key, KeyCode secondaryKey, GamepadInput gamepadInput, bool positiveAxis, Modifiers modifiers, Conditional conditional, string category = "Default")
+			{
+				Name = name;
+				Index = index;
+				Key = key;
+				SecondaryKey = secondaryKey;
+				GamepadInput = gamepadInput;
+				PositiveAxis = positiveAxis;
+				Modifiers = modifiers;
+				Conditional = conditional;
+				Category = category;
+			}
+
+
+
 			/// <summary>
 			/// The name of the action
 			/// </summary>
@@ -1198,6 +1235,15 @@ namespace ReAction
 			/// The current key of the action, you shouldn't use this to check the status of an action
 			/// </summary>
 			public KeyCode Key
+			{
+				get;
+				set;
+			}
+
+			/// <summary>
+			/// The secondary key of the action
+			/// </summary>
+			public KeyCode SecondaryKey
 			{
 				get;
 				set;

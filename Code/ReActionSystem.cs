@@ -13,7 +13,7 @@ namespace ReAction
 		public ReActionSystem(Scene scene) : base(scene)
 		{
 			ReAction.Init();
-			Listen(Stage.StartUpdate, -10, ReAction.PollInput, "ReActionPollInput");
+			Listen(Stage.StartUpdate, -10, ReAction.QueryInput, "ReActionPollInput");
 		}
 	}
 }

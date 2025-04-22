@@ -80,7 +80,15 @@ partial class ActionPanel : Widget
 		var name = Action.Name;
 		var nameRect = Paint.DrawText(r, name, TextFlag.LeftCenter);
 
-		var width = DrawTextWithIcon(r, GetFriendlyKeyCode(Action.Key), "keyboard");
+		float width = 0;
+
+		if (Action.SecondaryKey != ReAction.KeyCode.KEY_NONE)
+		{
+			width = DrawTextWithIcon(r, GetFriendlyKeyCode(Action.SecondaryKey), "keyboard_hide");
+			r.Right -= width - 8;
+		}
+
+		width = DrawTextWithIcon(r, GetFriendlyKeyCode(Action.Key), "keyboard");
 		r.Right -= width - 8;
 
 		if (Action.GamepadInput != ReAction.GamepadInput.None)
