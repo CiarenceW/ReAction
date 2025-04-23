@@ -1056,7 +1056,7 @@ namespace ReAction
 		/// </returns>
 		public static bool ActionTriggered(Action action)
 		{
-			return ActionConditionsValid(action) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0);
+			return ActionConditionsValid(action);
 		}
 
 		static bool ActionConditionsValid(Action action)
@@ -1090,49 +1090,49 @@ namespace ReAction
 		{
 			return conditional switch
 			{
-				Conditional.Press =>
+				Conditional.Press => (
 #if SANDBOX
 				ReAction.KeyPressed
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyDown
-# endif
+#endif
 				(action.Key) ||
 #if SANDBOX
 				ReAction.KeyPressed
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyDown
-# endif
-				(action.SecondaryKey),
-				Conditional.LongPress => (keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut) || (keysHeldSince.TryGetValue(action.SecondaryKey, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
-				Conditional.Continuous =>
+#endif
+				(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				Conditional.LongPress => ((keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut) || (keysHeldSince.TryGetValue(action.SecondaryKey, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
+				Conditional.Continuous => (
 #if SANDBOX
 				ReAction.KeyDown
 #elif UNITY_STANDALONE || UNITYEDITOR
-				Input.GetKeyDown
-# endif
+				Input.GetKey
+#endif
 				(action.Key) ||
 #if SANDBOX
 				ReAction.KeyDown
 #elif UNITY_STANDALONE || UNITYEDITOR
-				Input.GetKeyDown
-# endif
-				(action.SecondaryKey),
-				Conditional.Release =>
+				Input.GetKey
+#endif
+				(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				Conditional.Release => (
 #if SANDBOX
 				ReAction.KeyReleased
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyUp
-# endif
+#endif
 				(action.Key) ||
 #if SANDBOX
 				ReAction.KeyReleased
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyUp
-# endif
-				(action.SecondaryKey),
-				Conditional.DoubleTap => validDoubleTapKeyCodes.Contains(action.Key) || validDoubleTapKeyCodes.Contains(action.SecondaryKey),
-				Conditional.Toggle => toggledKeyCodes.Contains(action.Key) || toggledKeyCodes.Contains(action.SecondaryKey),
-				Conditional.Mash => mashedKeyCodes.Contains(action.Key) || mashedKeyCodes.Contains(action.SecondaryKey),
+#endif
+				(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				Conditional.DoubleTap => (validDoubleTapKeyCodes.Contains(action.Key) || validDoubleTapKeyCodes.Contains(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				Conditional.Toggle => (toggledKeyCodes.Contains(action.Key) || toggledKeyCodes.Contains(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				Conditional.Mash => (mashedKeyCodes.Contains(action.Key) || mashedKeyCodes.Contains(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
 				_ => false,
 			};
 		}
