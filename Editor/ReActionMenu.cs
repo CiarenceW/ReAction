@@ -1,12 +1,6 @@
-#if SANDBOX
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-
 namespace ReAction
 {
+#if SANDBOX
 	public static class ReActionMenu
 	{
 		[Menu("Editor", "ReAction/RegenerateKeyCodeThing")]
@@ -85,5 +79,37 @@ namespace ReAction
 			}
 		}
 	}
-}
+#elif UNITY_EDITOR || UNITY_STANDALONE
+	using UnityEditor;
+	using UnityEngine;
+	using UnityEngine.UIElements;
+
+	public class ReActionMenu : EditorWindow
+	{
+		[SerializeField]
+		private VisualTreeAsset m_VisualTreeAsset = default;
+
+		[MenuItem("Window/UI Toolkit/ReAction")]
+		public static void ShowExample()
+		{
+			ReActionMenu wnd = GetWindow<ReActionMenu>();
+			wnd.titleContent = new GUIContent("ReActionMenu");
+		}
+
+		public void CreateGUI()
+		{
+			// Each editor window contains a root VisualElement object
+			VisualElement root = rootVisualElement;
+
+			// VisualElements objects can contain other VisualElement following a tree hierarchy.
+			VisualElement label = new Label("Hello World! From C#");
+			root.Add(label);
+
+			// Instantiate UXML
+			VisualElement labelFromUXML = m_VisualTreeAsset.Instantiate();
+			root.Add(labelFromUXML);
+		}
+	}
+
 #endif
+}
