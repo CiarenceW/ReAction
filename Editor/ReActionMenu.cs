@@ -525,7 +525,8 @@ Project.Current.GetCodePath()
 						var enumBox = new EnumField((Enum)Enum.GetValues(propertyType).GetValue(0))
 						{
 							label = property.Name,
-							name = propertyType.Name
+							name = propertyType.Name,
+							value = (Enum)Enum.Parse(propertyType, property.GetValue(action).ToString())
 						};
 
 						enumBox.RegisterCallback<ChangeEvent<Enum>>((piss) =>
