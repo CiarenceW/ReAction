@@ -92,7 +92,7 @@ namespace ReAction
 
 			exportAsConsts.ToolTip = "If true, the indices will be public const ints, instead of public static readonly ints";
 
-			exportIndexConstsButton.Clicked += ExportIndexToFile;
+			exportIndexConstsButton.Clicked += ReActionMenu.ExportIndexToFile;
 		}
 
 		new bool OnPaintOverride()

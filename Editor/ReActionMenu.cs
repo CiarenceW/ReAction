@@ -1,9 +1,11 @@
 ﻿namespace ReAction
 {
 	using System;
+	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
+
 #if UNITY_EDITOR
 	using UnityEditor;
 	using UnityEditor.UIElements;
@@ -22,7 +24,14 @@
 #endif
 	{
 
-		private static Toggle exportAsConsts;
+		private static
+#if UNITY_EDITOR
+			Toggle 
+#elif SANDBOX
+			Checkbox
+#endif
+			exportAsConsts;
+
 
 		public static void ExportIndexToFile()
 		{
@@ -552,7 +561,7 @@ Project.Current.GetCodePath()
 
 			window.Show();
 		}
-	}
 
 #endif
+	}
 }

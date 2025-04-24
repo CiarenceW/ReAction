@@ -5,6 +5,9 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 
+#if SANDBOX
+using System.Text.Json.Serialization;
+#endif
 
 #if UNITY_EDITOR
 using System.Runtime.Serialization;
@@ -1860,17 +1863,14 @@ namespace ReAction
 				}
 			}
 
-			if (global::Editor.FileSystem.ProjectSettings.DirectoryExists("ReAction") && global::Editor.FileSystem.ProjectSettings.FileExists(defaultFilePath))
-			{
 				if (ProjectSettings.Get<ReActionSettings>(defaultFilePath) != null)
 				{
-					ReActionLogger.Info("Found default set, applying " + global::Editor.FileSystem.ProjectSettings.GetFullPath(defaultFilePath));
+					ReActionLogger.Info("Found default set, applying");
 
 					ReAction.Actions = new(ProjectSettings.Get<ReActionSettings>(defaultFilePath).Actions);
 
 					return;
 				}
-			}
 #elif UNITY_EDITOR || UNITY_STANDALONE
 			if (!toDefault)
 			{
