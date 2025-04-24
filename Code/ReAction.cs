@@ -1,6 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Text;
+
+
 #if UNITY_EDITOR
+using System.Runtime.Serialization;
 using UnityEditor;
 using UnityEngine;
 #endif
@@ -520,7 +527,7 @@ namespace ReAction
 			RCtrl = 1 << (8 - 8),
 		}
 
-		static void ReacquiReActionIfNeeded()
+		static void QueryModifiersIfNeeded()
 		{
 			if (
 #if SANDBOX
@@ -728,7 +735,7 @@ namespace ReAction
 		/// </summary>
 		public static void QueryInput()
 		{
-			ReacquiReActionIfNeeded();
+			QueryModifiersIfNeeded();
 
 			PopulateActionsLists();
 
@@ -1497,6 +1504,50 @@ namespace ReAction
 
 #endif
 
+		public static void SaveToFile()
+		{
+#if SANBOX
+			Sandbox.FileSystem.Data.WriteJson(filePath, meta.Serialize());
+#elif UNITY_EDITOR || UNITY_STANDALONE
+			var path = Path.Combine(Application.persistentDataPath, filePath);
+
+			Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "ReAction"));
+			using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+			{
+				using (StreamWriter sw = new StreamWriter(fs))
+				{
+					sw.Write(SaveToJSONSkullEmojiFuckYouUnity());
+				}
+			}
+
+			Debug.Log(path);
+#endif
+		}
+
+#if UNITY_EDITOR || UNITY_STANDALONE
+		//ONLY WAY TO SERIALISE IS BY USING JSONUTILITY.TOJSON BUT IT'S ONLY FOR FUCKING UNITY OBJECTS!!!!!!!!!!!!! WHAT DO YOU MEAN YOU CAN'T SERIALISE A HASHSET YOU MORON
+		public static string SaveToJSONSkullEmojiFuckYouUnity()
+		{
+			StringBuilder sb = new StringBuilder();
+			sb.AppendLine("[");
+			foreach (var action in Actions)
+			{
+				sb.AppendLine("\t{");
+				foreach (var property in action.GetType().GetProperties((BindingFlags)int.MaxValue))
+				{
+					if (property.SetMethod != null)
+					{
+						sb.AppendLine($"\t\t\"{property.Name}\": \"{property.GetValue(action).ToString()}\",");
+					}
+				}
+				sb.AppendLine("\t},");
+			}
+			sb.AppendLine("]");
+
+			return sb.ToString();
+		}
+#endif
+
 		public class Action
 		{
 			public Action(string name, int index, KeyCode key, GamepadInput gamepadInput, Modifiers modifiers, Conditional conditional, string category = "Default")
@@ -1710,6 +1761,154 @@ namespace ReAction
 
 #warning TODO: make this interact with SDL
 			return 1f;
+		}
+
+		public static void ReadFromJSON(string path)
+		{
+			HashSet<Action> actions = new();
+
+			Dictionary<string, PropertyInfo> nameForPropertyDic = new();
+
+			foreach (var property in typeof(Action).GetProperties((BindingFlags)int.MaxValue))
+			{
+				nameForPropertyDic.Add(property.Name, property);
+			}
+
+			using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+			{
+				using (StreamReader sr = new StreamReader(fs))
+				{
+					string line;
+
+					Action action = new Action();
+
+					while ((line = sr.ReadLine()) != null)
+					{
+						if (line.Contains("{") || line.Contains("[") || line.Contains("]")) //this makes this the worst json reader even created, I'm really proud of that fact
+							continue;
+
+						if (line.Contains("},"))
+						{
+							actions.Add(action);
+							action = new Action();
+							continue;
+						}
+
+						string[] splitLine = line.Split(':', StringSplitOptions.RemoveEmptyEntries);
+
+						string propertyName = splitLine[0].Trim().Split('"', StringSplitOptions.RemoveEmptyEntries)[0];
+						string propertyValue = splitLine[1].Trim().Split('"', StringSplitOptions.RemoveEmptyEntries)[0];
+
+						if (nameForPropertyDic.TryGetValue(propertyName, out var property))
+						{
+							Type propertyType = property.PropertyType;
+
+							object value = default;
+
+							if (propertyType == typeof(int))
+							{
+								value = int.Parse(propertyValue);
+							}
+							else if (propertyType == typeof(string))
+							{
+								value = propertyValue;
+							}
+							else if (propertyType == typeof(bool))
+							{
+								value = bool.Parse(propertyValue);
+							}
+							else if (propertyType.IsEnum)
+							{
+								value = Enum.Parse(propertyType, propertyValue);
+							}
+							else if (propertyType == typeof(float))
+							{
+								value = float.Parse(propertyValue);
+							}
+
+							property.SetValue(action, value);
+						}
+					}
+				}
+			}
+
+			Actions = actions;
+		}
+
+		public static void CreateDefaultActions(bool toDefault = false)
+		{
+			if (ReAction.Actions.Count > 0 && !toDefault)
+				return;
+
+#if SANDBOX
+			if (!toDefault)
+			{
+				if (Sandbox.FileSystem.Data.FileExists(filePath))
+				{
+					ReActionLogger.Info("Found locally saved set, applying to the thing, yeah");
+
+					var settings = new ReActionSettings();
+					settings.Deserialize(Sandbox.FileSystem.Data.ReadAllText(filePath));
+
+					ReAction.Actions = settings.Actions;
+
+					return;
+				}
+				else
+				{
+					ReActionLogger.Info("Couldn't find locally saved set");
+				}
+			}
+
+			if (global::Editor.FileSystem.ProjectSettings.DirectoryExists("ReAction") && global::Editor.FileSystem.ProjectSettings.FileExists(defaultFilePath))
+			{
+				if (ProjectSettings.Get<ReActionSettings>(defaultFilePath) != null)
+				{
+					ReActionLogger.Info("Found default set, applying " + global::Editor.FileSystem.ProjectSettings.GetFullPath(defaultFilePath));
+
+					ReAction.Actions = new(ProjectSettings.Get<ReActionSettings>(defaultFilePath).Actions);
+
+					return;
+				}
+			}
+#elif UNITY_EDITOR || UNITY_STANDALONE
+			if (!toDefault)
+			{
+				var path = Path.Combine(Application.persistentDataPath, filePath);
+
+				if (File.Exists(path))
+				{
+					using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+					{
+						using (StreamReader sr = new StreamReader(fs))
+						{
+							ReAction.ReadFromJSON(path);
+						}
+					}
+
+					return;
+				}
+			}
+
+			var defaultPath = Path.Combine(Application.dataPath, defaultFilePath);
+			Debug.Log(defaultPath);
+			if (File.Exists(defaultPath))
+			{
+				using (FileStream fs = new FileStream(defaultPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					using (StreamReader sr = new StreamReader(fs))
+					{
+						ReAction.ReadFromJSON(defaultPath);
+					}
+				}
+
+				return;
+			}
+#endif
+
+			ReActionLogger.Info("Action list is null, populating with defaults");
+
+			ReAction.Actions = new HashSet<ReAction.Action>(ReAction.DefaultActions);
 		}
 
 #if SANDBOX
