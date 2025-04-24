@@ -3,3 +3,34 @@
     -unity-font-style: bold;
     color: rgb(68, 138, 255);
 }
+
+.action-label {
+	border-width: 4px;
+	border-radius: 4px;
+	cursor: link;
+	-unity-text-align: middle-center;
+}
+
+.odd {
+	background-color: rgb(55, 64, 82);
+}
+
+.even {
+	background-color: rgb(58, 68, 86);
+}
+
+.category-foldout {
+	border-width: 2px;
+	background-color: rgb(53, 81, 130);
+	border-color: rgb(32, 57, 99);
+}
+
+.first {
+	border-top-left-radius: 10px;
+	border-top-right-radius: 10px;
+}
+
+.last {
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
