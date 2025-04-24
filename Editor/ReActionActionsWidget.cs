@@ -66,7 +66,7 @@ namespace ReAction
 
 				mainColumn.Add(ActionsTree);
 
-				CreateDefaultActions();
+				ReAction.CreateDefaultActions();
 				UpdateActionList();
 			};
 
@@ -120,7 +120,7 @@ namespace ReAction
 
 			meta.Actions = ReAction.Actions;
 
-			Sandbox.FileSystem.Data.WriteJson(filePath, meta.Serialize());
+			ReAction.SaveToFile();
 		}
 
 		void SaveActionsAsNewDefault()
@@ -136,79 +136,6 @@ namespace ReAction
 			global::Editor.FileSystem.ProjectSettings.WriteJson(ReAction.defaultFilePath, meta.Serialize());
 
 			Project.Current.Config.SetMeta("ReActionActions", null);
-		}
-
-		void ExportIndexToFile()
-		{
-			using (FileStream fs = new FileStream(Path.Combine(Project.Current.GetCodePath(), "ReActionConsts.cs"), FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-			{
-				using (StreamWriter sw = new StreamWriter(fs))
-				{
-					sw.AutoFlush = false;
-					sw.WriteLine("namespace ReAction.Consts");
-					sw.WriteLine("{");
-					sw.WriteLine("\tpublic static class ReActionConsts");
-					sw.WriteLine("\t{");
-					foreach (var action in ReAction.Actions)
-					{
-						sw.WriteLine($"\t \t{(exportAsConsts.Value ? $"public const int {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}" : $"public static readonly int {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}")} = {action.Index};");
-					}
-					sw.WriteLine("\t}");
-					sw.Write("}");
-					sw.Flush();
-				}
-			}
-		}
-
-		void CreateDefaultActions(bool toDefault = false)
-		{
-			if (ReAction.Actions.Count > 0)
-				return;
-
-			if (!toDefault)
-			{
-				if (Sandbox.FileSystem.Data.FileExists(filePath))
-				{
-					ReActionLogger.Info("Found locally saved set, applying to the thing, yeah");
-
-					var settings = new ReActionSettings();
-					settings.Deserialize(Sandbox.FileSystem.Data.ReadAllText(filePath));
-
-					ReAction.Actions = settings.Actions;
-
-
-					foreach (var action in ReAction.Actions)
-					{
-						ReActionLogger.Info($"{action.Name}: {action.Index}");
-					}
-					return;
-				}
-				else
-				{
-					ReActionLogger.Info("Couldn't find locally saved set");
-				}
-			}
-
-			if (global::Editor.FileSystem.ProjectSettings.DirectoryExists("ReAction") && global::Editor.FileSystem.ProjectSettings.FileExists(defaultFilePath))
-			{
-				if (ProjectSettings.Get<ReActionSettings>(defaultFilePath) != null)
-				{
-					ReActionLogger.Info("Found default set, applying " + global::Editor.FileSystem.ProjectSettings.GetFullPath(defaultFilePath));
-
-					ReAction.Actions = new(ProjectSettings.Get<ReActionSettings>(defaultFilePath).Actions);
-
-					foreach (var action in ReAction.Actions)
-					{
-						ReActionLogger.Info($"{action.Name}: {action.Index}");
-					}
-
-					return;
-				}
-			}
-
-			ReActionLogger.Info("Action list is null, populating with defaults");
-
-			ReAction.Actions = new HashSet<ReAction.Action>(ReAction.DefaultActions);
 		}
 
 		public void UpdateActionList()
@@ -261,7 +188,7 @@ namespace ReAction
 			reset.Clicked += () =>
 			{
 				ClearActions();
-				CreateDefaultActions(true);
+				ReAction.CreateDefaultActions(true);
 				UpdateActionList();
 			};
 		}
