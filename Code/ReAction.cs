@@ -1740,6 +1740,9 @@ namespace ReAction
 			}
 		}
 
+#if SANDBOX_STANDALONE || UNITY_EDITOR || UNITY_STANDALONE
+#endif
+
 		public static float GetGamepadCodeAnalog(GamepadInput gamepadInput)
 		{
 #if SANDBOX
@@ -1761,11 +1764,13 @@ namespace ReAction
 					return 0f;
 			}
 #endif
-
+#if UNITY_EDITOR || UNITY_STANDALONE
 #warning TODO: make this interact with SDL
 			return 1f;
+#endif
 		}
 
+#if UNITY_EDITOR || UNITY_STANDALONE
 		public static void ReadFromJSON(string path)
 		{
 			HashSet<Action> actions = new();
@@ -1837,6 +1842,7 @@ namespace ReAction
 
 			Actions = actions;
 		}
+#endif
 
 		public static void CreateDefaultActions(bool toDefault = false)
 		{
