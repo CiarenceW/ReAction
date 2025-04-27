@@ -25,6 +25,21 @@ partial class ActionPanel : Widget
 		Cursor = CursorShape.Finger;
 	}
 
+	static string FormatModifiersString(ReAction.Modifiers modifiers)
+	{
+		string str = "";
+
+		for (byte b = 1; b > 0; b <<= 1)
+		{
+			if (((byte)modifiers & b) != 0)
+			{
+				str += (ReAction.Modifiers)b + " + ";
+			}
+		}
+
+		return str;
+	}
+
 	private string GetFriendlyGamepadInput(ReAction.GamepadInput value)
 	{
 		return DisplayInfo.ForEnumValues<ReAction.GamepadInput>()
@@ -82,20 +97,20 @@ partial class ActionPanel : Widget
 
 		float width = 0;
 
-		if (Action.SecondaryKey != ReAction.KeyCode.KEY_NONE)
+		if (Action.SecondaryBind.key != ReAction.KeyCode.KEY_NONE)
 		{
-			width = DrawTextWithIcon(r, GetFriendlyKeyCode(Action.SecondaryKey), "keyboard_hide");
+			width = DrawTextWithIcon(r, $"{FormatModifiersString(Action.SecondaryBind.modifiers)} {GetFriendlyKeyCode(Action.SecondaryBind.key)}", "keyboard_hide");
 			r.Right -= width - 8;
 		}
 
-		width = DrawTextWithIcon(r, GetFriendlyKeyCode(Action.Key), "keyboard");
+		width = DrawTextWithIcon(r, $"{FormatModifiersString(Action.Bind.modifiers)} {GetFriendlyKeyCode(Action.Bind.key)}", "keyboard");
 		r.Right -= width - 8;
 
-		if (Action.GamepadInput != ReAction.GamepadInput.None)
+		/*if (Action.GamepadInput != ReAction.GamepadInput.None)
 		{
 			width = DrawTextWithIcon(r, GetFriendlyGamepadInput(Action.GamepadInput), "sports_esports");
 			r.Right -= width - 8;
-		}
+		}*/
 	}
 
 	protected override void OnMouseReleased(MouseEvent e)

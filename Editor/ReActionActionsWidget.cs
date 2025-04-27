@@ -18,7 +18,7 @@ namespace ReAction
 
 		ScrollArea Scroller;
 
-		private Checkbox exportAsConsts;
+		public static Checkbox exportAsConsts;
 
 		public const string filePath = "ReAction/actions.json";
 		public const string defaultFilePath = "ReAction/defaultActions.json";
@@ -167,7 +167,7 @@ namespace ReAction
 			var add = () =>
 			{
 				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {ReAction.Actions.Count}" : entry.Text;
-				AddAction(new ReAction.Action(name, ReAction.Actions.Count, ReAction.KeyCode.KEY_NONE, ReAction.GamepadInput.None, ReAction.Modifiers.None, ReAction.Conditional.Press, lastGroup ?? "Other"), updateDisplay: true);
+				AddAction(new ReAction.Action(name, ReAction.Actions.Count, ReAction.KeyCode.KEY_NONE, ReAction.GamepadInput.None, ReAction.Conditional.Press, lastGroup ?? "Other"), updateDisplay: true);
 			};
 
 			entry.ReturnPressed += add;

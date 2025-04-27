@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 #if SANDBOX
@@ -68,7 +69,6 @@ namespace ReAction
 				,
 	GamepadInput.LeftStickY,
 	true,
-	Modifiers.None,
 	Conditional.Continuous,
 	"Movement"
   ),
@@ -83,7 +83,6 @@ namespace ReAction
 	  ,
 	GamepadInput.LeftStickY,
 	false,
-	Modifiers.None,
 	Conditional.Continuous,
 	"Movement"
   ),
@@ -98,7 +97,6 @@ namespace ReAction
 	,
 	GamepadInput.LeftStickX,
 	true,
-	Modifiers.None,
 	Conditional.Continuous,
 	"Movement"
   ),
@@ -113,7 +111,6 @@ namespace ReAction
 	,
 	GamepadInput.LeftStickX,
 	false,
-	Modifiers.None,
 	Conditional.Continuous,
 	"Movement"
   ),
@@ -127,7 +124,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.A,
-	Modifiers.None,
 	Conditional.Press,
 	"Movement"
   ),
@@ -141,7 +137,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.LeftJoystickButton,
-	Modifiers.None,
 	Conditional.Press,
 	"Movement"
   ),
@@ -155,7 +150,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Movement"
   ),
@@ -169,7 +163,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.B,
-	Modifiers.None,
 	Conditional.Press,
 	"Movement"
   ),
@@ -183,7 +176,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.RightTrigger,
-	Modifiers.None,
 	Conditional.Press,
 	"Actions"
   ),
@@ -197,7 +189,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.LeftTrigger,
-	Modifiers.None,
 	Conditional.Press,
 	"Actions"
   ),
@@ -211,7 +202,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.X,
-	Modifiers.None,
 	Conditional.Press,
 	"Actions"
   ),
@@ -225,7 +215,6 @@ namespace ReAction
 				#endif
 	,
 	GamepadInput.Y,
-	Modifiers.None,
 	Conditional.Press,
 	"Actions"
   ),
@@ -239,7 +228,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.DpadWest,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -253,7 +241,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.DpadEast,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -267,7 +254,6 @@ namespace ReAction
 				#endif
 	,
 	GamepadInput.DpadSouth,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -281,7 +267,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -295,7 +280,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -309,7 +293,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -323,7 +306,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -337,7 +319,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -351,7 +332,6 @@ namespace ReAction
 				#endif
 	,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -365,7 +345,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -379,7 +358,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.SwitchLeftBumper,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -393,7 +371,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.SwitchRightBumper,
-	Modifiers.None,
 	Conditional.Press,
 	"Inventory"
   ),
@@ -407,7 +384,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.RightJoystickButton,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   ),
@@ -421,7 +397,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   ),
@@ -435,7 +410,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   ),
@@ -449,7 +423,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.DpadNorth,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   ),
@@ -463,7 +436,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.SwitchLeftMenu,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   ),
@@ -477,7 +449,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.SwitchRightMenu,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   ),
@@ -491,7 +462,6 @@ namespace ReAction
 				#endif
 	  ,
 	GamepadInput.None,
-	Modifiers.None,
 	Conditional.Press,
 	"Other"
   )
@@ -763,8 +733,8 @@ namespace ReAction
 			//could I replace these with async calls? would it matter?
 			foreach (var action in Actions)
 			{
-				var key = action.Key;
-				var secondaryKey = action.SecondaryKey;
+				var key = action.Bind.key;
+				var secondaryKey = action.SecondaryBind.key;
 
 				if (
 #if SANDBOX
@@ -1106,45 +1076,51 @@ namespace ReAction
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyDown
 #endif
-				(action.Key) ||
+				(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (
 #if SANDBOX
 				ReAction.KeyPressed
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyDown
 #endif
-				(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
-				Conditional.LongPress => ((keysHeldSince.TryGetValue(action.Key, out var heldTime) && heldTime > LongPressTimeOut) || (keysHeldSince.TryGetValue(action.SecondaryKey, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
+				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
+				Conditional.LongPress => (keysHeldSince.TryGetValue(action.Bind.key, out var heldTime) && heldTime > LongPressTimeOut && ModifiersActive(action.Bind.modifiers)) || (keysHeldSince.TryGetValue(action.SecondaryBind.key, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut && ModifiersActive(action.SecondaryBind.modifiers)),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
 				Conditional.Continuous => (
 #if SANDBOX
 				ReAction.KeyDown
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKey
 #endif
-				(action.Key) ||
+				(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (
 #if SANDBOX
 				ReAction.KeyDown
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKey
 #endif
-				(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
 				Conditional.Release => (
 #if SANDBOX
 				ReAction.KeyReleased
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyUp
 #endif
-				(action.Key) ||
+				(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (
 #if SANDBOX
 				ReAction.KeyReleased
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyUp
 #endif
-				(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
-				Conditional.DoubleTap => (validDoubleTapKeyCodes.Contains(action.Key) || validDoubleTapKeyCodes.Contains(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
-				Conditional.Toggle => (toggledKeyCodes.Contains(action.Key) || toggledKeyCodes.Contains(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
-				Conditional.Mash => (mashedKeyCodes.Contains(action.Key) || mashedKeyCodes.Contains(action.SecondaryKey)) && ((action.Modifiers == 0) || (action.Modifiers & currentlyActivatedModifiers) != 0),
+				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
+				Conditional.DoubleTap => (validDoubleTapKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (validDoubleTapKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
+				Conditional.Toggle => (toggledKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (toggledKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
+				Conditional.Mash => (mashedKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (mashedKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
 				_ => false,
 			};
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		static bool ModifiersActive(Modifiers modifiers)
+		{
+			return (modifiers == 0) || ((modifiers & currentlyActivatedModifiers) != 0);
 		}
 
 #if SANDBOX
@@ -1553,35 +1529,32 @@ namespace ReAction
 
 		public class Action
 		{
-			public Action(string name, int index, KeyCode key, GamepadInput gamepadInput, Modifiers modifiers, Conditional conditional, string category = "Default")
+			public Action(string name, int index, KeyBind bind, GamepadInput gamepadInput, Conditional conditional, string category = "Default")
 			{
 				Name = name;
 				Index = index;
-				Key = key;
+				Bind = bind;
 				GamepadInput = gamepadInput;
-				Modifiers = modifiers;
 				Conditional = conditional;
 				Category = category;
 			}
 
-			public Action(string name, int index, KeyCode key, GamepadInput gamepadInput, bool positiveAxis, Modifiers modifiers, Conditional conditional, string category = "Default")
+			public Action(string name, int index, KeyBind bind, GamepadInput gamepadInput, bool positiveAxis, Conditional conditional, string category = "Default")
 			{
 				Name = name;
 				Index = index;
-				Key = key;
+				Bind = bind;
 				GamepadInput = gamepadInput;
 				PositiveAxis = positiveAxis;
-				Modifiers = modifiers;
 				Conditional = conditional;
 				Category = category;
 			}
 
-			public Action(string name, int index, KeyCode key, Modifiers modifiers, Conditional conditional, string category = "Default")
+			public Action(string name, int index, KeyBind bind, Conditional conditional, string category = "Default")
 			{
 				Name = name;
 				Index = index;
-				Key = key;
-				Modifiers = modifiers;
+				Bind = bind;
 				Conditional = conditional;
 				Category = category;
 				GamepadInput = GamepadInput.None;
@@ -1597,34 +1570,32 @@ namespace ReAction
 			{
 				this.Name = other.Name;
 				this.Index = ReAction.Actions.Count;
-				this.Key = other.Key;
+				this.Bind = other.Bind;
+				this.SecondaryBind = other.SecondaryBind;
 				this.GamepadInput = other.GamepadInput;
 				this.PositiveAxis = other.PositiveAxis;
-				this.Modifiers = other.Modifiers;
 				this.Conditional = other.Conditional;
 				this.Category = other.Category;
 			}
 
-			public Action(string name, int index, KeyCode key, KeyCode secondaryKey, Modifiers modifiers, Conditional conditional, string category = "Default")
+			public Action(string name, int index, KeyBind bind, KeyBind secondaryBind, Conditional conditional, string category = "Default")
 			{
 				this.Name = name;
 				this.Index = index;
-				this.Key = key;
-				this.SecondaryKey = secondaryKey;
-				this.Modifiers = modifiers;
+				this.Bind = bind;
+				this.SecondaryBind = secondaryBind;
 				this.Conditional = conditional;
 				this.Category = category;
 			}
 
-			public Action(string name, int index, KeyCode key, KeyCode secondaryKey, GamepadInput gamepadInput, bool positiveAxis, Modifiers modifiers, Conditional conditional, string category = "Default")
+			public Action(string name, int index, KeyBind bind, KeyBind secondaryBind, GamepadInput gamepadInput, bool positiveAxis, Conditional conditional, string category = "Default")
 			{
 				Name = name;
 				Index = index;
-				Key = key;
-				SecondaryKey = secondaryKey;
+				Bind = bind;
+				SecondaryBind = secondaryBind;
 				GamepadInput = gamepadInput;
 				PositiveAxis = positiveAxis;
-				Modifiers = modifiers;
 				Conditional = conditional;
 				Category = category;
 			}
@@ -1652,7 +1623,8 @@ namespace ReAction
 			/// <summary>
 			/// The current key of the action, you shouldn't use this to check the status of an action
 			/// </summary>
-			public KeyCode Key
+			[InlineEditor]
+			public KeyBind Bind
 			{
 				get;
 				set;
@@ -1661,7 +1633,8 @@ namespace ReAction
 			/// <summary>
 			/// The secondary key of the action
 			/// </summary>
-			public KeyCode SecondaryKey
+			[InlineEditor]
+			public KeyBind SecondaryBind
 			{
 				get;
 				set;
@@ -1680,21 +1653,6 @@ namespace ReAction
 			/// For joysticks, determines on which axis the action will be triggered
 			/// </summary>
 			public bool PositiveAxis
-			{
-				get;
-				set;
-			}
-
-			//bitmask, each bit corresponds to the following modifier:
-			// 1st bit: lshift
-			// 2nd bit: lctrl
-			// 3rd bit: lwin/lmeta/lwhatever
-			// 4th bit: lalt
-			// 5th bit: ralt
-			// 6th bit: rwin/rmeta/rwhatever
-			// 7th bit: rshift
-			// 8th bit: rctrl
-			public Modifiers Modifiers
 			{
 				get;
 				set;
@@ -2024,6 +1982,27 @@ namespace ReAction
 			/// Active when key is mashed quickly
 			/// </summary>
 			Mash
+		}
+
+		public struct KeyBind(ReAction.KeyCode key, ReAction.Modifiers modifiers)
+		{
+			public KeyCode key = key;
+
+			//bitmask, each bit corresponds to the following modifier:
+			// 1st bit: lshift
+			// 2nd bit: lctrl
+			// 3rd bit: lwin/lmeta/lwhatever
+			// 4th bit: lalt
+			// 5th bit: ralt
+			// 6th bit: rwin/rmeta/rwhatever
+			// 7th bit: rshift
+			// 8th bit: rctrl
+			public Modifiers modifiers = modifiers;
+
+			public static implicit operator KeyBind(KeyCode key)
+			{
+				return new KeyBind(key, Modifiers.None);
+			}
 		}
 
 #if SANDBOX

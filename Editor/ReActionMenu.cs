@@ -26,13 +26,9 @@
 #endif
 	{
 
-		private static
 #if UNITY_EDITOR
-			Toggle 
-#elif SANDBOX
-			Checkbox
+		private static Toggle exportAsConsts;
 #endif
-			exportAsConsts;
 
 
 		public static void ExportIndexToFile()
@@ -59,7 +55,7 @@ Project.Current.GetCodePath()
 						string intLine;
 						string intDeclaration;
 #if SANDBOX
-						if (exportAsConsts.Value)
+						if (ReActionActionsWidget.exportAsConsts.Value)
 #elif UNITY_EDITOR
 						if (exportAsConsts.value)
 #endif
@@ -91,7 +87,7 @@ Project.Current.GetCodePath()
 						string stringLine;
 						string stringDeclaration;
 #if SANDBOX
-						if (exportAsConsts.Value)
+						if (ReActionActionsWidget.exportAsConsts.Value)
 #elif UNITY_EDITOR
 						if (exportAsConsts.value)
 #endif
@@ -154,7 +150,7 @@ Project.Current.GetCodePath()
 			{
 				action = actions.ElementAt(actionIndex);
 
-				var convertedAction = new ReAction.Action(action.Name, actionIndex, flippedDic[action.KeyboardCode.ToUpperInvariant()], (ReAction.GamepadInput)action.GamepadCode, true, ReAction.Modifiers.None, ReAction.Conditional.Press, action.GroupName);
+				var convertedAction = new ReAction.Action(action.Name, actionIndex, flippedDic[action.KeyboardCode.ToUpperInvariant()], (ReAction.GamepadInput)action.GamepadCode, true, ReAction.Conditional.Press, action.GroupName);
 				convertedActions.Add(convertedAction);
 			}
 
