@@ -18,7 +18,7 @@ using UnityEngine;
 
 namespace ReAction
 {
-	public static class ReAction
+	public static partial class ReAction
 	{
 		public const string fileName = "actions.json";
 
@@ -28,6 +28,27 @@ namespace ReAction
 
 		public const string defaultFilePath = "ReAction/" + defaultFileName;
 
+		/// <summary>
+		/// Formats the modifiers' strings, like the following: <code>LShift + LMeta + </code>
+		/// </summary>
+		/// <param name="modifiers"></param>
+		/// <returns></returns>
+		public static string FormatModifiersString(ReAction.Modifiers modifiers)
+		{
+			string str = "";
+
+			for (byte b = 1; b > 0; b <<= 1)
+			{
+				if (((byte)modifiers & b) != 0)
+				{
+					str += (ReAction.Modifiers)b + " + ";
+				}
+			}
+
+			return str;
+		}
+
+#if !CUSTOM_SAVE_SYSTEM
 		internal static void GetSavedActionData()
 		{
 			#if SANDBOX
@@ -52,6 +73,7 @@ namespace ReAction
 			}
 			#endif
 		}
+#endif
 
 		public static HashSet<ReAction.Action> DefaultActions
 		{
@@ -485,6 +507,20 @@ namespace ReAction
 		[ConVar(Name = "ReAction_debug", Flags = ConVarFlags.Saved, Saved = true, Max = 1, Min = 0, Help = "Enable ReAction debug overlay")]
 #endif
 		public static bool DebugInput { get; internal set; } = false;
+
+		[ConCmd(Name = "print_reaction_actions", Help = "Prints all ReAction actions to the console for debugging")]
+		static void PrintActionsToConsole()
+		{
+			foreach (var action in Actions)
+			{
+				ReActionLogger.QuickInfo(nameof(action.Name), action.Name);
+				ReActionLogger.QuickInfo(nameof(action.Index), action.Index);
+				ReActionLogger.QuickInfo(nameof(action.Bind), (action.Bind.Equals(default) ? "Unbound" : $"{FormatModifiersString(action.Bind.modifiers)}{action.Bind.key}"));
+				ReActionLogger.QuickInfo(nameof(action.SecondaryBind), (action.SecondaryBind.Equals(default) ? "Unbound" : $"{FormatModifiersString(action.SecondaryBind.modifiers)}{action.SecondaryBind.key}"));
+				ReActionLogger.QuickInfo(nameof(action.Conditional), action.Conditional);
+				ReActionLogger.QuickInfo(nameof(action.Category), action.Category);
+			}
+		}
 
 		[System.Flags]
 		public enum Modifiers : byte
@@ -1483,9 +1519,13 @@ namespace ReAction
 
 #endif
 
-		public static void SaveToFile()
+		public static void SaveToFile(
+#if SANDBOX
+			ReActionSettings meta
+#endif
+			)
 		{
-#if SANBOX
+#if SANDBOX
 			Sandbox.FileSystem.Data.WriteJson(filePath, meta.Serialize());
 #elif UNITY_EDITOR || UNITY_STANDALONE
 			var path = Path.Combine(Application.persistentDataPath, filePath);
@@ -1984,8 +2024,14 @@ namespace ReAction
 			Mash
 		}
 
+#if UNITY_EDITOR
+		[Serialize]
+#endif
 		public struct KeyBind(ReAction.KeyCode key, ReAction.Modifiers modifiers)
 		{
+#if SANDBOX
+			[JsonInclude]
+#endif
 			public KeyCode key = key;
 
 			//bitmask, each bit corresponds to the following modifier:
@@ -1997,6 +2043,9 @@ namespace ReAction
 			// 6th bit: rwin/rmeta/rwhatever
 			// 7th bit: rshift
 			// 8th bit: rctrl
+#if SANDBOX
+			[JsonInclude]
+#endif
 			public Modifiers modifiers = modifiers;
 
 			public static implicit operator KeyBind(KeyCode key)

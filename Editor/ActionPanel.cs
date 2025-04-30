@@ -25,21 +25,6 @@ partial class ActionPanel : Widget
 		Cursor = CursorShape.Finger;
 	}
 
-	static string FormatModifiersString(ReAction.Modifiers modifiers)
-	{
-		string str = "";
-
-		for (byte b = 1; b > 0; b <<= 1)
-		{
-			if (((byte)modifiers & b) != 0)
-			{
-				str += (ReAction.Modifiers)b + " + ";
-			}
-		}
-
-		return str;
-	}
-
 	private string GetFriendlyGamepadInput(ReAction.GamepadInput value)
 	{
 		return DisplayInfo.ForEnumValues<ReAction.GamepadInput>()
@@ -99,11 +84,11 @@ partial class ActionPanel : Widget
 
 		if (Action.SecondaryBind.key != ReAction.KeyCode.KEY_NONE)
 		{
-			width = DrawTextWithIcon(r, $"{FormatModifiersString(Action.SecondaryBind.modifiers)} {GetFriendlyKeyCode(Action.SecondaryBind.key)}", "keyboard_hide");
+			width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.SecondaryBind.modifiers)} {GetFriendlyKeyCode(Action.SecondaryBind.key)}", "keyboard_hide");
 			r.Right -= width - 8;
 		}
 
-		width = DrawTextWithIcon(r, $"{FormatModifiersString(Action.Bind.modifiers)} {GetFriendlyKeyCode(Action.Bind.key)}", "keyboard");
+		width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.Bind.modifiers)} {GetFriendlyKeyCode(Action.Bind.key)}", "keyboard");
 		r.Right -= width - 8;
 
 		/*if (Action.GamepadInput != ReAction.GamepadInput.None)

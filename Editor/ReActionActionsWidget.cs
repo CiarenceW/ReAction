@@ -120,7 +120,7 @@ namespace ReAction
 
 			meta.Actions = ReAction.Actions;
 
-			ReAction.SaveToFile();
+			ReAction.SaveToFile(meta);
 		}
 
 		void SaveActionsAsNewDefault()
