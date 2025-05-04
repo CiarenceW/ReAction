@@ -489,7 +489,7 @@ namespace ReAction
   )
 		};
 
-		static float lastTime;
+		static double lastTime;
 
 		static Modifiers currentlyActivatedModifiers;
 
@@ -639,11 +639,11 @@ namespace ReAction
 			set;
 		} = .3f;
 
-		static Dictionary<KeyCode, float> keysPressedSince = new();
+		static Dictionary<KeyCode, double> keysPressedSince = new();
 
-		static Dictionary<KeyCode, float> keysHeldSince = new();
+		static Dictionary<KeyCode, double> keysHeldSince = new();
 
-		static Dictionary<KeyCode, float> keysUpSince = new();
+		static Dictionary<KeyCode, double> keysUpSince = new();
 
 		static HashSet<KeyCode> validDoubleTapKeyCodes = new();
 
@@ -752,7 +752,7 @@ namespace ReAction
 
 			lastTime =
 #if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow 
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 #endif
@@ -803,13 +803,13 @@ namespace ReAction
 
 					if (
 				#if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow 
 				#elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 				#endif
 					- time <= DoubleTapTimeOut && time !=
 #if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 #endif
@@ -822,7 +822,7 @@ namespace ReAction
 				{
 					keysUpSince.Add(key,
 #if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 #endif
@@ -833,7 +833,7 @@ namespace ReAction
 				{
 					keysHeldSince.Add(key,
 #if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 #endif
@@ -844,7 +844,7 @@ namespace ReAction
 				{
 					keysPressedSince.Add(key,
 #if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 #endif
@@ -854,7 +854,7 @@ namespace ReAction
 				{
 					keysPressedSince[key] =
 #if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 #endif
@@ -867,7 +867,7 @@ namespace ReAction
 		static void RemoveTimedOutKeysFromLists()
 		{
 			//prevent collection size from getting modified while enumerating
-			var keysHeldSinceLocal = new Dictionary<KeyCode, float>(keysHeldSince);
+			var keysHeldSinceLocal = new Dictionary<KeyCode, double>(keysHeldSince);
 
 			foreach (var key in keysHeldSince)
 			{
@@ -886,13 +886,13 @@ namespace ReAction
 			keysHeldSince = keysHeldSinceLocal;
 
 			//ditto
-			var keysUpSinceLocal = new Dictionary<KeyCode, float>(keysUpSince);
+			var keysUpSinceLocal = new Dictionary<KeyCode, double>(keysUpSince);
 
 			foreach (var key in keysUpSince)
 			{
 				if (
 				#if SANDBOX
-					Time.Now 
+					RealTime.GlobalNow 
 				#elif UNITY_STANDALONE || UNITYEDITOR
 					Time.time
 				#endif
@@ -905,13 +905,13 @@ namespace ReAction
 			keysUpSince = keysUpSinceLocal;
 
 			//ditto ditto
-			var keysPressedSinceLocal = new Dictionary<KeyCode, float>(keysPressedSince);
+			var keysPressedSinceLocal = new Dictionary<KeyCode, double>(keysPressedSince);
 
 			foreach (var key in keysPressedSince)
 			{
 				if (
 					#if SANDBOX 
-					Time.Now 
+					RealTime.GlobalNow 
 					#elif UNITY_STANDALONE || UNITYEDITOR 
 					Time.time
 					#endif
