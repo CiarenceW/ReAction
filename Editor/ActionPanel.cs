@@ -69,7 +69,7 @@ partial class ActionPanel : Widget
 
 		Paint.ClearPen();
 		Paint.ClearBrush();
-		Paint.SetPen(Theme.White.WithAlpha(Paint.HasMouseOver ? 1f : 0.7f));
+		Paint.SetPen(Theme.Text.WithAlpha(Paint.HasMouseOver ? 1f : 0.7f));
 
 		if (Paint.HasMouseOver)
 		{

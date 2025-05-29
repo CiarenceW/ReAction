@@ -37,36 +37,36 @@
 	</ItemGroup>
 
   <PropertyGroup>
-	<OutputPath>G:\SteamLibrary\steamapps\common\sbox/.vs/output/</OutputPath>
-	<DocumentationFile>G:\SteamLibrary\steamapps\common\sbox/.vs/output/reaction.editor.xml</DocumentationFile>
+	<OutputPath>F:\Steam\steamapps\common\sbox/.vs/output/</OutputPath>
+	<DocumentationFile>F:\Steam\steamapps\common\sbox/.vs/output/reaction.editor.xml</DocumentationFile>
 	<RootNamespace>Sandbox</RootNamespace>
 	<Nullable>disable</Nullable>
   </PropertyGroup>
 
 	<ItemGroup>
-		<Analyzer Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed\Sandbox.CodeUpgrader.dll"/>
-		<Analyzer Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed\Sandbox.Generator.dll" Condition="$(DesignTimeBuild) != 'true'"/>
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.System.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Engine.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Filesystem.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Game.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Reflection.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Mounting.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Tools.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Compiling.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Microsoft.CodeAnalysis.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Microsoft.CodeAnalysis.CSharp.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Sandbox.Bind.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/Facepunch.ActionGraphs.dll" />
-		<Reference Include="G:\SteamLibrary\steamapps\common\sbox\bin\managed/SkiaSharp.dll" />
+		<Analyzer Include="F:\Steam\steamapps\common\sbox\bin\managed\Sandbox.CodeUpgrader.dll"/>
+		<Analyzer Include="F:\Steam\steamapps\common\sbox\bin\managed\Sandbox.Generator.dll" Condition="$(DesignTimeBuild) != 'true'"/>
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.System.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Engine.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Filesystem.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Game.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Reflection.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Mounting.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Tools.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Compiling.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Microsoft.CodeAnalysis.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Microsoft.CodeAnalysis.CSharp.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Sandbox.Bind.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/Facepunch.ActionGraphs.dll" />
+		<Reference Include="F:\Steam\steamapps\common\sbox\bin\managed/SkiaSharp.dll" />
 	</ItemGroup>
 
   <ItemGroup>
-		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\editor\ActionGraph\Code\actiongraph.csproj" />
-		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\editor\Hammer\Code\hammer.csproj" />
-		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\addons\tools\Code\Base Editor Library.csproj" />
+		<ProjectReference Include="F:\Steam\steamapps\common\sbox\editor\ActionGraph\Code\actiongraph.csproj" />
+		<ProjectReference Include="F:\Steam\steamapps\common\sbox\editor\Hammer\Code\hammer.csproj" />
+		<ProjectReference Include="F:\Steam\steamapps\common\sbox\addons\tools\Code\Base Editor Library.csproj" />
 		<ProjectReference Include="J:\Documents\s&amp;box projects\enlocked\Libraries\ReAction\Code\reaction.csproj" />
-		<ProjectReference Include="G:\SteamLibrary\steamapps\common\sbox\editor\ShaderGraph\Code\shadergraph.csproj" />
+		<ProjectReference Include="F:\Steam\steamapps\common\sbox\editor\ShaderGraph\Code\shadergraph.csproj" />
 
   </ItemGroup>
 
