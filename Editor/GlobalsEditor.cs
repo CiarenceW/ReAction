@@ -1,6 +1,6 @@
 ﻿#if SANDBOX
 global using Sandbox;
 global using Editor;
-global using ReAction;
-global using static ReAction.GlobalReActionLog;
+global using ReActionPlugin;
+global using static ReActionPlugin.GlobalReActionLog;
 #endif

@@ -1,7 +1,8 @@
 ﻿#if SANDBOX
+using System;
 using System.Linq;
 
-namespace ReAction.Editor;
+namespace ReActionPlugin.Editor;
 
 partial class ActionPanel : Widget
 {
@@ -112,7 +113,7 @@ partial class ActionPanel : Widget
 
 			m.AddOption("Duplicate", "file_copy", () =>
 			{
-				Page.AddAction(new ReAction.Action(Action));
+				Page.AddAction(Activator.CreateInstance(typeof(ReAction.Action), Action) as ReAction.Action);
 			});
 
 			m.AddOption("Delete", "delete", () =>

@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ReAction.ReAction;
+using static ReActionPlugin.ReAction;
 
-namespace ReAction
+namespace ReActionPlugin
 {
 	public class ReActionSettings : ConfigData
 	{

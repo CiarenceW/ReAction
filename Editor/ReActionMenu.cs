@@ -1,4 +1,4 @@
-﻿namespace ReAction
+﻿namespace ReActionPlugin.Editor
 {
 	using System;
 	using System.Collections.Generic;
@@ -45,7 +45,7 @@ Project.Current.GetCodePath()
 				using (StreamWriter sw = new StreamWriter(fs))
 				{
 					sw.AutoFlush = false;
-					sw.WriteLine("namespace ReAction.Consts.Int");
+					sw.WriteLine("namespace ReActionPlugin.Consts.Int");
 					sw.WriteLine("{");
 					sw.WriteLine("\tpublic static class ReActionConsts");
 					sw.WriteLine("\t{");
@@ -77,7 +77,7 @@ Project.Current.GetCodePath()
 
 					sw.WriteLine();
 
-					sw.WriteLine("namespace ReAction.Consts.String");
+					sw.WriteLine("namespace ReActionPlugin.Consts.String");
 					sw.WriteLine("{");
 					sw.WriteLine("\tpublic static class ReActionConsts");
 					sw.WriteLine("\t{");
@@ -150,7 +150,7 @@ Project.Current.GetCodePath()
 			{
 				action = actions.ElementAt(actionIndex);
 
-				var convertedAction = new ReAction.Action(action.Name, actionIndex, flippedDic[action.KeyboardCode.ToUpperInvariant()], (ReAction.GamepadInput)action.GamepadCode, true, ReAction.Conditional.Press, action.GroupName);
+				var convertedAction = Activator.CreateInstance(typeof(ReAction.Action), (action.Name, actionIndex, flippedDic[action.KeyboardCode.ToUpperInvariant()], (ReAction.GamepadInput)action.GamepadCode, true, ReAction.Conditional.Press, action.GroupName)) as ReAction.Action;
 				convertedActions.Add(convertedAction);
 			}
 

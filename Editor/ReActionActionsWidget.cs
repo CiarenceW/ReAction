@@ -7,9 +7,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Editor;
 using Microsoft.CodeAnalysis;
-using ReAction.Editor;
+using ReActionPlugin.Editor;
 
-namespace ReAction
+namespace ReActionPlugin
 {
 	[Dock("Editor", "ReAction Actions", "view_list")]
     public class ReActionActionsWidget : Widget
@@ -167,7 +167,7 @@ namespace ReAction
 			var add = () =>
 			{
 				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {ReAction.Actions.Count}" : entry.Text;
-				AddAction(new ReAction.Action(name, ReAction.Actions.Count, ReAction.KeyCode.KEY_NONE, ReAction.GamepadInput.None, ReAction.Conditional.Press, lastGroup ?? "Other"), updateDisplay: true);
+				AddAction(Activator.CreateInstance(typeof(ReAction.Action), name, ReAction.Actions.Count, ReAction.KeyCode.KEY_NONE, ReAction.GamepadInput.None, ReAction.Conditional.Press, lastGroup ?? "Other") as ReAction.Action, updateDisplay: true);
 			};
 
 			entry.ReturnPressed += add;

@@ -4,7 +4,7 @@
 using UnityEngine;
 #endif
 
-namespace ReAction
+namespace ReActionPlugin
 {
 #if SANDBOX
 	public class ReActionLog() : Sandbox.Diagnostics.Logger("ReAction")

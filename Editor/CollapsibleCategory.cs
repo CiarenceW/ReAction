@@ -1,5 +1,5 @@
 ﻿#if SANDBOX
-namespace ReAction.Editor;
+namespace ReActionPlugin.Editor;
 
 internal partial class CollapsibleCategory : Widget
 {

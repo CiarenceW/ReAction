@@ -2,7 +2,7 @@
 using UnityEngine;
 #endif
 
-namespace ReAction
+namespace ReActionPlugin
 {
 #if SANDBOX
 	public class ReActionSystem : GameObjectSystem<ReActionSystem>

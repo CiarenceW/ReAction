@@ -16,7 +16,7 @@ using UnityEditor;
 using UnityEngine;
 #endif
 
-namespace ReAction
+namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
@@ -1072,37 +1072,61 @@ namespace ReAction
 		/// </returns>
 		public static bool ActionTriggered(Action action)
 		{
-			return ActionConditionsValid(action);
+			return ActionTriggeredForCondition(action);
 		}
 
-		static bool ActionConditionsValid(Action action)
+		static bool ActionTriggeredForCondition(Action action)
 		{
-			return ActionConditionsValid(action, action.Conditional);
-		}
-
-		public static bool ActionConditionsValid(string actionName, Conditional conditional)
-		{
-			return TryGetAction(actionName, out var action) && ActionConditionsValid(action, conditional);
-		}
-
-		public static bool ActionConditionsValid(int index, Conditional conditional)
-		{
-			return TryGetAction(index, out var action) && ActionConditionsValid(action, conditional);
+			return ActionTriggeredForCondition(action, action.Conditional);
 		}
 
 		/// <summary>
-		/// Allows you to check if an action is valid with the specified conditional, I guess you could use this for QTEs?
+		/// Allows you to check if an action is valid with the specified conditional
+		/// </summary>
+		/// <param name="actionName">
+		/// The name of the action whose key you want to check (tip: export as const)
+		/// </param>
+		/// <param name="conditional">
+		/// The condition you want to check
+		/// </param>
+		/// <returns>
+		/// If the conditions for this action are valid
+		/// </returns>
+		public static bool ActionTriggeredForCondition(string actionName, Conditional conditional)
+		{
+			return TryGetAction(actionName, out var action) && ActionTriggeredForCondition(action, conditional);
+		}
+
+		/// <summary>
+		/// Allows you to check if an action is valid with the specified conditional
+		/// </summary>
+		/// <param name="index">
+		/// The index of the action whose key you want to check (tip: export as const) 
+		/// </param>
+		/// <param name="conditional">
+		/// The condition you want to check
+		/// </param>
+		/// <returns>
+		/// If the conditions for this action are valid
+		/// </returns>
+		public static bool ActionTriggeredForCondition(int index, Conditional conditional)
+		{
+			return TryGetAction(index, out var action) && ActionTriggeredForCondition(action, conditional);
+		}
+
+		/// <summary>
+		/// Allows you to check if an action is valid with the specified conditional
 		/// </summary>
 		/// <param name="action">
 		/// The actions whose key you want to check
 		/// </param>
 		/// <param name="conditional">
-		/// I think you get it
+		/// The condition you want to check
 		/// </param>
 		/// <returns>
 		/// If the conditions for this action are valid
 		/// </returns>
-		public static bool ActionConditionsValid(Action action, Conditional conditional)
+		public static bool ActionTriggeredForCondition(Action action, Conditional conditional)
 		{
 			return conditional switch
 			{
@@ -1693,6 +1717,15 @@ namespace ReAction
 			/// For joysticks, determines on which axis the action will be triggered
 			/// </summary>
 			public bool PositiveAxis
+			{
+				get;
+				set;
+			}
+
+			/// <summary>
+			/// Set to true if you don't want conditionals to be modifiable, useful if you're only going to check if an action is valid by calling <see cref="ActionTriggeredForCondition(Action, Conditional)"/>, use it for custom binding menus... etc..... it doesn't really do anything on its own :)
+			/// </summary>
+			public bool AllowSetConditional
 			{
 				get;
 				set;
