@@ -11,7 +11,6 @@ namespace ReActionPlugin
 		{
 			ReAction.Init();
 			Listen(Stage.StartUpdate, -10, ReAction.QueryInput, "ReActionQueryInput");
-			Listen(Stage.StartFixedUpdate, -10, ReAction.QueryInput, "ReActionQueryInputFixedUpdate"); //surely this makes querying inputs in fixed updates consistent, right? idk
 		}
 	}
 #elif UNITY_EDITOR || UNITY_STANDALONE

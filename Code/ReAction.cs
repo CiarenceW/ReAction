@@ -651,6 +651,9 @@ namespace ReActionPlugin
 
 		static HashSet<KeyCode> mashedKeyCodes = new();
 
+		static HashSet<KeyCode> validLongPressKeyCodes = new();
+		static HashSet<KeyCode> oldLongPressKeyCodes = new();
+
 		/// <summary>
 		/// Like <see cref="Input.AnalogMove"/> but kinda better, and also with ClampLength(1f) applied to it
 		/// </summary>
@@ -746,6 +749,7 @@ namespace ReActionPlugin
 		{
 			QueryModifiersIfNeeded();
 
+
 			PopulateActionsLists();
 
 			RemoveTimedOutKeysFromLists();
@@ -765,6 +769,16 @@ namespace ReActionPlugin
 		{
 			validDoubleTapKeyCodes.Clear();
 			mashedKeyCodes.Clear();
+			validLongPressKeyCodes.Clear();
+
+			foreach (var key in keysHeldSince)
+			{
+				if (!oldLongPressKeyCodes.Contains(key.Key) && RealTime.GlobalNow - key.Value > LongPressTimeOut)
+				{
+					validLongPressKeyCodes.Add(key.Key);
+					oldLongPressKeyCodes.Add(key.Key);
+				}
+			}
 
 			//could I replace these with async calls? would it matter?
 			foreach (var action in Actions)
@@ -793,42 +807,47 @@ namespace ReActionPlugin
 				{
 					OnKeyPressed(secondaryKey);
 				}
+
+				if (ReAction.KeyReleased(key))
+				{
+					if (keysUpSince.TryGetValue(key, out var time))
+					{
+						keysUpSince.Remove(key);
+
+						if (
+#if SANDBOX
+						RealTime.GlobalNow
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+						- time <= DoubleTapTimeOut && time !=
+#if SANDBOX
+						RealTime.GlobalNow
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+						)
+						{
+							validDoubleTapKeyCodes.Add(key);
+						}
+					}
+					else
+					{
+						keysUpSince.Add(key,
+#if SANDBOX
+						RealTime.GlobalNow
+#elif UNITY_STANDALONE || UNITYEDITOR
+					Time.time
+#endif
+						);
+					}
+
+					oldLongPressKeyCodes.Remove(key);
+				}
 			}
 
 			static void OnKeyPressed(KeyCode key)
 			{
-				if (keysUpSince.TryGetValue(key, out var time))
-				{
-					keysUpSince.Remove(key);
-
-					if (
-				#if SANDBOX
-					RealTime.GlobalNow 
-				#elif UNITY_STANDALONE || UNITYEDITOR
-					Time.time
-				#endif
-					- time <= DoubleTapTimeOut && time !=
-#if SANDBOX
-					RealTime.GlobalNow
-#elif UNITY_STANDALONE || UNITYEDITOR
-					Time.time
-#endif
-					)
-					{
-						validDoubleTapKeyCodes.Add(key);
-					}
-				}
-				else
-				{
-					keysUpSince.Add(key,
-#if SANDBOX
-					RealTime.GlobalNow
-#elif UNITY_STANDALONE || UNITYEDITOR
-					Time.time
-#endif
-					);
-				}
-
 				if (!keysHeldSince.ContainsKey(key))
 				{
 					keysHeldSince.Add(key,
@@ -876,7 +895,7 @@ namespace ReActionPlugin
 					ReAction.KeyDown
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Input.GetKey
-# endif
+#endif
 					(key.Key))
 				{
 					keysHeldSinceLocal.Remove(key.Key);
@@ -945,6 +964,16 @@ namespace ReActionPlugin
 					if (mashedKeyCodes.Count > 0)
 					{
 						hud.DrawText(new TextRendering.Scope($"Valid mashes: {string.Join(", ", mashedKeyCodes)}", Color.Yellow, 32), new Rect(0, pixels.y * 0.15f, pixels.x, pixels.y), TextFlag.LeftTop);
+					}
+
+					if (validLongPressKeyCodes.Count > 0)
+					{
+						hud.DrawText(new TextRendering.Scope($"Valid long presses: {string.Join(", ", validLongPressKeyCodes)}", Color.Yellow, 32), new Rect(0, pixels.y * 0.2f, pixels.x, pixels.y), TextFlag.LeftTop);
+					}
+
+					if (oldLongPressKeyCodes.Count > 0)
+					{
+						hud.DrawText(new TextRendering.Scope($"Old long presses: {string.Join(", ", oldLongPressKeyCodes)}", Color.Red, 32), new Rect(0, pixels.y * 0.25f, pixels.x, pixels.y), TextFlag.Top);
 					}
 
 					hud.DrawText(new TextRendering.Scope("Current up keys:", Color.Red, 16), new Rect(pixels.x * .6f, 0, pixels.x, pixels.y), TextFlag.LeftTop);
@@ -1143,7 +1172,7 @@ namespace ReActionPlugin
 				Input.GetKeyDown
 #endif
 				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
-				Conditional.LongPress => (keysHeldSince.TryGetValue(action.Bind.key, out var heldTime) && heldTime > LongPressTimeOut && ModifiersActive(action.Bind.modifiers)) || (keysHeldSince.TryGetValue(action.SecondaryBind.key, out var secondaryHeldtime) && secondaryHeldtime > LongPressTimeOut && ModifiersActive(action.SecondaryBind.modifiers)),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
+				Conditional.LongPress => validLongPressKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers) || (validLongPressKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
 				Conditional.Continuous => (
 #if SANDBOX
 				ReAction.KeyDown
