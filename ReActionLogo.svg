@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1024"
+   height="1024"
+   viewBox="0 0 270.9333 270.9333"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="ReActionLogo.svg"
+   inkscape:export-filename="ReActionLogoHwite.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#ffffee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     inkscape:zoom="1.0823864"
+     inkscape:cx="397.73227"
+     inkscape:cy="487.34906"
+     inkscape:window-width="2560"
+     inkscape:window-height="1417"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showborder="false"
+     inkscape:export-bgcolor="#ffffffff" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect4"
+       is_visible="true"
+       lpeversion="1.3"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false"
+       uniform="false" />
+    <inkscape:path-effect
+       effect="bspline"
+       id="path-effect2"
+       is_visible="true"
+       lpeversion="1.3"
+       weight="33.333333"
+       steps="2"
+       helper_size="0"
+       apply_no_weight="true"
+       apply_with_weight="true"
+       only_selected="false"
+       uniform="false" />
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath4">
+      <path
+         style="fill:#ff0000;stroke-width:0.264583"
+         d="m 69.381479,162.92222 c 1.01852,-1.42593 1.507409,-3.70741 3.055583,-11.65199 1.548174,-7.94458 4.155528,-21.55171 5.214783,-29.08876 1.059254,-7.53706 0.570378,-9.00369 -10.022422,-10.83705 -10.5928,-1.83335 -31.288683,-4.03331 -42.288695,-4.31848 -11.000013,-0.28517 -12.303691,1.34443 -14.055565,10.59274 -1.7518734,9.24832 -3.9518294,26.11465 -4.4814485,35.11837 -0.5296191,9.00371 0.6111002,10.14443 10.6335115,10.95925 10.022412,0.81482 28.925737,1.3037 39.151679,1.26295 10.225942,-0.0408 11.774054,-0.61111 12.792574,-2.03703 z"
+         id="path5"
+         inkscape:path-effect="#path-effect4"
+         inkscape:original-d="m 69.91111,163.77777 c 0.488889,-2.28148 0.977778,-4.56296 1.466667,-6.84444 2.607458,-13.60768 5.214813,-27.21481 7.822221,-40.82222 -0.488897,-1.4667 -0.977778,-2.93333 -1.466664,-4.4 -20.696711,-2.20004 -41.392594,-4.4 -62.08889,-6.6 -1.30373,1.62966 -2.607407,3.25926 -3.911111,4.88889 -2.2000437,16.867 -4.3999999,33.73333 -6.5999997,50.6 1.1407635,1.14076 2.2814814,2.28148 3.4222221,3.42222 18.9040826,0.4889 37.8074076,0.97778 56.7111116,1.46667 1.548178,-0.57039 3.096294,-1.14074 4.644443,-1.71112 z" />
+    </clipPath>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath6">
+      <path
+         style="display:inline;fill:#ff0000;stroke-width:0.264583"
+         d="m 77,158.39999 c 2.525925,-17.19259 5.051795,-34.3848 7.374069,-43.30722 2.322275,-8.92242 4.440748,-9.57425 34.426511,-8.51496 29.98576,1.05929 87.83646,3.8296 117.08831,6.15184 29.25186,2.32224 29.90369,4.19627 29.57776,8.59634 -0.32594,4.40007 -1.62962,11.32586 -3.05556,19.10743 -1.42594,7.78157 -2.97406,16.41843 -4.97038,20.57398 -1.99632,4.15556 -4.44071,3.82964 -32.10421,3.82964 -27.66349,0 -80.54279,0.32591 -109.51007,0.52962 -28.967279,0.20371 -34.018893,0.28518 -36.504142,-0.89633 C 76.837039,163.28882 76.918519,160.84444 77,158.39999 Z"
+         id="path6"
+         inkscape:original-d="m 77,158.39999 c 0,0 5.051795,-34.3848 7.577776,-51.57777 2.118566,-0.65187 4.237041,-1.3037 6.355556,-1.95555 57.853008,2.77042 115.703708,5.54074 173.555548,8.31111 0.65187,1.87411 1.3037,3.74814 1.95556,5.62222 -1.30374,6.92606 -2.60741,13.85185 -3.91111,20.77778 -1.54818,8.63721 -3.0963,17.27407 -4.64445,25.91111 -2.44449,-0.32593 -4.88888,-0.65186 -7.33333,-0.97778 -52.88254,0.32593 -105.76184,0.65184 -158.64444,0.97777 -5.051959,0.0815 -10.103573,0.16297 -15.155554,0.24445 C 76.83704,163.28882 77,158.39999 77,158.39999 Z"
+         inkscape:path-effect="#path-effect2"
+         sodipodi:nodetypes="ccccccccccc" />
+    </clipPath>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g6"
+       transform="translate(1.3008841)">
+      <text
+         xml:space="preserve"
+         style="font-style:italic;font-variant:normal;font-weight:800;font-stretch:normal;font-size:88.1944px;font-family:'Alumni Sans SC';-inkscape-font-specification:'Alumni Sans SC, Ultra-Bold Italic';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;display:inline;fill:#ff0000;stroke-width:0.264583"
+         x="135.42259"
+         y="161.08719"
+         id="text2"
+         mask="none"
+         clip-path="url(#clipPath4)"
+         transform="translate(4.2333335)"><tspan
+           sodipodi:role="line"
+           id="tspan2"
+           x="135.42259"
+           y="161.08719">ReAction</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:88.1944px;font-family:'Alumni Sans SC';-inkscape-font-specification:'Alumni Sans SC, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;display:inline;fill:#000000;stroke-width:0.264583"
+         x="135.42259"
+         y="161.08719"
+         id="text1"
+         clip-path="url(#clipPath6)"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           x="135.42259"
+           y="161.08719">ReAction</tspan></text>
+    </g>
+  </g>
+</svg>
