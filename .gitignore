@@ -2,3 +2,4 @@ obj
 *.meta
 defaultActions.json
 *.csproj
+launchSettings.json

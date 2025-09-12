@@ -45,7 +45,7 @@ Project.Current.GetCodePath()
 				using (StreamWriter sw = new StreamWriter(fs))
 				{
 					sw.AutoFlush = false;
-					sw.WriteLine("namespace ReActionPlugin.Consts.Int");
+					/*sw.WriteLine("namespace ReActionPlugin.Consts.Int");
 					sw.WriteLine("{");
 					sw.WriteLine("\tpublic static class ReActionConsts");
 					sw.WriteLine("\t{");
@@ -60,7 +60,7 @@ Project.Current.GetCodePath()
 						if (exportAsConsts.value)
 #endif
 						{
-							intDeclaration = $"public const int {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
+							intDeclaration = $"public const int {string.Concat(action.InputAction.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
 						}
 						else
 						{
@@ -75,7 +75,7 @@ Project.Current.GetCodePath()
 					sw.WriteLine("\t}");
 					sw.WriteLine("}");
 
-					sw.WriteLine();
+					sw.WriteLine();*/
 
 					sw.WriteLine("namespace ReActionPlugin.Consts.String");
 					sw.WriteLine("{");
@@ -92,14 +92,14 @@ Project.Current.GetCodePath()
 						if (exportAsConsts.value)
 #endif
 						{
-							stringDeclaration = $"public const string {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
+							stringDeclaration = $"public const string {string.Concat(action.InputAction.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
 						}
 						else
 						{
-							stringDeclaration = $"public static readonly string {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
+							stringDeclaration = $"public static readonly string {string.Concat(action.InputAction.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
 						}
 
-						stringLine = $"\t\t{stringDeclaration} = \"{action.Name}\";";
+						stringLine = $"\t\t{stringDeclaration} = \"{action.InputAction.Name}\";";
 
 						sw.WriteLine(stringLine);
 					}

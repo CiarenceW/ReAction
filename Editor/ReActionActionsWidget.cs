@@ -66,7 +66,7 @@ namespace ReActionPlugin
 
 				mainColumn.Add(ActionsTree);
 
-				ReAction.CreateDefaultActions();
+				ReAction.PopulateActions();
 				UpdateActionList();
 			};
 
@@ -113,6 +113,8 @@ namespace ReActionPlugin
 		{
 			Sandbox.FileSystem.Data.CreateDirectory("ReAction");
 
+			EditorUtility.SaveProjectSettings(ProjectSettings.Input, "Input.config");
+
 			if (!Project.Current.Config.TryGetMeta<ReActionSettings>("ReActionActions", out var meta))
 			{
 				meta = new ReActionSettings();
@@ -143,13 +145,14 @@ namespace ReActionPlugin
 			ActionsTree.Layout.Clear(true);
 
 			string lastGroup = null;
-			foreach (var group in ReAction.Actions.GroupBy(x => x.Category))
+			int actionCount = 0;
+			foreach (var group in ReAction.Actions.GroupBy(x => x.InputAction.GroupName))
 			{
-				var collapsibleCategory = ActionsTree.Layout.Add(new CollapsibleCategory(null, group.Key) { Name = $"Group {group.First().Category}"});
+				var collapsibleCategory = ActionsTree.Layout.Add(new CollapsibleCategory(null, group.Key) { Name = $"Group {group.First().InputAction.GroupName}"});
 
 				foreach (var action in group)
 				{
-					collapsibleCategory.Container.Layout.Add(new ActionPanel(action, this) { Name = $"ActionsPanel {action.Index}"});
+					collapsibleCategory.Container.Layout.Add(new ActionPanel(action, this) { Name = $"ActionsPanel {actionCount++}"});
 				}
 
 				collapsibleCategory.StateCookieName = $"inputpage.category.{group.Key}";
@@ -164,33 +167,31 @@ namespace ReActionPlugin
 
 			var entry = footer.Add(new LineEdit() { MaximumHeight = 24, PlaceholderText = "Add New Action..." }, 2);
 
-			var add = () =>
-			{
-				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {ReAction.Actions.Count}" : entry.Text;
-				AddAction(Activator.CreateInstance(typeof(ReAction.Action), name, ReAction.Actions.Count, ReAction.KeyCode.KEY_NONE, ReAction.GamepadInput.None, ReAction.Conditional.Press, lastGroup ?? "Other") as ReAction.Action, updateDisplay: true);
-			};
-
 			entry.ReturnPressed += add;
 
 			var btn = footer.Add(new Button.Primary("Add", "new_label"), 0);
 			btn.Clicked += add;
 
-			var clear = footer.Add(new Button("Clear", "auto_fix_normal"));
-			clear.Clicked += () =>
-			{
-				ClearActions();
-
-				// Add one action to start out with
-				add();
-			};
-
 			var reset = footer.Add(new Button("Reset to Default", "restart_alt"));
 			reset.Clicked += () =>
 			{
 				ClearActions();
-				ReAction.CreateDefaultActions(true);
+				ReAction.PopulateActions(true);
 				UpdateActionList();
 			};
+
+			void add()
+			{
+				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {Sandbox.Input.GetActions().Count()}" : entry.Text;
+
+				var inputActions = ProjectSettings.Input.Actions;
+
+				var newInputAction = new InputAction(name, string.Empty);
+
+				inputActions.Add(newInputAction);
+
+				AddAction(new ReAction.Action(newInputAction), updateDisplay: true);
+			}
 		}
 
 		public void AddAction(ReAction.Action action, bool updateDisplay = true)
@@ -203,6 +204,7 @@ namespace ReActionPlugin
 
 		public void RemoveAction(ReAction.Action action)
 		{
+			ProjectSettings.Input.Actions.Remove(action.InputAction);
 			ReAction.Actions.Remove(action);
 
 			UpdateActionList();

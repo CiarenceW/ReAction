@@ -19,7 +19,7 @@ namespace ReActionPlugin
 		public void InitDefault()
 		{
 			this.Actions?.Clear();
-			this.Actions = ReAction.DefaultActions;
+			this.Actions = ReAction.GetDefaultActions();
 		}
 
 		public HashSet<ReAction.Action> Actions

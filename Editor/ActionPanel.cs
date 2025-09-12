@@ -26,7 +26,7 @@ partial class ActionPanel : Widget
 		Cursor = CursorShape.Finger;
 	}
 
-	private string GetFriendlyGamepadInput(ReAction.GamepadInput value)
+	/*private string GetFriendlyGamepadInput(ReAction.GamepadInput value)
 	{
 		return DisplayInfo.ForEnumValues<ReAction.GamepadInput>()
 			.FirstOrDefault(x => x.value.Equals(value))
@@ -38,7 +38,7 @@ partial class ActionPanel : Widget
 		return DisplayInfo.ForEnumValues<ReAction.KeyCode>()
 			.FirstOrDefault(x => x.value.Equals(value))
 			.info.Name;
-	}
+	}*/
 
 	private float DrawTextWithIcon(Rect r, string text, string icon, int iconSize = 14)
 	{
@@ -78,19 +78,13 @@ partial class ActionPanel : Widget
 			r.Left += 20;
 		}
 
-		var name = Action.Name;
+		var name = string.IsNullOrEmpty(Action.InputAction.Title) ? Action.InputAction.Name : Action.InputAction.Title;
 		var nameRect = Paint.DrawText(r, name, TextFlag.LeftCenter);
 
 		float width = 0;
 
-		if (Action.SecondaryBind.key != ReAction.KeyCode.KEY_NONE)
-		{
-			width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.SecondaryBind.modifiers)} {GetFriendlyKeyCode(Action.SecondaryBind.key)}", "keyboard_hide");
-			r.Right -= width - 8;
-		}
-
-		width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.Bind.modifiers)} {GetFriendlyKeyCode(Action.Bind.key)}", "keyboard");
-		r.Right -= width - 8;
+		width = DrawTextWithIcon(r, $"{(Action.Conditional)} {ReAction.FormatModifiersString(Action.Modifiers)} {(Action.InputAction.KeyboardCode)}", "keyboard");
+		r.Right -= width - 16;
 
 		/*if (Action.GamepadInput != ReAction.GamepadInput.None)
 		{

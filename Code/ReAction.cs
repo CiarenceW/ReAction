@@ -75,11 +75,19 @@ namespace ReActionPlugin
 		}
 #endif
 
-		public static HashSet<ReAction.Action> DefaultActions
+		public static HashSet<ReAction.Action> GetDefaultActions()
 		{
-			get;
-		} = new()
-		{
+			HashSet<ReAction.Action> actions = new HashSet<ReAction.Action>();
+
+			foreach (var action in Input.GetActions())
+			{
+				actions.Add(new Action(action));
+			}
+
+			return actions;
+		}
+
+		/*{
 			new ReAction.Action(
 	"Forward",
 	0,
@@ -487,7 +495,7 @@ namespace ReActionPlugin
 	Conditional.Press,
 	"Other"
   )
-		};
+		};*/
 
 		static double lastTime;
 
@@ -513,12 +521,11 @@ namespace ReActionPlugin
 		{
 			foreach (var action in Actions)
 			{
-				ReActionLogger.QuickInfo(nameof(action.Name), action.Name);
-				ReActionLogger.QuickInfo(nameof(action.Index), action.Index);
-				ReActionLogger.QuickInfo(nameof(action.Bind), (action.Bind.Equals(default) ? "Unbound" : $"{FormatModifiersString(action.Bind.modifiers)}{action.Bind.key}"));
-				ReActionLogger.QuickInfo(nameof(action.SecondaryBind), (action.SecondaryBind.Equals(default) ? "Unbound" : $"{FormatModifiersString(action.SecondaryBind.modifiers)}{action.SecondaryBind.key}"));
+				ReActionLogger.QuickInfo(nameof(action.InputAction.Name), action.InputAction.Name);
+				ReActionLogger.QuickInfo(nameof(action.InputAction.KeyboardCode), (action.InputAction.KeyboardCode.Equals(default) ? "Unbound" : $"{FormatModifiersString(action.Modifiers)}{action.InputAction.KeyboardCode}"));
 				ReActionLogger.QuickInfo(nameof(action.Conditional), action.Conditional);
-				ReActionLogger.QuickInfo(nameof(action.Category), action.Category);
+				ReActionLogger.QuickInfo(nameof(action.InputAction.GroupName), action.InputAction.GroupName);
+				ReActionLogger.QuickInfo(nameof(action.InputAction.Title), action.InputAction.Title);
 			}
 		}
 
@@ -639,22 +646,22 @@ namespace ReActionPlugin
 			set;
 		} = .3f;
 
-		static Dictionary<KeyCode, double> keysPressedSince = new();
+		static Dictionary<string, double> keysPressedSince = new();
 
-		static Dictionary<KeyCode, double> keysHeldSince = new();
+		static Dictionary<string, double> keysHeldSince = new();
 
-		static Dictionary<KeyCode, double> keysUpSince = new();
+		static Dictionary<string, double> keysUpSince = new();
 
-		static HashSet<KeyCode> validDoubleTapKeyCodes = new();
+		static HashSet<string> validDoubleTapKeyCodes = new();
 
-		static HashSet<KeyCode> toggledKeyCodes = new();
+		static HashSet<string> toggledKeyCodes = new();
 
-		static HashSet<KeyCode> mashedKeyCodes = new();
+		static HashSet<string> mashedKeyCodes = new();
 
-		static HashSet<KeyCode> validLongPressKeyCodes = new();
-		static HashSet<KeyCode> oldLongPressKeyCodes = new();
+		static HashSet<string> validLongPressKeyCodes = new();
+		static HashSet<string> oldLongPressKeyCodes = new();
 
-		/// <summary>
+		/*/// <summary>
 		/// Like <see cref="Input.AnalogMove"/> but kinda better, and also with ClampLength(1f) applied to it
 		/// </summary>
 		public static Vector3 AnalogMove
@@ -730,7 +737,7 @@ namespace ReActionPlugin
 				#endif
 
 			}
-		}
+		}*/
 
 		/// <summary>
 		/// This is kind of the Awake() method for this, probably don't need to call it, the <see cref="ReActionSystem"/> should take care of it
@@ -748,7 +755,6 @@ namespace ReActionPlugin
 		public static void QueryInput()
 		{
 			QueryModifiersIfNeeded();
-
 
 			PopulateActionsLists();
 
@@ -783,6 +789,7 @@ namespace ReActionPlugin
 			//could I replace these with async calls? would it matter?
 			foreach (var action in Actions)
 			{
+				/*
 				var key = action.Bind.key;
 				var secondaryKey = action.SecondaryBind.key;
 
@@ -806,9 +813,16 @@ namespace ReActionPlugin
 					(secondaryKey))
 				{
 					OnKeyPressed(secondaryKey);
+				}*/
+
+				var key = action.InputAction.Name;
+
+				if (Input.Pressed(key))
+				{
+					OnKeyPressed(key);
 				}
 
-				if (ReAction.KeyReleased(key))
+				if (Input.Released(key))
 				{
 					if (keysUpSince.TryGetValue(key, out var time))
 					{
@@ -846,8 +860,13 @@ namespace ReActionPlugin
 				}
 			}
 
-			static void OnKeyPressed(KeyCode key)
+			static void OnKeyPressed(string key)
 			{
+				if (!toggledKeyCodes.Add(key))
+				{
+					toggledKeyCodes.Remove(key);
+				}
+
 				if (!keysHeldSince.ContainsKey(key))
 				{
 					keysHeldSince.Add(key,
@@ -886,13 +905,13 @@ namespace ReActionPlugin
 		static void RemoveTimedOutKeysFromLists()
 		{
 			//prevent collection size from getting modified while enumerating
-			var keysHeldSinceLocal = new Dictionary<KeyCode, double>(keysHeldSince);
+			var keysHeldSinceLocal = new Dictionary<string, double>(keysHeldSince);
 
 			foreach (var key in keysHeldSince)
 			{
 				if (!
 #if SANDBOX
-					ReAction.KeyDown
+					Input.Down
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Input.GetKey
 #endif
@@ -905,7 +924,7 @@ namespace ReActionPlugin
 			keysHeldSince = keysHeldSinceLocal;
 
 			//ditto
-			var keysUpSinceLocal = new Dictionary<KeyCode, double>(keysUpSince);
+			var keysUpSinceLocal = new Dictionary<string, double>(keysUpSince);
 
 			foreach (var key in keysUpSince)
 			{
@@ -924,7 +943,7 @@ namespace ReActionPlugin
 			keysUpSince = keysUpSinceLocal;
 
 			//ditto ditto
-			var keysPressedSinceLocal = new Dictionary<KeyCode, double>(keysPressedSince);
+			var keysPressedSinceLocal = new Dictionary<string, double>(keysPressedSince);
 
 			foreach (var key in keysPressedSince)
 			{
@@ -1004,7 +1023,7 @@ namespace ReActionPlugin
 			}
 		}
 
-		public static bool TryGetAction(int index, out Action action)
+		/*public static bool TryGetAction(int index, out Action action)
 		{
 			return (action = GetAction(index)) != null;
 		}
@@ -1020,7 +1039,7 @@ namespace ReActionPlugin
 			}
 
 			return null;
-		}
+		}*/
 
 		public static bool TryGetAction(string name, out Action action)
 		{
@@ -1031,7 +1050,7 @@ namespace ReActionPlugin
 		{
 			foreach (var action in Actions)
 			{
-				if (action.Name == name)
+				if (action.InputAction.Name == name)
 				{
 					return action;
 				}
@@ -1040,7 +1059,7 @@ namespace ReActionPlugin
 			return null;
 		}
 
-		/// <summary>
+		/*/// <summary>
 		/// Is the action currently triggered?
 		/// </summary>
 		/// <param name="index">
@@ -1063,7 +1082,7 @@ namespace ReActionPlugin
 				ReActionLogger.Warning($"Could not find Action with index {index}");
 
 			return false;
-		}
+		}*/
 
 		/// <summary>
 		/// Is the action triggered?
@@ -1126,7 +1145,7 @@ namespace ReActionPlugin
 			return TryGetAction(actionName, out var action) && ActionTriggeredForCondition(action, conditional);
 		}
 
-		/// <summary>
+		/*/// <summary>
 		/// Allows you to check if an action is valid with the specified conditional
 		/// </summary>
 		/// <param name="index">
@@ -1141,7 +1160,7 @@ namespace ReActionPlugin
 		public static bool ActionTriggeredForCondition(int index, Conditional conditional)
 		{
 			return TryGetAction(index, out var action) && ActionTriggeredForCondition(action, conditional);
-		}
+		}*/
 
 		/// <summary>
 		/// Allows you to check if an action is valid with the specified conditional
@@ -1161,47 +1180,29 @@ namespace ReActionPlugin
 			{
 				Conditional.Press => (
 #if SANDBOX
-				ReAction.KeyPressed
+				Input.Pressed
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyDown
 #endif
-				(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (
-#if SANDBOX
-				ReAction.KeyPressed
-#elif UNITY_STANDALONE || UNITYEDITOR
-				Input.GetKeyDown
-#endif
-				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
-				Conditional.LongPress => validLongPressKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers) || (validLongPressKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
+				(action.InputAction.Name) && ModifiersActive(action.Modifiers)),
+				Conditional.LongPress => validLongPressKeyCodes.Contains(action.InputAction.Name) && ModifiersActive(action.Modifiers),//I guess I could have a nullref somehow if there's a race condition with the component's updates?
 				Conditional.Continuous => (
 #if SANDBOX
-				ReAction.KeyDown
+				Input.Down
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKey
 #endif
-				(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (
-#if SANDBOX
-				ReAction.KeyDown
-#elif UNITY_STANDALONE || UNITYEDITOR
-				Input.GetKey
-#endif
-				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
+				(action.InputAction.Name) && ModifiersActive(action.Modifiers)),
 				Conditional.Release => (
 #if SANDBOX
-				ReAction.KeyReleased
+				Input.Released
 #elif UNITY_STANDALONE || UNITYEDITOR
 				Input.GetKeyUp
 #endif
-				(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (
-#if SANDBOX
-				ReAction.KeyReleased
-#elif UNITY_STANDALONE || UNITYEDITOR
-				Input.GetKeyUp
-#endif
-				(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
-				Conditional.DoubleTap => (validDoubleTapKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (validDoubleTapKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
-				Conditional.Toggle => (toggledKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (toggledKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
-				Conditional.Mash => (mashedKeyCodes.Contains(action.Bind.key) && ModifiersActive(action.Bind.modifiers)) || (mashedKeyCodes.Contains(action.SecondaryBind.key) && ModifiersActive(action.SecondaryBind.modifiers)),
+				(action.InputAction.Name) && ModifiersActive(action.Modifiers)),
+				Conditional.DoubleTap => (validDoubleTapKeyCodes.Contains(action.InputAction.Name) && ModifiersActive(action.Modifiers)),
+				Conditional.Toggle => (toggledKeyCodes.Contains(action.InputAction.Name) && ModifiersActive(action.Modifiers)),
+				Conditional.Mash => (mashedKeyCodes.Contains(action.InputAction.Name) && ModifiersActive(action.Modifiers)),
 				_ => false,
 			};
 		}
@@ -1622,7 +1623,22 @@ namespace ReActionPlugin
 
 		public class Action
 		{
-			public Action(string name, int index, KeyBind bind, GamepadInput gamepadInput, Conditional conditional, string category = "Default")
+			[JsonConstructor]
+			public Action(InputAction inputAction, ReAction.Conditional conditional = ReAction.Conditional.Press, ReAction.Modifiers modifiers = ReAction.Modifiers.None)
+			{
+				this.InputAction = inputAction;
+				this.Conditional = conditional;
+				this.Modifiers = modifiers;
+			}
+
+			public Action(Action action)
+			{
+				this.InputAction = action.InputAction;
+				this.Conditional = action.Conditional;
+				this.Modifiers = action.Modifiers;
+			}
+
+			/*public Action(string name, int index, KeyBind bind, GamepadInput gamepadInput, Conditional conditional, string category = "Default")
 			{
 				Name = name;
 				Index = index;
@@ -1691,20 +1707,18 @@ namespace ReActionPlugin
 				PositiveAxis = positiveAxis;
 				Conditional = conditional;
 				Category = category;
-			}
+			}*/
 
+			/*			/// <summary>
+						/// The name of the action
+						/// </summary>
+						public string Name
+						{
+							get;
+							set;
+						}*/
 
-
-			/// <summary>
-			/// The name of the action
-			/// </summary>
-			public string Name
-			{
-				get;
-				set;
-			}
-
-			/// <summary>
+			/*/// <summary>
 			/// The index of the action, you should use consts if you want to use this
 			/// </summary>
 			public int Index
@@ -1749,12 +1763,13 @@ namespace ReActionPlugin
 			{
 				get;
 				set;
-			}
+			}*/
 
 			/// <summary>
-			/// Set to true if you don't want conditionals to be modifiable, useful if you're only going to check if an action is valid by calling <see cref="ActionTriggeredForCondition(Action, Conditional)"/>, use it for custom binding menus... etc..... it doesn't really do anything on its own :)
+			/// The <see cref="Sandbox.InputAction"/> this ReAction is bound to.
 			/// </summary>
-			public bool AllowSetConditional
+			[InlineEditor]
+			public InputAction InputAction
 			{
 				get;
 				set;
@@ -1770,15 +1785,29 @@ namespace ReActionPlugin
 			}
 
 			/// <summary>
+			/// Set to true if you don't want conditionals to be modifiable, useful if you're only going to check if an action is valid by calling <see cref="ActionTriggeredForCondition(Action, Conditional)"/>, use it for custom binding menus... etc..... it doesn't really do anything on its own :)
+			/// </summary>
+			public bool AllowSetConditional
+			{
+				get;
+				set;
+			}
+			public Modifiers Modifiers
+			{
+				get;
+				set;
+			}
+
+			/*/// <summary>
 			/// Category, use this for a keybind menu of some sorts
 			/// </summary>
 			public string Category
 			{
 				get;
 				set;
-			}
+			}*/
 
-			/// <summary>
+			/*/// <summary>
 			/// You can get this action's analog value with this, if the <see cref="GamepadInput"/>'s assigned button isn't analog, it'll be 1f if the action is currently triggered, and 0f if it's not
 			/// </summary>
 #if SANDBOX
@@ -1797,10 +1826,10 @@ namespace ReActionPlugin
 						return GetGamepadCodeAnalog(GamepadInput);
 					}
 				}
-			}
+			}*/
 		}
 
-#if SANDBOX_STANDALONE || UNITY_EDITOR || UNITY_STANDALONE
+/*#if SANDBOX_STANDALONE || UNITY_EDITOR || UNITY_STANDALONE
 #endif
 
 		public static float GetGamepadCodeAnalog(GamepadInput gamepadInput)
@@ -1828,7 +1857,7 @@ namespace ReActionPlugin
 #warning TODO: make this interact with SDL
 			return 1f;
 #endif
-		}
+		}*/
 
 #if UNITY_EDITOR || UNITY_STANDALONE
 		public static void ReadFromJSON(string path)
@@ -1904,7 +1933,7 @@ namespace ReActionPlugin
 		}
 #endif
 
-		public static void CreateDefaultActions(bool toDefault = false)
+		public static void PopulateActions(bool toDefault = false)
 		{
 			if (ReAction.Actions.Count > 0 && !toDefault)
 				return;
@@ -1974,7 +2003,7 @@ namespace ReActionPlugin
 
 			ReActionLogger.Info("Action list is null, populating with defaults");
 
-			ReAction.Actions = new HashSet<ReAction.Action>(ReAction.DefaultActions);
+			ReAction.Actions = GetDefaultActions();
 		}
 
 #if SANDBOX
@@ -2086,7 +2115,7 @@ namespace ReActionPlugin
 			Mash
 		}
 
-#if UNITY_EDITOR
+/*#if UNITY_EDITOR
 		[Serialize]
 #endif
 		public struct KeyBind(ReAction.KeyCode key, ReAction.Modifiers modifiers)
@@ -2114,7 +2143,7 @@ namespace ReActionPlugin
 			{
 				return new KeyBind(key, Modifiers.None);
 			}
-		}
+		}*/
 
 #if SANDBOX
 		//taken from NativeEngine.ButtonCode, as it's an internal enum :(
