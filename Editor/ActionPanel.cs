@@ -26,14 +26,14 @@ partial class ActionPanel : Widget
 		Cursor = CursorShape.Finger;
 	}
 
-	/*private string GetFriendlyGamepadInput(ReAction.GamepadInput value)
+	private string GetFriendlyGamepadCode(GamepadCode value)
 	{
-		return DisplayInfo.ForEnumValues<ReAction.GamepadInput>()
+		return DisplayInfo.ForEnumValues<GamepadCode>()
 			.FirstOrDefault(x => x.value.Equals(value))
 			.info.Name;
 	}
 
-	private string GetFriendlyKeyCode(ReAction.KeyCode value)
+	/*private string GetFriendlyKeyCode(ReAction.KeyCode value)
 	{
 		return DisplayInfo.ForEnumValues<ReAction.KeyCode>()
 			.FirstOrDefault(x => x.value.Equals(value))
@@ -81,10 +81,24 @@ partial class ActionPanel : Widget
 		var name = string.IsNullOrEmpty(Action.InputAction.Title) ? Action.InputAction.Name : Action.InputAction.Title;
 		var nameRect = Paint.DrawText(r, name, TextFlag.LeftCenter);
 
-		float width = 0;
+		float width = 0f;
 
-		width = DrawTextWithIcon(r, $"{(Action.Conditional)} {ReAction.FormatModifiersString(Action.Modifiers)} {(Action.InputAction.KeyboardCode)}", "keyboard");
-		r.Right -= width - 16;
+		r.Right -= 10;
+
+		if (!string.IsNullOrEmpty(Action.InputAction.KeyboardCode))
+		{
+			width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.Modifiers)} {(Action.InputAction.KeyboardCode.ToUpper())}", "keyboard");
+			r.Right -= width - 8;
+		}
+
+		if (Action.InputAction.GamepadCode != GamepadCode.None)
+		{
+			width = DrawTextWithIcon(r, GetFriendlyGamepadCode(Action.InputAction.GamepadCode), "sports_esports");
+			r.Right -= width - 8;
+		}
+
+		width = DrawTextWithIcon(r, Action.Conditional.ToString(), "article");
+		r.Right -= width - 8;
 
 		/*if (Action.GamepadInput != ReAction.GamepadInput.None)
 		{

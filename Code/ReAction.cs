@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -747,6 +748,25 @@ namespace ReActionPlugin
 			ReActionLogger.Info("Initialising ReAction");
 
 			GetSavedActionData();
+
+			AssignInputActions();
+		}
+
+		static void AssignInputActions()
+		{
+			foreach (var action in Actions)
+			{
+				var matchingAction = ProjectSettings.Input.Actions.Where(e => e.Name == action.InputAction.Name).FirstOrDefault();
+
+				if (matchingAction != null)
+				{
+					action.InputAction = matchingAction;
+				}
+				else
+				{
+					ReActionLogger.Warning($"Found missing action for {action.InputAction.Name}");
+				}
+			}
 		}
 
 		/// <summary>

@@ -93,6 +93,42 @@ namespace ReActionPlugin
 			exportAsConsts.ToolTip = "If true, the indices will be public const ints, instead of public static readonly ints";
 
 			exportIndexConstsButton.Clicked += ReActionMenu.ExportIndexToFile;
+
+			var sanityCheckActionsButton = Layout.Add(new Button("Sanity check actions", this));
+
+			sanityCheckActionsButton.Clicked += CheckIfActionsActuallyExistLol;
+		}
+
+		static void CheckIfActionsActuallyExistLol()
+		{
+			CheckIfActionsActuallyExistLol(true);
+		}
+
+		static void CheckIfActionsActuallyExistLol(bool saveInputActions = true)
+		{
+			foreach (var reAction in ReAction.Actions)
+			{
+				if (reAction.InputAction != null)
+				{
+					var matchingAction = ProjectSettings.Input.Actions.Where(inputAction => inputAction.Name == reAction.InputAction.Name).FirstOrDefault();
+
+					if (matchingAction != null)
+					{
+						ReActionLogger.Info(matchingAction.Name);
+						reAction.InputAction = matchingAction;
+					}
+					else
+					{
+						ReActionLogger.Warning($"Found action {reAction.InputAction.Name} missing from project InputActions, adding");
+
+						ProjectSettings.Input.Actions.Add(reAction.InputAction);
+						EditorUtility.SaveProjectSettings(ProjectSettings.Input, "Input.config");
+
+						ReActionLogger.QuickInfo(nameof(InputSettings), ProjectSettings.Input.Actions.Where(e => e.Name == reAction.InputAction.Name).FirstOrDefault());
+						ReActionLogger.QuickInfo(nameof(Sandbox.Input.ActionNames), Sandbox.Input.ActionNames.Where(e => e == reAction.InputAction.Name).FirstOrDefault());
+					}
+				}
+			}
 		}
 
 		new bool OnPaintOverride()
