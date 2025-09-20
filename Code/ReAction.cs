@@ -49,6 +49,13 @@ namespace ReActionPlugin
 			return str;
 		}
 
+		/// <summary>
+		/// Like <see cref="Input.AnalogLook"/> but scaled properly
+		/// </summary>
+		public static Angles Look => m_AnalogLook;
+
+		static Angles m_AnalogLook;
+
 #if !CUSTOM_SAVE_SYSTEM
 		internal static void GetSavedActionData()
 		{
@@ -774,6 +781,8 @@ namespace ReActionPlugin
 		/// </summary>
 		public static void QueryInput()
 		{
+			ProcessAnalogLook();
+
 			QueryModifiersIfNeeded();
 
 			PopulateActionsLists();
@@ -789,6 +798,35 @@ namespace ReActionPlugin
 					;
 
 			DrawDebugOverlay();
+		}
+
+		static void ProcessAnalogLook()
+		{
+			m_AnalogLook = default;
+
+			if (!Input.MouseCursorVisible)
+			{
+				//Check if player is using controller to look
+				if (Input.GetAnalog(InputAnalog.RightStickX) == 0 && Input.GetAnalog(InputAnalog.RightStickY) == 0)
+				{
+					m_AnalogLook = new Angles(Input.MouseDelta.y * Preferences.Sensitivity, -Input.MouseDelta.x * Preferences.Sensitivity, 0f);
+
+					if (Preferences.InvertMousePitch)
+					{
+						m_AnalogLook.pitch = -m_AnalogLook.pitch;
+					}
+
+					if (Preferences.InvertMouseYaw)
+					{
+						m_AnalogLook.yaw = -m_AnalogLook.yaw;
+					}
+				}
+				else
+				{
+					m_AnalogLook = new Angles(Input.GetAnalog(InputAnalog.RightStickY) * Time.Delta * Preferences.ControllerLookPitchSpeed, -(Input.GetAnalog(InputAnalog.RightStickX) * Time.Delta * Preferences.ControllerLookYawSpeed), 0f);
+				}
+			}
+
 		}
 
 		static void PopulateActionsLists()
@@ -984,7 +1022,7 @@ namespace ReActionPlugin
 
 		static void DrawDebugOverlay()
 		{
-			if (DebugInput)
+			if (DebugInput && Game.InGame && !Game.IsPaused)
 			{
 #if SANDBOX
 				if (Game.ActiveScene != null && Game.ActiveScene.Camera != null)
