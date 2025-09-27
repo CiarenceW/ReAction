@@ -149,7 +149,12 @@ namespace ReActionPlugin
 		{
 			Sandbox.FileSystem.Data.CreateDirectory("ReAction");
 
-			EditorUtility.SaveProjectSettings(ProjectSettings.Input, "Input.config");
+			if (!ProjectSettings.Input.Actions.Equals(Sandbox.Input.GetActions().ToList()))
+			{
+				ReActionLogger.Info("Input were different from default inputs, saving.");
+
+				EditorUtility.SaveProjectSettings(ProjectSettings.Input, "Input.config");
+			}
 
 			if (!Project.Current.Config.TryGetMeta<ReActionSettings>("ReActionActions", out var meta))
 			{
