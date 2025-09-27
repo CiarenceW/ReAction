@@ -962,62 +962,56 @@ namespace ReActionPlugin
 
 		static void RemoveTimedOutKeysFromLists()
 		{
-			//prevent collection size from getting modified while enumerating
-			var keysHeldSinceLocal = new Dictionary<string, double>(keysHeldSince);
-
-			foreach (var key in keysHeldSince)
+			lock (keysHeldSince)
 			{
-				if (!
+				foreach (var key in keysHeldSince)
+				{
+					if (!
 #if SANDBOX
-					Input.Down
+						Input.Down
 #elif UNITY_STANDALONE || UNITYEDITOR
 					Input.GetKey
 #endif
-					(key.Key))
-				{
-					keysHeldSinceLocal.Remove(key.Key);
+						(key.Key))
+					{
+						keysHeldSince.Remove(key.Key);
+					}
 				}
 			}
 
-			keysHeldSince = keysHeldSinceLocal;
-
-			//ditto
-			var keysUpSinceLocal = new Dictionary<string, double>(keysUpSince);
-
-			foreach (var key in keysUpSince)
+			lock (keysUpSince)
 			{
-				if (
-				#if SANDBOX
-					RealTime.GlobalNow 
-				#elif UNITY_STANDALONE || UNITYEDITOR
-					Time.time
-				#endif
-					- key.Value > DoubleTapTimeOut) //wow!!!! key is above the max timeout threshold, and the key isn't being held, yeet that shit
+				foreach (var key in keysUpSince)
 				{
-					keysUpSinceLocal.Remove(key.Key);
-				}
-			}
-
-			keysUpSince = keysUpSinceLocal;
-
-			//ditto ditto
-			var keysPressedSinceLocal = new Dictionary<string, double>(keysPressedSince);
-
-			foreach (var key in keysPressedSince)
-			{
-				if (
-					#if SANDBOX 
-					RealTime.GlobalNow 
-					#elif UNITY_STANDALONE || UNITYEDITOR 
-					Time.time
+					if (
+					#if SANDBOX
+						RealTime.GlobalNow
+					#elif UNITY_STANDALONE || UNITYEDITOR
+						Time.time
 					#endif
-					- key.Value > MashTimeOut)
-				{
-					keysPressedSinceLocal.Remove(key.Key);
+						- key.Value > DoubleTapTimeOut) //wow!!!! key is above the max timeout threshold, and the key isn't being held, yeet that shit
+					{
+						keysUpSince.Remove(key.Key);
+					}
 				}
 			}
 
-			keysPressedSince = keysPressedSinceLocal;
+			lock (keysPressedSince)
+			{
+				foreach (var key in keysPressedSince)
+				{
+					if (
+					#if SANDBOX
+						RealTime.GlobalNow
+					#elif UNITY_STANDALONE || UNITYEDITOR
+						Time.time
+					#endif
+						- key.Value > MashTimeOut)
+					{
+						keysPressedSince.Remove(key.Key);
+					}
+				}
+			}
 		}
 
 		static void DrawDebugOverlay()
@@ -1265,7 +1259,6 @@ namespace ReActionPlugin
 			};
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static bool ModifiersActive(Modifiers modifiers)
 		{
 			return (modifiers == 0) || ((modifiers & currentlyActivatedModifiers) != 0);
