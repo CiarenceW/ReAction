@@ -1,0 +1,725 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace ReActionPlugin
+{
+	public static partial class ReAction
+	{
+		//TODO: could I make this a struct?
+		public class ButtonAction
+		{
+			internal ButtonAction(string name, Bind primary, Bind secondary, string set = "general", bool enabled = true, Conditional allowedConditionals = Conditional.None)
+			{
+				this.Name = name;
+				this.m_Primary = primary;
+				this.m_Secondary = secondary;
+				this.Set = set;
+				this.Enabled = enabled;
+				this.AllowedConditionals = allowedConditionals;
+			}
+
+			internal string Name { get; set; }
+
+			internal Conditional ConditionalsState { get; set; } = Conditional.None;
+
+			internal string Set { get; set; } = "general";
+
+			public bool Enabled { get; internal set; }
+
+			public Bind Primary { get => m_Primary; }
+
+			internal Bind m_Primary;
+
+			public Bind Secondary { get => m_Secondary; }
+
+			internal Bind m_Secondary;
+
+			public Conditional AllowedConditionals { get; set; } = Conditional.None;
+
+			public bool Active
+			{
+				get =>
+					Enabled &&
+					((ConditionalsState & Primary.Conditional) != Conditional.None && (Primary.Modifiers == Modifiers.None || (ReAction.ActiveModifiers & Primary.Modifiers) != Modifiers.None)) ||
+					((ConditionalsState & Secondary.Conditional) != Conditional.None && (Secondary.Modifiers == Modifiers.None || (ReAction.ActiveModifiers & Secondary.Modifiers) != Modifiers.None))
+					;
+			}
+
+			public bool GetConditionState(Conditional conditional)
+			{
+				return (ConditionalsState & conditional) != Conditional.None;
+			}
+
+			public override int GetHashCode()
+			{
+				return HashCode.Combine(m_Primary, m_Secondary, Set, AllowedConditionals);
+			}
+
+			public static implicit operator bool(ButtonAction action)
+			{
+				return action.Active;
+			}
+
+			public struct Bind
+			{
+				public Bind(ButtonCode key, Modifiers modifiers, Conditional conditional, float timeOut = .5f)
+				{
+					this.Key = key;
+					this.Modifiers = modifiers;
+					this.Conditional = conditional;
+					this.TimeOut = timeOut;
+				}
+
+				public ButtonCode Key
+				{
+					readonly get
+					{
+						return (ButtonCode)(m_InternalBitmask & k_KeyMask);
+					}
+
+					set
+					{
+						m_InternalBitmask = (m_InternalBitmask & k_KeyMask) | (uint)value;
+					}
+				}
+
+				public Modifiers Modifiers
+				{
+					readonly get
+					{
+						return (Modifiers)((m_InternalBitmask & k_ModifierMask) >> k_ModifiersBitOffset);
+					}
+
+					set
+					{
+						m_InternalBitmask = (m_InternalBitmask & ~k_ModifierMask) | ((uint)value << k_ModifiersBitOffset);
+					}
+				}
+
+				public Conditional Conditional
+				{
+					readonly get
+					{
+						return (Conditional)((m_InternalBitmask & k_ConditionalMask) >> k_ConditionalBitOffset);
+					}
+
+					set
+					{
+						m_InternalBitmask = (m_InternalBitmask & ~k_ConditionalMask) | ((uint)value << k_ConditionalBitOffset);
+					}
+				}
+
+				internal bool DoubleTapped
+				{
+					readonly get
+					{
+						return (m_InternalBitmask & k_DoubleTappedMask) != 0;
+					}
+
+					set
+					{
+																						//crazy performance improvement, saves 2 (two(!)) instructions
+						m_InternalBitmask = (m_InternalBitmask & ~k_DoubleTappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_DoubleTappedBitOffset);
+					}
+				}
+
+				internal bool LongPressed
+				{
+					readonly get
+					{
+						return (m_InternalBitmask & k_LongPressedMask) != 0;
+					}
+
+					set
+					{
+						m_InternalBitmask = (m_InternalBitmask & ~k_LongPressedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_LongPressedBitOffset);
+					}
+				}
+
+				public float TimeOut
+				{
+					readonly get;
+					set;
+				}
+
+				//this + timeout means this whole struct only takes 64 bits, wow, that's one single register!!
+				uint m_InternalBitmask;
+
+				const uint k_KeyMask          = 0b00000000_00000000_00000001_11111111u;
+
+				const int k_ModifiersBitOffset = 9;
+				const uint k_ModifierMask     = 0b00000000_00000001_11111110_00000000u;
+
+				const int k_ConditionalBitOffset = 17;
+				const uint k_ConditionalMask  = 0b00000001_11111110_00000000_00000000u;
+
+				const int k_TappedBitOffset = 29;
+				const uint k_TappedMask       = 0b00100000_00000000_00000000_00000000u;
+
+				const int k_LongPressedBitOffset = 30;
+				const uint k_LongPressedMask  = 0b01000000_00000000_00000000_00000000u;
+
+				const int k_DoubleTappedBitOffset = 31;
+				const uint k_DoubleTappedMask = 0b10000000_00000000_00000000_00000000u;
+
+				public readonly override int GetHashCode()
+				{
+					return HashCode.Combine(TimeOut, m_InternalBitmask);
+				}
+			}
+		}
+
+		/// <summary>
+		/// The conditions for the button to be active, this is only marked as a bitflag for convenience, probably don't try to use it as one, it wouldn't really work
+		/// </summary>
+		[Flags]
+		public enum Conditional : byte
+		{
+			/// <summary>
+			/// Was the action pressed during this frame?
+			/// </summary>
+			Press      = 1 << 0,
+
+			/// <summary>
+			/// Was the action pressed and held?
+			/// </summary>
+			LongPress  = 1 << 1,
+
+			/// <summary>
+			/// Was the action released during this frame?
+			/// </summary>
+			Release    = 1 << 2,
+
+			/// <summary>
+			/// Is the action being held?
+			/// </summary>
+			Continuous = 1 << 3,
+
+			/// <summary>
+			/// Was the action pressed and quickly released?
+			/// </summary>
+			Tap        = 1 << 4,
+
+			/// <summary>
+			/// Was the action tapped twice in quick succession?
+			/// </summary>
+			DoubleTap  = 1 << 5,
+
+			/// <summary>
+			/// Is the action being Continuously tapped?
+			/// </summary>
+			Mash       = 1 << 6,
+
+			/// <summary>
+			/// Is the action tapped?
+			/// </summary>
+			Toggle     = 1 << 7,
+
+
+			None       = 0,
+		}
+
+		[Flags]
+		public enum Modifiers : byte
+		{
+			LShift = 1 << 0,
+			LCtrl = 1 << 1,
+			LMeta = 1 << 2,
+			//why not lol
+			LWin = LMeta,
+			LAlt = 1 << 3,
+			RAlt = 1 << 4,
+			RMeta = 1 << 5,
+			RWin = RMeta,
+			RCtrl = 1 << 6,
+			RShift = 1 << 7,
+			None = 0,
+		}
+
+		public enum ButtonCode
+		{
+			BUTTON_CODE_INVALID = -1,
+			BUTTON_CODE_NONE,
+			BUTTON_CODE_FIRST = 0,
+			KEY_FIRST = 0,
+			KEY_NONE = 0,
+			KEY_0,
+			KEY_1,
+			KEY_2,
+			KEY_3,
+			KEY_4,
+			KEY_5,
+			KEY_6,
+			KEY_7,
+			KEY_8,
+			KEY_9,
+			KEY_A,
+			KEY_B,
+			KEY_C,
+			KEY_D,
+			KEY_E,
+			KEY_F,
+			KEY_G,
+			KEY_H,
+			KEY_I,
+			KEY_J,
+			KEY_K,
+			KEY_L,
+			KEY_M,
+			KEY_N,
+			KEY_O,
+			KEY_P,
+			KEY_Q,
+			KEY_R,
+			KEY_S,
+			KEY_T,
+			KEY_U,
+			KEY_V,
+			KEY_W,
+			KEY_X,
+			KEY_Y,
+			KEY_Z,
+			KEY_PAD_0,
+			KEY_PAD_1,
+			KEY_PAD_2,
+			KEY_PAD_3,
+			KEY_PAD_4,
+			KEY_PAD_5,
+			KEY_PAD_6,
+			KEY_PAD_7,
+			KEY_PAD_8,
+			KEY_PAD_9,
+			KEY_PAD_DIVIDE,
+			KEY_PAD_MULTIPLY,
+			KEY_PAD_MINUS,
+			KEY_PAD_PLUS,
+			KEY_PAD_ENTER,
+			KEY_PAD_DECIMAL,
+			KEY_LESS,
+			KEY_LBRACKET,
+			KEY_RBRACKET,
+			KEY_SEMICOLON,
+			KEY_APOSTROPHE,
+			KEY_BACKQUOTE,
+			KEY_COMMA,
+			KEY_PERIOD,
+			KEY_SLASH,
+			KEY_BACKSLASH,
+			KEY_MINUS,
+			KEY_EQUAL,
+			KEY_ENTER,
+			KEY_SPACE,
+			KEY_BACKSPACE,
+			KEY_TAB,
+			KEY_CAPSLOCK,
+			KEY_NUMLOCK,
+			KEY_ESCAPE,
+			KEY_SCROLLLOCK,
+			KEY_INSERT,
+			KEY_DELETE,
+			KEY_HOME,
+			KEY_END,
+			KEY_PAGEUP,
+			KEY_PAGEDOWN,
+			KEY_BREAK,
+			KEY_LSHIFT,
+			KEY_RSHIFT,
+			KEY_LALT,
+			KEY_RALT,
+			KEY_LCONTROL,
+			KEY_RCONTROL,
+			KEY_LWIN,
+			KEY_RWIN,
+			KEY_APP,
+			KEY_UP,
+			KEY_LEFT,
+			KEY_DOWN,
+			KEY_RIGHT,
+			KEY_F1,
+			KEY_F2,
+			KEY_F3,
+			KEY_F4,
+			KEY_F5,
+			KEY_F6,
+			KEY_F7,
+			KEY_F8,
+			KEY_F9,
+			KEY_F10,
+			KEY_F11,
+			KEY_F12,
+			KEY_CAPSLOCKTOGGLE,
+			KEY_NUMLOCKTOGGLE,
+			KEY_SCROLLLOCKTOGGLE,
+			KEY_AC_BACK,
+			KEY_AC_BOOKMARKS,
+			KEY_AC_FORWARD,
+			KEY_AC_HOME,
+			KEY_AC_REFRESH,
+			KEY_AC_SEARCH,
+			KEY_AC_STOP,
+			KEY_AGAIN,
+			KEY_ALTERASE,
+			KEY_AMPERSAND,
+			KEY_ASTERISK,
+			KEY_AT,
+			KEY_AUDIOMUTE,
+			KEY_AUDIONEXT,
+			KEY_AUDIOPLAY,
+			KEY_AUDIOPREV,
+			KEY_AUDIOSTOP,
+			KEY_BRIGHTNESSDOWN,
+			KEY_BRIGHTNESSUP,
+			KEY_CALCULATOR,
+			KEY_CANCEL,
+			KEY_CARET,
+			KEY_CLEAR,
+			KEY_CLEARAGAIN,
+			KEY_COLON,
+			KEY_COMPUTER,
+			KEY_COPY,
+			KEY_CRSEL,
+			KEY_CURRENCYSUBUNIT,
+			KEY_CURRENCYUNIT,
+			KEY_CUT,
+			KEY_DECIMALSEPARATOR,
+			KEY_DISPLAYSWITCH,
+			KEY_DOLLAR,
+			KEY_EJECT,
+			KEY_EXCLAIM,
+			KEY_BTN_EXECUTE,
+			KEY_EXSEL,
+			KEY_F13,
+			KEY_F14,
+			KEY_F15,
+			KEY_F16,
+			KEY_F17,
+			KEY_F18,
+			KEY_F19,
+			KEY_F20,
+			KEY_F21,
+			KEY_F22,
+			KEY_F23,
+			KEY_F24,
+			KEY_FIND,
+			KEY_GREATER,
+			KEY_HASH,
+			KEY_HELP,
+			KEY_KBDILLUMDOWN,
+			KEY_KBDILLUMTOGGLE,
+			KEY_KBDILLUMUP,
+			KEY_KP_00,
+			KEY_KP_000,
+			KEY_KP_A,
+			KEY_KP_AMPERSAND,
+			KEY_KP_AT,
+			KEY_KP_B,
+			KEY_KP_BACKSPACE,
+			KEY_KP_BINARY,
+			KEY_KP_C,
+			KEY_KP_CLEAR,
+			KEY_KP_CLEARENTRY,
+			KEY_KP_COLON,
+			KEY_KP_COMMA,
+			KEY_KP_D,
+			KEY_KP_DBLAMPERSAND,
+			KEY_KP_DBLVERTICALBAR,
+			KEY_KP_DECIMAL,
+			KEY_KP_E,
+			KEY_KP_EQUALS,
+			KEY_KP_EQUALSAS400,
+			KEY_KP_EXCLAM,
+			KEY_KP_F,
+			KEY_KP_GREATER,
+			KEY_KP_HASH,
+			KEY_KP_HEXADECIMAL,
+			KEY_KP_LEFTBRACE,
+			KEY_KP_LEFTPAREN,
+			KEY_KP_LESS,
+			KEY_KP_MEMADD,
+			KEY_KP_MEMCLEAR,
+			KEY_KP_MEMDIVIDE,
+			KEY_KP_MEMMULTIPLY,
+			KEY_KP_MEMRECALL,
+			KEY_KP_MEMSTORE,
+			KEY_KP_MEMSUBTRACT,
+			KEY_KP_OCTAL,
+			KEY_KP_PERCENT,
+			KEY_KP_PLUSMINUS,
+			KEY_KP_POWER,
+			KEY_KP_RIGHTBRACE,
+			KEY_KP_RIGHTPAREN,
+			KEY_KP_SPACE,
+			KEY_KP_TAB,
+			KEY_KP_VERTICALBAR,
+			KEY_KP_XOR,
+			KEY_LEFTPAREN,
+			KEY_MAIL,
+			KEY_MEDIASELECT,
+			KEY_MODE,
+			KEY_MUTE,
+			KEY_OPER,
+			KEY_OUT,
+			KEY_PASTE,
+			KEY_PERCENT,
+			KEY_PLUS,
+			KEY_POWER,
+			KEY_PRINTSCREEN,
+			KEY_PRIOR,
+			KEY_QUESTION,
+			KEY_QUOTEDBL,
+			KEY_RETURN2,
+			KEY_RIGHTPAREN,
+			KEY_SELECT,
+			KEY_SEPARATOR,
+			KEY_SLEEP,
+			KEY_STOP,
+			KEY_SYSREQ,
+			KEY_THOUSANDSSEPARATOR,
+			KEY_UNDERSCORE,
+			KEY_UNDO,
+			KEY_VOLUMEDOWN,
+			KEY_VOLUMEUP,
+			KEY_WWW,
+			KEY_INVERTED_EXCLAMATION_MARK,
+			KEY_CENT_SIGN,
+			KEY_POUND_SIGN,
+			KEY_CURRENCY_SIGN,
+			KEY_YEN_SIGN,
+			KEY_BROKEN_BAR,
+			KEY_SECTION_SIGN,
+			KEY_DIAERESIS,
+			KEY_COPYRIGHT_SIGN,
+			KEY_FEMININE_ORDINAL_INDICATOR,
+			KEY_LEFT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK,
+			KEY_NOT_SIGN,
+			KEY_REGISTERED_SIGN,
+			KEY_MACRON,
+			KEY_DEGREE_SYMBOL,
+			KEY_PLUS_MINUS_SIGN,
+			KEY_SUPERSCRIPT_TWO,
+			KEY_SUPERSCRIPT_THREE,
+			KEY_ACUTE_ACCENT,
+			KEY_MICRO_SIGN,
+			KEY_PILCROW_SIGN,
+			KEY_MIDDLE_DOT,
+			KEY_CEDILLA,
+			KEY_SUPERSCRIPT_ONE,
+			KEY_MASCULINE_ORDINAL_INDICATOR,
+			KEY_RIGHT_POINTING_DOUBLE_ANGLE_QUOTATION_MARK,
+			KEY_VULGAR_FRACTION_ONE_QUARTER,
+			KEY_VULGAR_FRACTION_ONE_HALF,
+			KEY_VULGAR_FRACTION_THREE_QUARTERS,
+			KEY_INVERTED_QUESTION_MARK,
+			KEY_MULTIPLICATION_SIGN,
+			KEY_SHARP_S,
+			KEY_A_WITH_GRAVE,
+			KEY_A_WITH_ACUTE,
+			KEY_A_WITH_CIRCUMFLEX,
+			KEY_A_WITH_TILDE,
+			KEY_A_WITH_DIAERESIS,
+			KEY_A_WITH_RING_ABOVE,
+			KEY_AE,
+			KEY_C_WITH_CEDILLA,
+			KEY_E_WITH_GRAVE,
+			KEY_E_WITH_ACUTE,
+			KEY_E_WITH_CIRCUMFLEX,
+			KEY_E_WITH_DIAERESIS,
+			KEY_I_WITH_GRAVE,
+			KEY_I_WITH_ACUTE,
+			KEY_I_WITH_CIRCUMFLEX,
+			KEY_I_WITH_DIAERESIS,
+			KEY_ETH,
+			KEY_N_WITH_TILDE,
+			KEY_O_WITH_GRAVE,
+			KEY_O_WITH_ACUTE,
+			KEY_O_WITH_CIRCUMFLEX,
+			KEY_O_WITH_TILDE,
+			KEY_O_WITH_DIAERESIS,
+			KEY_DIVISION_SIGN,
+			KEY_O_WITH_STROKE,
+			KEY_U_WITH_GRAVE,
+			KEY_U_WITH_ACUTE,
+			KEY_U_WITH_CIRCUMFLEX,
+			KEY_U_WITH_DIAERESIS,
+			KEY_Y_WITH_ACUTE,
+			KEY_THORN,
+			KEY_Y_WITH_DIAERESIS,
+			KEY_EURO_SIGN,
+			KEY_TILDE,
+			KEY_LEFT_CURLY_BRACKET,
+			KEY_RIGHT_CURLY_BRACKET,
+			KEY_VERTICAL_BAR,
+			KEY_CYRILLIC_YU,
+			KEY_CYRILLIC_E,
+			KEY_CYRILLIC_HARD_SIGN,
+			KEY_CYRILLIC_HA,
+			KEY_CYRILLIC_IO,
+			KEY_CYRILLIC_ZHE,
+			KEY_CYRILLIC_BE,
+			KEY_LAST = 313,
+			MOUSE_FIRST,
+			MouseLeft = 314,
+			MouseRight,
+			MouseMiddle,
+			MouseBack,
+			MouseForward,
+			MouseWheelUp,
+			MouseWheelDown,
+			MOUSE_LAST = 320,
+			MOUSE_COUNT = 7,
+			JOYSTICK_FIRST = 321,
+			JOYSTICK_FIRST_BUTTON = 321,
+			JOYSTICK_LAST_BUTTON = 448,
+			JOYSTICK_FIRST_POV_BUTTON,
+			JOYSTICK_LAST_POV_BUTTON = 464,
+			JOYSTICK_FIRST_AXIS_BUTTON,
+			JOYSTICK_LAST_AXIS_BUTTON = 512,
+			JOYSTICK_LAST = 512,
+			BUTTON_CODE_COUNT,
+			BUTTON_CODE_LAST = 512,
+			KEY_XBUTTON_UP = 449,
+			KEY_XBUTTON_RIGHT,
+			KEY_XBUTTON_DOWN,
+			KEY_XBUTTON_LEFT,
+			KEY_XBUTTON_A = 321,
+			KEY_XBUTTON_B,
+			KEY_XBUTTON_X,
+			KEY_XBUTTON_Y,
+			KEY_XBUTTON_LEFT_SHOULDER,
+			KEY_XBUTTON_RIGHT_SHOULDER,
+			KEY_XBUTTON_BACK,
+			KEY_XBUTTON_START,
+			KEY_XBUTTON_STICK1,
+			KEY_XBUTTON_STICK2,
+			KEY_XBUTTON_INACTIVE_START,
+			KEY_XSTICK1_RIGHT = 465,
+			KEY_XSTICK1_LEFT,
+			KEY_XSTICK1_DOWN,
+			KEY_XSTICK1_UP,
+			KEY_XBUTTON_LTRIGGER,
+			KEY_XBUTTON_RTRIGGER,
+			KEY_XSTICK2_RIGHT,
+			KEY_XSTICK2_LEFT,
+			KEY_XSTICK2_DOWN,
+			KEY_XSTICK2_UP
+		}
+
+		internal struct KeyState()
+		{
+			//64 bitssssss yeahhhhhhhhhhhhhhhhh babyyyyyyy
+			ulong m_Shitmask;
+			
+			/// <summary>
+			/// Gets the time since the key's state changed
+			/// </summary>
+			public readonly float TimeSinceStateChange
+			{
+				get => (Down) ? TimeSinceReleased : TimeSincePressed;
+			}
+
+			/// <summary>
+			/// Gets the time since the key's been pressed
+			/// </summary>
+			public float TimeSincePressed
+			{
+				readonly get
+				{
+					return Time.Now - Unsafe.BitCast<uint, float>(((uint)(m_Shitmask >> k_PressedTimeBitOffset)) & k_AwesomeFloat);
+				}
+
+				internal set
+				{
+					m_Shitmask = (m_Shitmask & ~k_PressedTimeMask) | ((ulong)(Unsafe.BitCast<float, uint>(value) & k_AwesomeFloat) << k_PressedTimeBitOffset);
+				}
+			}
+
+			/// <summary>
+			/// Gets the time since the key's been released
+			/// </summary>
+			public float TimeSinceReleased
+			{
+				readonly get
+				{
+					return Time.Now - Unsafe.BitCast<uint, float>(((uint)(m_Shitmask >> k_ReleasedTimeBitOffset)) & k_AwesomeFloat);
+				}
+
+				internal set
+				{
+					m_Shitmask = (m_Shitmask & ~k_ReleasedTimeMask) | ((ulong)(Unsafe.BitCast<float, uint>(value) & k_AwesomeFloat) << k_ReleasedTimeBitOffset);
+				}
+			}
+
+			/// <summary>
+			/// Is key currently being held?
+			/// </summary>
+			public bool Down
+			{
+				readonly get
+				{
+					return (m_Shitmask & k_UpMask) != 0;
+				}
+
+				internal set
+				{
+					var last = Down;
+
+					m_Shitmask = ((m_Shitmask & ~k_UpMask) | Convert.ToUInt32(value));
+
+					StateChanged |= last ^ Down;
+
+					if (Down)
+					{
+						TimeSincePressed = Time.Now;
+					}
+					else
+					{
+						TimeSinceReleased = Time.Now;
+					}
+				}
+			}
+
+			/// <summary>
+			/// Has key's state recently changed?
+			/// </summary>
+			public bool StateChanged
+			{
+				readonly get
+				{
+					return (m_Shitmask & k_JustChangedMask) != 0;
+				}
+
+				internal set
+				{
+					m_Shitmask = ((m_Shitmask & ~k_JustChangedMask) | (Convert.ToUInt32(value) << k_JustChangedMaskBitOffset));
+				}
+			}
+
+			/// <summary>
+			/// Has key been released this frame?
+			/// </summary>
+			public readonly bool Released => (StateChanged && !Down);
+
+			/// <summary>
+			/// Has key been pressed this frame?
+			/// </summary>
+			public readonly bool Pressed => (StateChanged && Down);
+
+			const ulong k_UpMask           = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000001u;
+
+			const ulong k_JustChangedMask  = 0b00000000_00000000_00000000_00000000_00000000_00000000_00000000_00000010u;
+			const int k_JustChangedMaskBitOffset = 1;
+
+			//we only need 2 store 31 bits, we can discard the sign exponent, because we know that it'll be 0 (positive)
+			const ulong k_ReleasedTimeMask = 0b00000000_00000000_00000000_00000001_11111111_11111111_11111111_11111100u;
+			const int k_ReleasedTimeBitOffset = 2;
+
+			const ulong k_PressedTimeMask  = 0b11111111_11111111_11111111_11111110_00000000_00000000_00000000_00000000u;
+			const int k_PressedTimeBitOffset = 33;
+
+			const uint k_AwesomeFloat = 0b01111111_11111111_11111111_11111111u;
+		}
+	}
+}

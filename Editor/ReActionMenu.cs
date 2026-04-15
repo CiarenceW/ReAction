@@ -1,4 +1,5 @@
-﻿namespace ReActionPlugin.Editor
+﻿/*
+namespace ReActionPlugin.Editor
 {
 	using System;
 	using System.Collections.Generic;
@@ -45,37 +46,6 @@ Project.Current.GetCodePath()
 				using (StreamWriter sw = new StreamWriter(fs))
 				{
 					sw.AutoFlush = false;
-					/*sw.WriteLine("namespace ReActionPlugin.Consts.Int");
-					sw.WriteLine("{");
-					sw.WriteLine("\tpublic static class ReActionConsts");
-					sw.WriteLine("\t{");
-
-					foreach (var action in ReAction.Actions)
-					{
-						string intLine;
-						string intDeclaration;
-#if SANDBOX
-						if (ReActionActionsWidget.exportAsConsts.Value)
-#elif UNITY_EDITOR
-						if (exportAsConsts.value)
-#endif
-						{
-							intDeclaration = $"public const int {string.Concat(action.InputAction.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
-						}
-						else
-						{
-							intDeclaration = $"public static readonly int {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
-						}
-
-						intLine = $"\t\t{intDeclaration} = {action.Index};";
-
-						sw.WriteLine(intLine);
-					}
-
-					sw.WriteLine("\t}");
-					sw.WriteLine("}");
-
-					sw.WriteLine();*/
 
 					sw.WriteLine("namespace ReActionPlugin.Consts.String");
 					sw.WriteLine("{");
@@ -562,4 +532,4 @@ Project.Current.GetCodePath()
 
 #endif
 	}
-}
+}*/

@@ -1,12 +1,7 @@
 ﻿using System;
 
-#if UNITY_EDITOR || UNITY_STANDALONE
-using UnityEngine;
-#endif
-
 namespace ReActionPlugin
 {
-#if SANDBOX
 	public class ReActionLog() : Sandbox.Diagnostics.Logger("ReAction")
 	{
 		/// <summary>
@@ -31,18 +26,4 @@ namespace ReActionPlugin
 			get;
 		} = new ReActionLog();
     }
-#elif UNITY_EDITOR || UNITY_STANDALONE
-	public static class ReActionLogger
-	{
-		public static void Warning(object info)
-		{
-			Debug.LogWarning("ReAction: " + info);
-		}
-
-		public static void Info(object info)
-		{
-			Debug.Log("ReAction: " + info);
-		}
-	}
-#endif
 }
