@@ -1,15 +1,12 @@
-﻿#if SANDBOX
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Editor;
-using Microsoft.CodeAnalysis;
-using ReActionPlugin.Editor;
 
-namespace ReActionPlugin
+namespace ReActionPlugin.Editor
 {
 	[Dock("Editor", "ReAction Actions", "view_list")]
     public class ReActionActionsWidget : Widget
@@ -37,7 +34,6 @@ namespace ReActionPlugin
 
 		void CreateLayout()
 		{
-			//I gotta be the only person to add a scrollarea to a thing in sbox, ever, right?
 			Scroller = new ScrollArea(this);
 			Scroller.Name = "Scroller";
 			Scroller.Layout = Layout.Column();
@@ -66,15 +62,13 @@ namespace ReActionPlugin
 
 				mainColumn.Add(ActionsTree);
 
-				ReAction.PopulateActions();
+				ReAction.LoadDefaultActions();
 				UpdateActionList();
 			};
 
 			Layout.AddSeparator();
 
 			var saveActionsButton = Layout.Add(new Button("Save actions", "logout", this));
-
-			var saveActionsAsDefaultGameActionsButton = Layout.Add(new Button("Set as new game default", "lock", this));
 
 			var exportIndexConstsButton = Layout.Add(new Button.Primary("Export action indices", "open_in_new", this));
 
@@ -84,10 +78,6 @@ namespace ReActionPlugin
 
 			saveActionsButton.ToolTip = "Save actions locally. This is if you like having a weird control scheme, but you prefer the default set not being fucked";
 
-			saveActionsAsDefaultGameActionsButton.Clicked += SaveActionsAsNewDefault;
-
-			saveActionsAsDefaultGameActionsButton.ToolTip = "Sets the current actions as the game's default keybinds";
-
 			exportIndexConstsButton.ToolTip = "Exports all actions' indices to a .cs file, for use with ReAction.ActionTriggered(int)";
 
 			exportAsConsts.ToolTip = "If true, the indices will be public const ints, instead of public static readonly ints";
@@ -95,40 +85,6 @@ namespace ReActionPlugin
 			exportIndexConstsButton.Clicked += ReActionMenu.ExportIndexToFile;
 
 			var sanityCheckActionsButton = Layout.Add(new Button("Sanity check actions", this));
-
-			sanityCheckActionsButton.Clicked += CheckIfActionsActuallyExistLol;
-		}
-
-		static void CheckIfActionsActuallyExistLol()
-		{
-			CheckIfActionsActuallyExistLol(true);
-		}
-
-		static void CheckIfActionsActuallyExistLol(bool saveInputActions = true)
-		{
-			foreach (var reAction in ReAction.Actions)
-			{
-				if (reAction.InputAction != null)
-				{
-					var matchingAction = ProjectSettings.Input.Actions.Where(inputAction => inputAction.Name == reAction.InputAction.Name).FirstOrDefault();
-
-					if (matchingAction != null)
-					{
-						ReActionLogger.Info(matchingAction.Name);
-						reAction.InputAction = matchingAction;
-					}
-					else
-					{
-						ReActionLogger.Warning($"Found action {reAction.InputAction.Name} missing from project InputActions, adding");
-
-						ProjectSettings.Input.Actions.Add(reAction.InputAction);
-						EditorUtility.SaveProjectSettings(ProjectSettings.Input, "Input.config");
-
-						ReActionLogger.QuickInfo(nameof(InputSettings), ProjectSettings.Input.Actions.Where(e => e.Name == reAction.InputAction.Name).FirstOrDefault());
-						ReActionLogger.QuickInfo(nameof(Sandbox.Input.ActionNames), Sandbox.Input.ActionNames.Where(e => e == reAction.InputAction.Name).FirstOrDefault());
-					}
-				}
-			}
 		}
 
 		new bool OnPaintOverride()
@@ -149,36 +105,14 @@ namespace ReActionPlugin
 		{
 			Sandbox.FileSystem.Data.CreateDirectory("ReAction");
 
-			if (!ProjectSettings.Input.Actions.Equals(Sandbox.Input.GetActions().ToList()))
-			{
-				ReActionLogger.Info("Input were different from default inputs, saving.");
-
-				EditorUtility.SaveProjectSettings(ProjectSettings.Input, "Input.config");
-			}
-
 			if (!Project.Current.Config.TryGetMeta<ReActionSettings>("ReActionActions", out var meta))
 			{
 				meta = new ReActionSettings();
 			}
 
-			meta.Actions = ReAction.Actions;
+			meta.Actions = ReAction.GetAllActions().ToHashSet();
 
-			ReAction.SaveToFile(meta);
-		}
-
-		void SaveActionsAsNewDefault()
-		{
-			global::Editor.FileSystem.ProjectSettings.CreateDirectory("ReAction");
-			if (!Project.Current.Config.TryGetMeta<ReActionSettings>("ReActionActions", out var meta))
-			{
-				meta = new ReActionSettings();
-			}
-
-			meta.Actions = ReAction.Actions;
-
-			global::Editor.FileSystem.ProjectSettings.WriteJson(ReAction.defaultFilePath, meta.Serialize());
-
-			Project.Current.Config.SetMeta("ReActionActions", null);
+			EditorUtility.SaveProjectSettings<ReActionSettings>(meta, "ReAction/defaultActions.json");
 		}
 
 		public void UpdateActionList()
@@ -187,9 +121,9 @@ namespace ReActionPlugin
 
 			string lastGroup = null;
 			int actionCount = 0;
-			foreach (var group in ReAction.Actions.GroupBy(x => x.InputAction.GroupName))
+			foreach (var group in ReAction.GetAllActions().GroupBy(x => x.Set))
 			{
-				var collapsibleCategory = ActionsTree.Layout.Add(new CollapsibleCategory(null, group.Key) { Name = $"Group {group.First().InputAction.GroupName}"});
+				var collapsibleCategory = ActionsTree.Layout.Add(new CollapsibleCategory(null, group.Key) { Name = $"Group {group.First().Set}"});
 
 				foreach (var action in group)
 				{
@@ -217,7 +151,7 @@ namespace ReActionPlugin
 			reset.Clicked += () =>
 			{
 				ClearActions();
-				ReAction.PopulateActions(true);
+				ReAction.LoadDefaultActions();
 				UpdateActionList();
 			};
 
@@ -225,28 +159,15 @@ namespace ReActionPlugin
 			{
 				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {Sandbox.Input.GetActions().Count()}" : entry.Text;
 
-				var inputActions = ProjectSettings.Input.Actions;
+				ReAction.CreateAction(name, default, default);
 
-				var newInputAction = new InputAction(name, string.Empty);
-
-				inputActions.Add(newInputAction);
-
-				AddAction(new ReAction.Action(newInputAction), updateDisplay: true);
+				UpdateActionList();
 			}
 		}
 
-		public void AddAction(ReAction.Action action, bool updateDisplay = true)
+		public void RemoveAction(ButtonAction action)
 		{
-			ReAction.Actions.Add(action);
-
-			if (updateDisplay)
-				UpdateActionList();
-		}
-
-		public void RemoveAction(ReAction.Action action)
-		{
-			ProjectSettings.Input.Actions.Remove(action.InputAction);
-			ReAction.Actions.Remove(action);
+			ReAction.UnregisterButtonAction(action);
 
 			UpdateActionList();
 		}
@@ -255,15 +176,17 @@ namespace ReActionPlugin
 		{
 			Log.Info("Clearing actions");
 
-			ReAction.Actions.Clear();
+			foreach (var action in ReAction.GetAllActions())
+			{
+				ReAction.UnregisterButtonAction(action);
+			}
 		}
 
-		[EditorEvent.Hotload]
+		/*[EditorEvent.Hotload]
 		void OnHotLoad()
 		{
 			Layout.Clear(true);
 			CreateLayout();
-		}
+		}*/
 	}
 }
-#endif

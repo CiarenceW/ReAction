@@ -7,6 +7,6 @@ namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
-		static Logger ReActionLogger { get; set; } = new ("ReAction");
+		internal static Logger ReActionLogger { get; set; } = new ("ReAction");
 	}
 }

@@ -2,7 +2,7 @@
 
 namespace ReActionPlugin.Editor
 {
-	[CustomEditor(typeof(ReAction.Action))]
+	[CustomEditor(typeof(ButtonAction))]
 	public class ActionCustomEditor : ControlObjectWidget
 	{
 		public ActionCustomEditor(SerializedProperty property) : base(property, false)

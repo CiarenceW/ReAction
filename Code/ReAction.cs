@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace ReActionPlugin
+﻿namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
@@ -15,9 +13,8 @@ namespace ReActionPlugin
 		static HashSet<ButtonAction> m_AllActions = new();
 		static HashSet<ButtonAction> m_EnabledActions = new();
 
-		static HashSet<string> m_Sets = ["general"];
-		static Dictionary<ButtonAction.Bind, float> m_TappedButtons = new();
-		static HashSet<string> m_ActiveSets = ["general"];
+		static HashSet<string> m_Sets = ["General"];
+		static HashSet<string> m_ActiveSets = ["General"];
 
 		/// <summary>
 		/// Like <see cref="Input.AnalogLook"/> but good
@@ -31,7 +28,27 @@ namespace ReActionPlugin
 			get; private set;
 		}
 
-		static void OnGameButton(ButtonCode scanCode, bool pressed)
+		/// <summary>
+		/// Formats the modifiers' strings, like the following: <code>LShift + LMeta + </code>
+		/// </summary>
+		/// <param name="modifiers"></param>
+		/// <returns></returns>
+		public static string FormatModifiersString(Modifiers modifiers)
+		{
+			string str = "";
+
+			for (byte b = 1; b > 0; b <<= 1)
+			{
+				if (((byte)modifiers & b) != 0)
+				{
+					str += (Modifiers)b + " + ";
+				}
+			}
+
+			return str;
+		}
+
+		public static void OnGameButton(ButtonCode scanCode, string buttonName, bool pressed)
 		{
 			keyStates[(int)scanCode].Down = pressed;
 
@@ -102,7 +119,7 @@ namespace ReActionPlugin
 
 				action.ConditionalsState |= Conditional.Continuous;
 
-				if (keyStates[(int)bind.Key].TimeSinceReleased < bind.TimeOut)
+				if (keyStates[(int)bind.Key].ReleasedFor < bind.TimeOut)
 				{
 					action.ConditionalsState |= Conditional.Mash;
 				}
@@ -116,29 +133,32 @@ namespace ReActionPlugin
 
 				bind.LongPressed = false;
 
-				if (keyStates[(int)bind.Key].TimeSincePressed < bind.TimeOut)
+				if (keyStates[(int)bind.Key].PressedFor < bind.TimeOut)
 				{
 					action.ConditionalsState |= Conditional.Tap;
 
-					if (m_TappedButtons.TryGetValue(bind, out var time))
+					bind.CountTappedTime = true;
+
+					if (bind.TappedFor < bind.TimeOut && !bind.DoubleTapped)
 					{
-						if (time < bind.TimeOut && !bind.DoubleTapped)
-						{
-							action.ConditionalsState |= Conditional.DoubleTap;
+						action.ConditionalsState |= Conditional.DoubleTap;
 
-							bind.DoubleTapped = true;
-						}
-						else
-						{
-							time = bind.TimeOut;
-
-							bind.DoubleTapped = false;
-						}
+						bind.DoubleTapped = true;
 					}
 					else
 					{
-						m_TappedButtons[bind] = Time.Now;
+						bind.DoubleTapped = false;
 					}
+
+#if USE_32BIT_FLOATS_FOR_TIME
+					bind.TappedFor = 0f;
+#else
+					bind.TappedFor = Half.Zero;
+#endif
+				}
+				else
+				{
+					bind.CountTappedTime = false;
 				}
 
 				action.ConditionalsState &= ~Conditional.Continuous;
@@ -162,7 +182,11 @@ namespace ReActionPlugin
 			UpdateActionEnabled(buttonAction);
 		}
 
-		static void UnregisterButtonAction(ButtonAction buttonAction)
+		/// <summary>
+		/// Removes an action, you should stop using it
+		/// </summary>
+		/// <param name="buttonAction"></param>
+		public static void UnregisterButtonAction(ButtonAction buttonAction)
 		{
 			m_AllActions.Remove(buttonAction);
 			m_EnabledActions.Remove(buttonAction);
@@ -199,6 +223,24 @@ namespace ReActionPlugin
 
 				action.ConditionalsState &= ~Conditional.DoubleTap;
 
+				if (action.m_Primary.CountTappedTime)
+				{
+#if USE_32BIT_FLOATS_FOR_TIME
+					action.m_Primary.TappedFor += Time.Delta;
+#else
+					action.m_Primary.TappedFor += (Half)Time.Delta;
+#endif
+				}
+
+				if (action.m_Secondary.CountTappedTime)
+				{
+#if USE_32BIT_FLOATS_FOR_TIME
+					action.m_Secondary.TappedFor += Time.Delta;
+#else
+					action.m_Secondary.TappedFor += (Half)Time.Delta;
+#endif
+				}
+
 				CheckMash(action, ref action.m_Primary);
 				CheckMash(action, ref action.m_Secondary);
 
@@ -208,12 +250,16 @@ namespace ReActionPlugin
 
 			static void CheckLongPress(ButtonAction action, ref ButtonAction.Bind bind)
 			{
-				if (bind.TimeOut == 0)
+#if USE_32BIT_FLOATS_FOR_TIME
+				if (bind.TimeOut == 0f)
+#else
+				if (bind.TimeOut == Half.Zero)
+#endif
 				{
 					return;
 				}
 
-				if (keyStates[(int)bind.Key].TimeSincePressed >= bind.TimeOut && !bind.LongPressed)
+				if (keyStates[(int)bind.Key].PressedFor >= bind.TimeOut && !bind.LongPressed)
 				{
 					action.ConditionalsState |= Conditional.LongPress;
 
@@ -223,19 +269,29 @@ namespace ReActionPlugin
 
 			static void CheckMash(ButtonAction action, ref ButtonAction.Bind bind)
 			{
-				if (bind.TimeOut == 0)
+#if USE_32BIT_FLOATS_FOR_TIME
+				if (bind.TimeOut == 0f)
+#else
+				if (bind.TimeOut == Half.Zero)
+#endif
 				{
 					return;
 				}
 
-				if (keyStates[(int)bind.Key].TimeSinceStateChange >= bind.TimeOut)
+				if (keyStates[(int)bind.Key].ChangedStateFor >= bind.TimeOut)
 				{
 					action.ConditionalsState &= ~Conditional.Mash;
 				}
 			}
 		}
 
-		internal static ButtonAction CreateAction(string name, ButtonAction.Bind primary, ButtonAction.Bind secondary, string set, bool enabled, Conditional allowedConditionals)
+		/// <summary>
+		/// Creates a new <see cref="ButtonAction"/>, registers it to the list, and returns it. <br/>
+		/// You probably shouldn't be using this at runtime, but hey, you do you
+		/// </summary>
+		/// <inheritdoc cref="ButtonAction(string, ButtonAction.Bind, ButtonAction.Bind, string, bool, Conditional)"/>
+		/// <returns>The newly created <see cref="ButtonAction"/></returns>
+		public static ButtonAction CreateAction(string name, ButtonAction.Bind primary, ButtonAction.Bind secondary, string set = "General", bool enabled = true, Conditional allowedConditionals = Conditional.All)
 		{
 			ButtonAction action = new(name, primary, secondary, set, enabled, allowedConditionals);
 			RegisterButtonAction(action);
@@ -278,7 +334,7 @@ namespace ReActionPlugin
 
 		public static void SetActionSetActive(string setName, bool active)
 		{
-			if (setName != "general")
+			if (setName != "General")
 			{
 				if (m_Sets.Contains(setName))
 				{

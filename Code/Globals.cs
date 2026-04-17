@@ -1,3 +1,5 @@
 ﻿global using Sandbox;
 global using ReActionPlugin;
-global using static ReActionPlugin.GlobalReActionLog;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("ReActionPlugin.Editor"), InternalsVisibleTo("ReAction.Hooking")]

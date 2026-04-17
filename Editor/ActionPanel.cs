@@ -6,7 +6,7 @@ namespace ReActionPlugin.Editor;
 
 partial class ActionPanel : Widget
 {
-	private ReAction.Action Action
+	private ButtonAction Action
 	{
 		get; set;
 	}
@@ -18,7 +18,7 @@ partial class ActionPanel : Widget
 
 	int Index { get; set; } = -1;
 
-	public ActionPanel(ReAction.Action action, ReActionActionsWidget page) : base(null)
+	public ActionPanel(ButtonAction action, ReActionActionsWidget page) : base(null)
 	{
 		Page = page;
 		Action = action;
@@ -78,33 +78,46 @@ partial class ActionPanel : Widget
 			r.Left += 20;
 		}
 
-		var name = string.IsNullOrEmpty(Action.InputAction.Title) ? Action.InputAction.Name : Action.InputAction.Title;
+		var name = !string.IsNullOrEmpty(Action.Name) ? Action.Name : "no name lol";
 		var nameRect = Paint.DrawText(r, name, TextFlag.LeftCenter);
 
 		float width = 0f;
 
 		r.Right -= 10;
 
-		if (!string.IsNullOrEmpty(Action.InputAction.KeyboardCode))
+		if (Action.Primary.Key != ButtonCode.BUTTON_CODE_NONE)
 		{
-			width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.Modifiers)} {(Action.InputAction.KeyboardCode.ToUpper())}", "keyboard");
-			r.Right -= width - 8;
+			DrawBindTextAndIcon(Action.Primary);
 		}
 
-		if (Action.InputAction.GamepadCode != GamepadCode.None)
+		if (Action.Secondary.Key != ButtonCode.BUTTON_CODE_NONE)
 		{
-			width = DrawTextWithIcon(r, GetFriendlyGamepadCode(Action.InputAction.GamepadCode), "sports_esports");
-			r.Right -= width - 8;
+			DrawBindTextAndIcon(Action.Secondary);
 		}
 
-		width = DrawTextWithIcon(r, Action.Conditional.ToString(), "article");
-		r.Right -= width - 8;
-
-		/*if (Action.GamepadInput != ReAction.GamepadInput.None)
+		void DrawBindTextAndIcon(ButtonAction.Bind bind)
 		{
-			width = DrawTextWithIcon(r, GetFriendlyGamepadInput(Action.GamepadInput), "sports_esports");
+			if (Action.Primary.Key != ButtonCode.BUTTON_CODE_NONE)
+			{
+				width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.Primary.Modifiers)} {(Action.Primary.Key.GetEngineString())}", "keyboard");
+				r.Right -= width - 8;
+			}
+
+			/*if (Action.InputAction.GamepadCode != GamepadCode.None)
+			{
+				width = DrawTextWithIcon(r, GetFriendlyGamepadCode(Action.InputAction.GamepadCode), "sports_esports");
+				r.Right -= width - 8;
+			}*/
+
+			width = DrawTextWithIcon(r, Action.Primary.Conditional.ToString(), "article");
 			r.Right -= width - 8;
-		}*/
+
+			/*if (Action.GamepadInput != ReAction.GamepadInput.None)
+			{
+				width = DrawTextWithIcon(r, GetFriendlyGamepadInput(Action.GamepadInput), "sports_esports");
+				r.Right -= width - 8;
+			}*/
+		}
 	}
 
 	protected override void OnMouseReleased(MouseEvent e)
@@ -119,10 +132,10 @@ partial class ActionPanel : Widget
 			var m = new ContextMenu(this);
 			m.AddOption("Edit", "edit", ShowModal);
 
-			m.AddOption("Duplicate", "file_copy", () =>
+			/*m.AddOption("Duplicate", "file_copy", () =>
 			{
-				Page.AddAction(Activator.CreateInstance(typeof(ReAction.Action), Action) as ReAction.Action);
-			});
+				Page.AddAction(Activator.CreateInstance(typeof(ButtonAction), Action) as ButtonAction);
+			});*/
 
 			m.AddOption("Delete", "delete", () =>
 			{
@@ -141,6 +154,8 @@ partial class ActionPanel : Widget
 		var d = new Dialog(Page);
 		d.DeleteOnClose = true;
 		d.Layout = Layout.Column();
+		d.WindowTitle = Action.Name;
+		d.Name = Action.Name;
 		d.Layout.Margin = 16;
 		d.Window.Size = new(400, 270);
 
