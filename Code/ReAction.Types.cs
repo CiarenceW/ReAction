@@ -90,6 +90,14 @@ namespace ReActionPlugin
 			return action.Active;
 		}
 
+		public struct ControllerBind
+		{
+			//need 6bits for this
+			public GamepadCode GamepadCode { get; set; }
+
+			public Half analogThreshold;
+		}
+
 		public struct Bind
 		{
 			public Bind(ButtonCode key,Conditional conditional, Modifiers modifiers = Modifiers.None, float timeOut = .5f)
@@ -117,6 +125,7 @@ namespace ReActionPlugin
 				}
 			}
 
+			[HideIf(nameof(Key), ButtonCode.BUTTON_CODE_NONE)]
 			public Modifiers Modifiers
 			{
 				readonly get
@@ -130,6 +139,7 @@ namespace ReActionPlugin
 				}
 			}
 
+			[HideIf(nameof(Key), ButtonCode.BUTTON_CODE_NONE)]
 			public Conditional Conditional
 			{
 				readonly get
@@ -158,7 +168,6 @@ namespace ReActionPlugin
 				}
 			}
 
-			//useless lol
 			[JsonIgnore, Hide]
 			internal bool CountTappedTime
 			{
@@ -192,7 +201,15 @@ namespace ReActionPlugin
 
 				internal float TappedFor { readonly get; set; }
 #else
+			[Hide]
 			public Half TimeOut { readonly get; set; }
+
+			[JsonIgnore, Title("Time Out")]
+			float TimeOutF
+			{
+				get => (float)TimeOut;
+				set => TimeOut = (Half)value;
+			}
 
 			[JsonIgnore, Hide]
 			internal Half TappedFor
@@ -202,6 +219,14 @@ namespace ReActionPlugin
 #endif
 
 			//this + timeout means this whole struct only takes 64 bits, wow, that's one single register!!
+			// k: key code bits
+			// m: modifier bits
+			// c: conditional bits
+			// t: tapped bits
+			// l: long pressed bits
+			// d: double tapped bits
+			// x: unused bits
+			// DLTXXXXC_CCCCCCCM_MMMMMMMK_KKKKKKKKK
 			[JsonIgnore, Hide] uint m_InternalBitmask;
 
 			const uint k_KeyMask = 0b00000000_00000000_00000001_11111111u;
@@ -223,7 +248,7 @@ namespace ReActionPlugin
 
 			public readonly override int GetHashCode()
 			{
-				return HashCode.Combine(TimeOut, m_InternalBitmask);
+				return HashCode.Combine(TappedFor, TimeOut, m_InternalBitmask);
 			}
 		}
 	}
@@ -276,6 +301,7 @@ namespace ReActionPlugin
 
 		All = Press | LongPress | Release | Continuous | Tap | DoubleTap | Mash | Toggle,
 
+		[Hide]
 		None = 0,
 	}
 
@@ -296,11 +322,98 @@ namespace ReActionPlugin
 		None = 0,
 	}
 
+	// Taken and extended from Sandbox.GamepadCode
+	public enum GamepadCode
+	{
+		None = -1,
+		A,
+		B,
+		X,
+		Y,
+		/// <summary>
+		/// Normally the small button on the left side of a gamepad
+		/// </summary>
+		[Title("Back")]
+		SwitchLeftMenu,
+		/// <summary>
+		/// The big button in the middle of a gamepad, usually with the logo on it
+		/// </summary>
+		Guide,
+		/// <summary>
+		/// This is automatically used as the escape key in all games
+		/// </summary>
+		SwitchRightMenu,
+		/// <summary>
+		/// The button when you press down on the stick
+		/// </summary>
+		[Title("Left Analog Stick")]
+		LeftJoystickButton,
+		/// <summary>
+		/// The button when you press down on the stick
+		/// </summary>
+		[Title("Right Analog Stick")]
+		RightJoystickButton,
+		/// <summary>
+		/// Also known as the left bumper, or LB, or L1
+		/// </summary>
+		[Title("Left Shoulder")]
+		SwitchLeftBumper,
+		/// <summary>
+		/// Also known as the right bumper, or RB, or R1
+		/// </summary>
+		[Title("Right Shoulder")]
+		SwitchRightBumper,
+		[Title("D-Pad Up")]
+		[Icon("arrow_circle_up")]
+		DpadNorth,
+		[Title("D-Pad Down")]
+		[Icon("arrow_circle_down")]
+		DpadSouth,
+		[Title("D-Pad Left")]
+		[Icon("arrow_circle_left")]
+		DpadWest,
+		[Title("D-Pad Right")]
+		[Icon("arrow_circle_right")]
+		DpadEast,
+		/// <summary>
+		/// This is a button that doesn't have a specific name, like the share button on some controllers
+		/// </summary>
+		[Title("Misc")]
+		Misc1,
+		/// <summary>
+		/// Extra button on the back of some gamepads, like the Xbox Elite
+		/// </summary>
+		Paddle1,
+		/// <summary>
+		/// Extra button on the back of some gamepads, like the Xbox Elite
+		/// </summary>
+		Paddle2,
+		/// <summary>
+		/// Extra button on the back of some gamepads, like the Xbox Elite
+		/// </summary>
+		Paddle3,
+		/// <summary>
+		/// Extra button on the back of some gamepads, like the Xbox Elite
+		/// </summary>
+		Paddle4,
+		Touchpad,
+
+		//analog stuff here
+		LeftTrigger,
+		RightTrigger,
+		LeftJoystick,
+		RightJoystick
+	}
+
 	public enum ButtonCode
 	{
+		[Hide]
 		BUTTON_CODE_INVALID = -1,
+		[Hide]
 		BUTTON_CODE_NONE,
+		[Hide]
 		BUTTON_CODE_FIRST = 0,
+		[Hide]
 		KEY_FIRST = 0,
 		KEY_NONE = 0,
 		KEY_0,
@@ -616,7 +729,9 @@ namespace ReActionPlugin
 		KEY_CYRILLIC_IO,
 		KEY_CYRILLIC_ZHE,
 		KEY_CYRILLIC_BE,
+		[Hide]
 		KEY_LAST = 313,
+		[Hide]
 		MOUSE_FIRST,
 		MouseLeft = 314,
 		MouseRight,
@@ -625,42 +740,79 @@ namespace ReActionPlugin
 		MouseForward,
 		MouseWheelUp,
 		MouseWheelDown,
+		[Hide]
 		MOUSE_LAST = 320,
+		[Hide]
 		MOUSE_COUNT = 7,
+		[Hide]
 		JOYSTICK_FIRST = 321,
+		[Hide]
 		JOYSTICK_FIRST_BUTTON = 321,
+		[Hide]
 		JOYSTICK_LAST_BUTTON = 448,
+		[Hide]
 		JOYSTICK_FIRST_POV_BUTTON,
+		[Hide]
 		JOYSTICK_LAST_POV_BUTTON = 464,
+		[Hide]
 		JOYSTICK_FIRST_AXIS_BUTTON,
+		[Hide]
 		JOYSTICK_LAST_AXIS_BUTTON = 512,
+		[Hide]
 		JOYSTICK_LAST = 512,
+		[Hide]
 		BUTTON_CODE_COUNT,
+		[Hide]
 		BUTTON_CODE_LAST = 512,
+		[Hide]
 		KEY_XBUTTON_UP = 449,
+		[Hide]
 		KEY_XBUTTON_RIGHT,
+		[Hide]
 		KEY_XBUTTON_DOWN,
+		[Hide]
 		KEY_XBUTTON_LEFT,
+		[Hide]
 		KEY_XBUTTON_A = 321,
+		[Hide]
 		KEY_XBUTTON_B,
+		[Hide]
 		KEY_XBUTTON_X,
+		[Hide]
 		KEY_XBUTTON_Y,
+		[Hide]
 		KEY_XBUTTON_LEFT_SHOULDER,
+		[Hide]
 		KEY_XBUTTON_RIGHT_SHOULDER,
+		[Hide]
 		KEY_XBUTTON_BACK,
+		[Hide]
 		KEY_XBUTTON_START,
+		[Hide]
 		KEY_XBUTTON_STICK1,
+		[Hide]
 		KEY_XBUTTON_STICK2,
+		[Hide]
 		KEY_XBUTTON_INACTIVE_START,
+		[Hide]
 		KEY_XSTICK1_RIGHT = 465,
+		[Hide]
 		KEY_XSTICK1_LEFT,
+		[Hide]
 		KEY_XSTICK1_DOWN,
+		[Hide]
 		KEY_XSTICK1_UP,
+		[Hide]
 		KEY_XBUTTON_LTRIGGER,
+		[Hide]
 		KEY_XBUTTON_RTRIGGER,
+		[Hide]
 		KEY_XSTICK2_RIGHT,
+		[Hide]
 		KEY_XSTICK2_LEFT,
+		[Hide]
 		KEY_XSTICK2_DOWN,
+		[Hide]
 		KEY_XSTICK2_UP
 	}
 
@@ -779,8 +931,6 @@ namespace ReActionPlugin
 
 			const uint k_AwesomeFloat = 0b01111111_11111111_11111111_11111111u;
 #else
-		uint m_Shitmask;
-
 		public readonly Half ChangedStateFor => Down ? PressedFor : ReleasedFor;
 
 		public Half ReleasedFor
@@ -842,6 +992,13 @@ namespace ReActionPlugin
 		public readonly bool Released => !Down && StateChanged;
 
 		public readonly bool Pressed => Down && StateChanged;
+
+		// R: released time bits
+		// P: pressed time bits
+		// D: down bits
+		// S: state changed bits
+		// PPPPPPPP_PPPPPPPR_RRRRRRRR_RRRRRRSD
+		uint m_Shitmask;
 
 		const uint k_DownFlagMask = 0b00000000_00000000_00000000_000000001u;
 

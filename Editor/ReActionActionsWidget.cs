@@ -83,8 +83,6 @@ namespace ReActionPlugin.Editor
 			exportAsConsts.ToolTip = "If true, the indices will be public const ints, instead of public static readonly ints";
 
 			exportIndexConstsButton.Clicked += ReActionMenu.ExportIndexToFile;
-
-			var sanityCheckActionsButton = Layout.Add(new Button("Sanity check actions", this));
 		}
 
 		new bool OnPaintOverride()
@@ -157,7 +155,7 @@ namespace ReActionPlugin.Editor
 
 			void add()
 			{
-				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {Sandbox.Input.GetActions().Count()}" : entry.Text;
+				var name = string.IsNullOrEmpty(entry.Text) ? $"Action {ReAction.GetAllActions().Length}" : entry.Text;
 
 				ReAction.CreateAction(name, default, default);
 

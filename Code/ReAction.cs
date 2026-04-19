@@ -23,6 +23,8 @@
 
 		static Angles m_AnalogLook;
 
+		public static Vector3 Move { get; private set; }
+
 		public static Modifiers ActiveModifiers
 		{
 			get; private set;
@@ -188,8 +190,12 @@
 		/// <param name="buttonAction"></param>
 		public static void UnregisterButtonAction(ButtonAction buttonAction)
 		{
-			m_AllActions.Remove(buttonAction);
-			m_EnabledActions.Remove(buttonAction);
+			//in case an action with the same name is present but not the same exact action, for some reason *cough cough* fuck ass editor piss of shit *cough cough*
+
+			var action = GetAction(buttonAction.Name);
+
+			m_AllActions.Remove(action);
+			m_EnabledActions.Remove(action);
 		}
 
 		static void UpdateActionEnabled(ButtonAction buttonAction)
@@ -393,11 +399,40 @@
 			}
 		}
 
+		static void ProcessAnalogMove()
+		{
+			var move = Vector3.Zero;
+
+			if (GetAction("Forward"))
+			{
+				move += Vector3.Forward;
+			}
+
+			if (GetAction("Backward"))
+			{
+				move += Vector3.Backward;
+			}
+
+			if (GetAction("Left"))
+			{
+				move += Vector3.Left;
+			}
+
+			if (GetAction("Right"))
+			{
+				move += Vector3.Right;
+			}
+
+			Move = move;
+		}
+
 		internal static void Frame()
 		{
 			ReinitialiseKeyStates();
 
 			ProcessAnalogLook();
+
+			ProcessAnalogMove();
 		}
 
 		internal static void FrameEnd()
