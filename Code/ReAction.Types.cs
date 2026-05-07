@@ -1,25 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json.Serialization;
 
 namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
-		static readonly MethodInfo CodeToStringMethod = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("CodeToString", BindingFlags.Static | BindingFlags.NonPublic);
+		[SkipHotload] static readonly CodeToStringDelegate CodeToString = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("CodeToString", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<CodeToStringDelegate>();
+		[SkipHotload] static readonly GetKeyDisplayNameDelegate GetKeyDisplayName = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("GetKeyDisplayName", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<GetKeyDisplayNameDelegate>();
+
+		/// <summary>
+		/// Gets the internal engine name for the key
+		/// </summary>
 		public static string GetEngineString(this ButtonCode buttonCode)
 		{
-			return CodeToStringMethod.Invoke(null, [buttonCode]) as string;
+			return CodeToString(buttonCode);
 		}
 
-		static readonly MethodInfo GetKeyDisplayNameMethod = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("GetKeyDisplayName", BindingFlags.Static | BindingFlags.NonPublic);
+		/// <summary>
+		/// Gets the locale key name for your keyboard, for example, on QWERTY "W" will return "W", but on AZERTY "W" will return "Z"
+		/// </summary>
+		/// <param name="buttonCode"></param>
+		/// <returns>The locale key name for your keyboard, or null, depending on the key</returns>
 		public static string GetKeyDisplay(this ButtonCode buttonCode)
 		{
-			return GetKeyDisplayNameMethod.Invoke(null, [buttonCode]) as string;
+			return GetKeyDisplayName(buttonCode);
 		}
 	}
 
@@ -49,30 +54,63 @@ namespace ReActionPlugin
 
 		public string Set { get; init; } = "general";
 
-		public bool Enabled { get; set; }
+		public bool Enabled 
+		{ 
+			get; 
 
-		[JsonIgnore, Hide]
-		public Bind Primary => m_Primary;
+			set
+			{
+				field = value;
+				ReAction.UpdateActionEnabled(this);
+			} 
+		}
 
-		[JsonInclude, InlineEditor, Title("Primary Bind")]
+		[InlineEditor]
+		public Bind Primary
+		{
+			get
+			{
+				return m_Primary;
+			}
+
+			set
+			{
+				m_Primary = value;
+			}
+		}
+
+		[Hide]
 		internal Bind m_Primary;
 
-		[JsonIgnore, Hide]
-		public Bind Secondary => m_Secondary;
+		[InlineEditor]
+		public Bind Secondary
+		{
+			get
+			{
+				return m_Secondary;
+			}
 
-		[JsonInclude, InlineEditor, Title("Secondary Bind")]
+			set
+			{
+				m_Secondary = value;
+			}
+		}
+
+		[Hide]
 		internal Bind m_Secondary;
 
 		public Conditional AllowedConditionals { get; set; } = Conditional.All;
 
-		[JsonIgnore]
-		public bool Active
+		[JsonIgnore, Hide]
+		public bool Active 
 		{
-			get =>
-				Enabled &&
-				((ConditionalsState & Primary.Conditional) != Conditional.None && (Primary.Modifiers == Modifiers.None || (ReAction.ActiveModifiers & Primary.Modifiers) != Modifiers.None)) ||
-				((ConditionalsState & Secondary.Conditional) != Conditional.None && (Secondary.Modifiers == Modifiers.None || (ReAction.ActiveModifiers & Secondary.Modifiers) != Modifiers.None))
-				;
+			//still get Enabled, because it might be disabled in between frames
+			get 
+			{ 
+				return Enabled && field; 
+			} 
+
+			internal set; 
 		}
 
 		public bool GetConditionState(Conditional conditional)
@@ -85,6 +123,11 @@ namespace ReActionPlugin
 			return HashCode.Combine(m_Primary, m_Secondary, Set, AllowedConditionals);
 		}
 
+		public override string ToString()
+		{
+			return this.Name;
+		}
+
 		public static implicit operator bool(ButtonAction action)
 		{
 			return action.Active;
@@ -95,12 +138,24 @@ namespace ReActionPlugin
 			//need 6bits for this
 			public GamepadCode GamepadCode { get; set; }
 
+			public bool isCoolAnalogLol;
+
+			public bool isPosAnalog;
+
+			public float Analog
+			{
+				get
+				{
+					return 0;
+				}
+			}
+
 			public Half analogThreshold;
 		}
 
 		public struct Bind
 		{
-			public Bind(ButtonCode key,Conditional conditional, Modifiers modifiers = Modifiers.None, float timeOut = .5f)
+			public Bind(ButtonCode key, Conditional conditional, Modifiers modifiers = Modifiers.None, float timeOut = .5f)
 			{
 				this.Key = key;
 				this.Modifiers = modifiers;
@@ -218,6 +273,11 @@ namespace ReActionPlugin
 			}
 #endif
 
+			public void StartTrappingKey()
+			{
+				
+			}
+
 			//this + timeout means this whole struct only takes 64 bits, wow, that's one single register!!
 			// k: key code bits
 			// m: modifier bits
@@ -298,6 +358,12 @@ namespace ReActionPlugin
 		/// Is the action tapped?
 		/// </summary>
 		Toggle = 1 << 7,
+
+		DoubleTapToggle = DoubleTap | Toggle,
+
+		ReleaseToggle = Release | Toggle,
+
+		LongPressToggle = LongPress | Toggle,
 
 		All = Press | LongPress | Release | Continuous | Tap | DoubleTap | Mash | Toggle,
 

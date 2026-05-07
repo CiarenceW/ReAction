@@ -6,15 +6,9 @@ namespace ReActionPlugin.Editor;
 
 partial class ActionPanel : Widget
 {
-	private ButtonAction Action
-	{
-		get; set;
-	}
+	private ButtonAction Action { get; set; }
 
-	private ReActionActionsWidget Page
-	{
-		get; set;
-	}
+	private ReActionActionsWidget Page { get; set; }
 
 	int Index { get; set; } = -1;
 
@@ -97,9 +91,9 @@ partial class ActionPanel : Widget
 
 		void DrawBindTextAndIcon(ButtonAction.Bind bind)
 		{
-			if (Action.Primary.Key != ButtonCode.BUTTON_CODE_NONE)
+			if (bind.Key != ButtonCode.BUTTON_CODE_NONE)
 			{
-				width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(Action.Primary.Modifiers)} {(Action.Primary.Key.GetEngineString())}", "keyboard");
+				width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(bind.Modifiers)} {(string.IsNullOrWhiteSpace(bind.Key.GetKeyDisplay()) ? bind.Key.GetEngineString() : bind.Key.GetKeyDisplay())}", "keyboard");
 				r.Right -= width - 8;
 			}
 
@@ -109,7 +103,7 @@ partial class ActionPanel : Widget
 				r.Right -= width - 8;
 			}*/
 
-			width = DrawTextWithIcon(r, Action.Primary.Conditional.ToString(), "article");
+			width = DrawTextWithIcon(r, bind.Conditional.ToString(), "article");
 			r.Right -= width - 8;
 
 			/*if (Action.GamepadInput != ReAction.GamepadInput.None)

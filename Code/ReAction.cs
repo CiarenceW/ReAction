@@ -7,14 +7,13 @@
 			InitialiseKeyMap();
 		}
 
-		static HashSet<ButtonCode> m_PressedKeys = new();
-		static HashSet<ButtonCode> m_ReleasedKeys = new();
+		static readonly HashSet<ButtonCode> m_PressedKeys = new();
+		static readonly HashSet<ButtonCode> m_ReleasedKeys = new();
 
-		static HashSet<ButtonAction> m_AllActions = new();
-		static HashSet<ButtonAction> m_EnabledActions = new();
+		static readonly HashSet<ButtonAction> m_AllActions = new();
+		static readonly HashSet<ButtonAction> m_EnabledActions = new();
 
-		static HashSet<string> m_Sets = ["General"];
-		static HashSet<string> m_ActiveSets = ["General"];
+		static readonly HashSet<string> m_ActiveSets = ["General"];
 
 		/// <summary>
 		/// Like <see cref="Input.AnalogLook"/> but good
@@ -25,10 +24,9 @@
 
 		public static Vector3 Move { get; private set; }
 
-		public static Modifiers ActiveModifiers
-		{
-			get; private set;
-		}
+		public static Modifiers ActiveModifiers { get; private set; }
+
+		static ButtonAction MissingAction { get; } = new ButtonAction("missing", default, default, null, false, Conditional.None);
 
 		/// <summary>
 		/// Formats the modifiers' strings, like the following: <code>LShift + LMeta + </code>
@@ -126,12 +124,20 @@
 					action.ConditionalsState |= Conditional.Mash;
 				}
 
-				action.ConditionalsState ^= Conditional.Toggle;
+				if (!((bind.Conditional & Conditional.ReleaseToggle) == Conditional.ReleaseToggle) && !((bind.Conditional & Conditional.LongPressToggle) == Conditional.LongPressToggle) && !((bind.Conditional & Conditional.DoubleTapToggle) == Conditional.DoubleTapToggle))
+				{
+					action.ConditionalsState ^= Conditional.Toggle;
+				}
 			}
 
 			static void CheckReleasedKey(ButtonAction action, ref ButtonAction.Bind bind)
 			{
 				action.ConditionalsState |= Conditional.Release;
+
+				if ((bind.Conditional & Conditional.ReleaseToggle) == Conditional.ReleaseToggle)
+				{
+					action.ConditionalsState ^= Conditional.Toggle;
+				}
 
 				bind.LongPressed = false;
 
@@ -146,6 +152,11 @@
 						action.ConditionalsState |= Conditional.DoubleTap;
 
 						bind.DoubleTapped = true;
+
+						if ((bind.Conditional & Conditional.DoubleTapToggle) == Conditional.DoubleTapToggle)
+						{
+							action.ConditionalsState ^= Conditional.Toggle;
+						}
 					}
 					else
 					{
@@ -179,8 +190,6 @@
 
 			m_AllActions.Add(buttonAction);
 
-			m_Sets.Add(buttonAction.Set);
-
 			UpdateActionEnabled(buttonAction);
 		}
 
@@ -198,7 +207,7 @@
 			m_EnabledActions.Remove(action);
 		}
 
-		static void UpdateActionEnabled(ButtonAction buttonAction)
+		internal static void UpdateActionEnabled(ButtonAction buttonAction)
 		{
 			if (buttonAction.Enabled)
 			{
@@ -213,6 +222,11 @@
 
 				buttonAction.ConditionalsState = Conditional.None;
 			}
+		}
+
+		public static void TrapKeys(Action<string> onKeysTrappedCallback)
+		{
+			
 		}
 
 		static void RefreshActionLists()
@@ -270,6 +284,11 @@
 					action.ConditionalsState |= Conditional.LongPress;
 
 					bind.LongPressed = true;
+
+					if ((bind.Conditional & Conditional.LongPressToggle) == Conditional.LongPressToggle)
+					{
+						bind.Conditional ^= Conditional.Toggle;
+					}
 				}
 			}
 
@@ -335,37 +354,34 @@
 				ReActionLogger.Warning($"{actionName} does not exists, lmao");
 			}
 
-			return null;
+			return MissingAction;
 		}
 
 		public static void SetActionSetActive(string setName, bool active)
 		{
 			if (setName != "General")
 			{
-				if (m_Sets.Contains(setName))
+				if (active)
 				{
-					if (active)
-					{
-						m_ActiveSets.Add(setName);
+					m_ActiveSets.Add(setName);
 
-						foreach (var action in m_AllActions)
+					foreach (var action in m_AllActions)
+					{
+						if (action.Set == setName)
 						{
-							if (action.Set == setName)
-							{
-								m_EnabledActions.Add(action);
-							}
+							m_EnabledActions.Add(action);
 						}
 					}
-					else
-					{
-						m_ActiveSets.Remove(setName);
+				}
+				else
+				{
+					m_ActiveSets.Remove(setName);
 
-						foreach (var action in m_AllActions)
+					foreach (var action in m_AllActions)
+					{
+						if (action.Set == setName)
 						{
-							if (action.Set == setName)
-							{
-								m_EnabledActions.Remove(action);
-							}
+							m_EnabledActions.Remove(action);
 						}
 					}
 				}
@@ -426,9 +442,21 @@
 			Move = move;
 		}
 
+		static void UpdateButtonActions()
+		{
+			foreach (var action in m_EnabledActions)
+			{
+				action.Active =
+					(((action.ConditionalsState & action.Primary.Conditional) != Conditional.None) && (action.Primary.Modifiers == Modifiers.None || (ActiveModifiers & action.Primary.Modifiers) != Modifiers.None)) ||
+					(((action.ConditionalsState & action.Secondary.Conditional) != Conditional.None) && (action.Secondary.Modifiers == Modifiers.None || (ActiveModifiers & action.Secondary.Modifiers) != Modifiers.None));
+			}
+		}
+
 		internal static void Frame()
 		{
 			ReinitialiseKeyStates();
+
+			UpdateButtonActions();
 
 			ProcessAnalogLook();
 

@@ -13,6 +13,13 @@ namespace ReActionPlugin
 	{
 		const string k_ReActionHookName = "ReActionOnButtonHook";
 
+		delegate string GetKeyDisplayNameDelegate(ButtonCode buttonCode);
+		delegate string CodeToStringDelegate(ButtonCode buttonCode);
+
+		delegate void StartTrappingDelegate(Action<string[]> onTrappedKeysCallback);
+
+		[SkipHotload] static StartTrappingDelegate StartTrappingKeys;
+
 #pragma warning disable CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
 		[ModuleInitializer]
 #pragma warning restore CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
@@ -36,34 +43,38 @@ namespace ReActionPlugin
 
 			var reActionHookModuleBuilder = reActionHookAssemblyBuilder.DefineDynamicModule("ReAction.Hooking");
 
+			var ignoreAccessChecksAttribute = typeof(DispatchProxy).Assembly.GetType("System.Reflection.Emit.IgnoreAccessChecksToAttributeBuilder").GetMethod("AddToModule", BindingFlags.Public | BindingFlags.Static).Invoke(null, [reActionHookModuleBuilder]) as ConstructorInfo;
+
+			reActionHookAssemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(ignoreAccessChecksAttribute, [reActionHookAssemblyBuilder.GetName().Name]));
+
 			var reActionHookTypeBuiler = reActionHookModuleBuilder.DefineType("ReActionButtonCallbackHook", TypeAttributes.Public | TypeAttributes.Class);
 
-			var reActionHookMethodBuilder = reActionHookTypeBuiler.DefineMethod(k_ReActionHookName, MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard, typeof(void), actionsArgsTypes);
+			{
+				var reActionHookMethodBuilder = reActionHookTypeBuiler.DefineMethod(k_ReActionHookName, MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard, typeof(void), actionsArgsTypes);
 
-			//sure? why not
-			reActionHookMethodBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(SkipHotloadAttribute).GetConstructor(Type.EmptyTypes), []));
-			reActionHookMethodBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MethodImplAttribute).GetConstructor([typeof(MethodImplOptions)]), [MethodImplOptions.AggressiveInlining]));
+				//sure? why not
+				reActionHookMethodBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(SkipHotloadAttribute).GetConstructor(Type.EmptyTypes), []));
+				reActionHookMethodBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MethodImplAttribute).GetConstructor([typeof(MethodImplOptions)]), [MethodImplOptions.AggressiveInlining]));
 
-			var ilGen = reActionHookMethodBuilder.GetILGenerator();
+				var ilGen = reActionHookMethodBuilder.GetILGenerator();
 
-			//public static void ReActionOnButtonHook(NativeEngine.ButtonCode scanCode, string buttonName, bool pressed)
-			//{
-			//		ReAction.OnGameButton(scanCode, buttonName, pressed);
-			//}
+				//public static void ReActionOnButtonHook(NativeEngine.ButtonCode scanCode, string buttonName, bool pressed)
+				//{
+				//		ReAction.OnGameButton(scanCode, buttonName, pressed);
+				//}
 
-			ilGen.Emit(OpCodes.Ldarg_0);
-			ilGen.Emit(OpCodes.Ldarg_1);
-			ilGen.Emit(OpCodes.Ldarg_2);
+				ilGen.Emit(OpCodes.Ldarg_0);
+				ilGen.Emit(OpCodes.Ldarg_1);
+				ilGen.Emit(OpCodes.Ldarg_2);
 
-			ilGen.EmitCall(OpCodes.Call, typeof(ReAction).GetMethod(nameof(OnGameButton), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), null);
+				ilGen.EmitCall(OpCodes.Call, typeof(ReAction).GetMethod(nameof(OnGameButton), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), null);
 
-			ilGen.Emit(OpCodes.Ret);
+				ilGen.Emit(OpCodes.Ret);
 
-			reActionHookMethodBuilder.DefineParameter(0, ParameterAttributes.None, "scanCode");
-			reActionHookMethodBuilder.DefineParameter(1, ParameterAttributes.None, "buttonName");
-			reActionHookMethodBuilder.DefineParameter(2, ParameterAttributes.None, "pressed");
-
-			reActionHookMethodBuilder.SetImplementationFlags(MethodImplAttributes.IL);
+				reActionHookMethodBuilder.DefineParameter(0, ParameterAttributes.None, "scanCode");
+				reActionHookMethodBuilder.DefineParameter(1, ParameterAttributes.None, "buttonName");
+				reActionHookMethodBuilder.DefineParameter(2, ParameterAttributes.None, "pressed");
+			}
 
 			reActionHookModuleBuilder.CreateGlobalFunctions();
 
