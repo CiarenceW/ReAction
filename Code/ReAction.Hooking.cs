@@ -33,6 +33,8 @@ namespace ReActionPlugin
 
 			var inputContext = globalContextType.GetProperty("InputContext", BindingFlags.Instance | BindingFlags.Public).GetValue(currentContext);
 
+			StartTrappingKeys = (StartTrappingDelegate)Delegate.CreateDelegate(typeof(StartTrappingDelegate), inputContext, inputContext.GetType().GetMethod("StartTrapping"), true);
+
 			var inputContextOnGameButtonProp = inputContext.GetType().GetProperty("OnGameButton", BindingFlags.Instance | BindingFlags.Public);
 
 			var actionsArgsTypes = inputContextOnGameButtonProp.PropertyType.GenericTypeArguments;

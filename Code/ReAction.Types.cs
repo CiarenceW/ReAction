@@ -249,11 +249,6 @@ namespace ReActionPlugin
 			}
 #endif
 
-			public void StartTrappingKey()
-			{
-				
-			}
-
 			//this + timeout means this whole struct only takes 64 bits, wow, that's one single register!!
 			// k: key code bits
 			// m: modifier bits
