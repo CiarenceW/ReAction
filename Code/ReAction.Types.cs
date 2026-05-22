@@ -41,7 +41,7 @@ namespace ReActionPlugin
 			} 
 		}
 
-		[InlineEditor]
+		[InlineEditor, Title("Primary Bind")]
 		public Bind Primary
 		{
 			get
@@ -58,7 +58,7 @@ namespace ReActionPlugin
 		[Hide]
 		internal Bind m_Primary;
 
-		[InlineEditor]
+		[InlineEditor, Title("Secondary Bind")]
 		public Bind Secondary
 		{
 			get
@@ -235,12 +235,15 @@ namespace ReActionPlugin
 			[Hide]
 			public Half TimeOut { readonly get; set; }
 
+#if DEBUG
 			[JsonIgnore, Title("Time Out")]
+			//The inspector can't show Half values, lol, do this for simplicity
 			float TimeOutF
 			{
 				get => (float)TimeOut;
 				set => TimeOut = (Half)value;
 			}
+#endif
 
 			[JsonIgnore, Hide]
 			internal Half TappedFor
