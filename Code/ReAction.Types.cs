@@ -152,7 +152,7 @@ namespace ReActionPlugin
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & k_KeyMask) | (uint)value;
+					m_InternalBitmask = (m_InternalBitmask & ~k_KeyMask) | (uint)value;
 				}
 			}
 
