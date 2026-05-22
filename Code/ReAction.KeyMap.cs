@@ -8,7 +8,7 @@ namespace ReActionPlugin
 	{
 		static KeyState[] keyStates;
 
-		const ButtonCode k_ButtonCodeLength = ButtonCode.MOUSE_LAST;
+		const ButtonCode k_ButtonCodeLength = ButtonCode.MOUSE_LAST + 1;
 
 		static void InitialiseKeyMap()
 		{
@@ -24,7 +24,7 @@ namespace ReActionPlugin
 		{
 			KeyState key;
 
-			for (int i = 0; i < (int)ButtonCode.MOUSE_LAST; i++)
+			for (int i = 0; i < (int)k_ButtonCodeLength; i++)
 			{
 				key = keyStates[i];
 
