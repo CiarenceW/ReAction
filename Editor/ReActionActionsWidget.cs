@@ -74,6 +74,8 @@ namespace ReActionPlugin.Editor
 
 			exportAsConsts = Layout.Add(new Checkbox("Export indices as const", this));
 
+			exportAsConsts.Value = true;
+
 			saveActionsButton.Clicked += Save;
 
 			saveActionsButton.ToolTip = "Save actions locally. This is if you like having a weird control scheme, but you prefer the default set not being fucked";
