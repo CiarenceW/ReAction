@@ -15,6 +15,7 @@ namespace ReActionPlugin
 
 		delegate string GetKeyDisplayNameDelegate(ButtonCode buttonCode);
 		delegate string CodeToStringDelegate(ButtonCode buttonCode);
+		delegate ButtonCode StringToCodeDelegate(string pString);
 
 		delegate void StartTrappingDelegate(Action<string[]> onTrappedKeysCallback);
 
