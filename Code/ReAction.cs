@@ -1,4 +1,6 @@
-﻿namespace ReActionPlugin
+﻿using System.Runtime.CompilerServices;
+
+namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
@@ -6,9 +8,6 @@
 		{
 			InitialiseKeyMap();
 		}
-
-		static readonly HashSet<ButtonCode> m_PressedKeys = new();
-		static readonly HashSet<ButtonCode> m_ReleasedKeys = new();
 
 		static readonly HashSet<ButtonAction> m_AllActions = new();
 		static readonly HashSet<ButtonAction> m_EnabledActions = new();
@@ -51,6 +50,8 @@
 		public static void OnGameButton(ButtonCode scanCode, string buttonName, bool pressed)
 		{
 			keyStates[(int)scanCode].Down = pressed;
+
+			buttonCodeNames[(int)scanCode] = buttonName;
 
 			switch (scanCode)
 			{
