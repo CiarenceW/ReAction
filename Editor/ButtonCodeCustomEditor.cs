@@ -48,11 +48,12 @@ namespace ReActionPlugin
 		protected override void OnMouseReleased(MouseEvent e)
 		{
 			//fucking ARM
+			//e.Button is a bitmask, however, the values are in the same order as the mouse codes in ButtonCode, so we can do some epic friggin intrinsincs!! epic win
 			if (Bmi1.IsSupported)
 				OnBindPressed((ButtonCode)(Bmi1.TrailingZeroCount((uint)e.Button) + (uint)ButtonCode.MOUSE_FIRST));
 			else
 			if (ArmBase.IsSupported)
-				OnBindPressed((ButtonCode)(ArmBase.LeadingZeroCount(ArmBase.ReverseElementBits((int)e.Button)) + (int)ButtonCode.MOUSE_FIRST));
+				OnBindPressed((ButtonCode)(31u - (ArmBase.LeadingZeroCount((int)e.Button)) + (int)ButtonCode.MOUSE_FIRST));
 			else
 				Log.Info("fuck you");
 		}
