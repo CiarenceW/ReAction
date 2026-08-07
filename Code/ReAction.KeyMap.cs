@@ -9,21 +9,15 @@ namespace ReActionPlugin
 	{
 		static KeyState[] keyStates;
 
-		static string[] buttonCodeNames;
-
 		const ButtonCode k_ButtonCodeLength = ButtonCode.MOUSE_LAST + 1;
 
 		static void InitialiseKeyMap()
 		{
 			keyStates = new KeyState[(int)k_ButtonCodeLength];
 
-			buttonCodeNames = new string[(int)k_ButtonCodeLength];
-
 			for (int i = (int)ButtonCode.BUTTON_CODE_FIRST; i < (int)k_ButtonCodeLength; i++)
 			{
 				keyStates[i] = new();
-
-				buttonCodeNames[i] = string.Empty;
 			}
 		}
 

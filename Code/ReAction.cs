@@ -47,11 +47,9 @@ namespace ReActionPlugin
 			return str;
 		}
 
-		public static void OnGameButton(ButtonCode scanCode, string buttonName, bool pressed)
+		public static void OnGameButton(ButtonCode scanCode, bool pressed)
 		{
 			keyStates[(int)scanCode].Down = pressed;
-
-			buttonCodeNames[(int)scanCode] = buttonName;
 
 			switch (scanCode)
 			{
