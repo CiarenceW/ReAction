@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
-using System.Text;
 
 namespace ReActionPlugin
 {
@@ -19,77 +14,48 @@ namespace ReActionPlugin
 
 		delegate void StartTrappingDelegate(Action<string[]> onTrappedKeysCallback);
 
+		delegate void OnKeyDelegate(ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods);
+
+		delegate void DoubleTrouble(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods);
+
+		static object onKey_Hook;
+
 		[SkipHotload] static StartTrappingDelegate StartTrappingKeys;
 
 #pragma warning disable CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
 		[ModuleInitializer]
-#pragma warning restore CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
-		//we have to create a whole new method because NativeEngine.ButtonCode is internal, so we can't just make a compatible method
+		//Create a hook with MonoMod.RuntimeDetour from Sandbox.Engine.InputRouter.OnKey, so, we don't have to bother with the input processing the game does, real raw input! yay!
+		//also allows us to get the scan code, and the "real" key code, nice for input within UI and shit :)
 		internal static void Main()
 		{
-			var globalContextType = typeof(WorldInput).Assembly.GetType("Sandbox.Engine.GlobalContext");
+			var runtimeDetourAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault((asm) => asm.FullName.Contains("MonoMod.RuntimeDetour"));
+
+			var hookType = runtimeDetourAssembly.GetType("MonoMod.RuntimeDetour.Hook");
+
+			var inputRouterType = Assembly.GetAssembly(typeof(Input)).GetType("Sandbox.Engine.InputRouter");
+
+			var inputRouter_OnKey_MethodBase = inputRouterType.GetMethod("OnKey", BindingFlags.NonPublic | BindingFlags.Static);
+
+			onKey_Hook = Activator.CreateInstance(hookType, [inputRouter_OnKey_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<DoubleTrouble>()]);
+
+			/*var globalContextType = typeof(WorldInput).Assembly.GetType("Sandbox.Engine.GlobalContext");
 
 			var currentContext = globalContextType.GetProperty("Current", BindingFlags.Static | BindingFlags.Public).GetValue(null);
 
 			var inputContext = globalContextType.GetProperty("InputContext", BindingFlags.Instance | BindingFlags.Public).GetValue(currentContext);
 
-			StartTrappingKeys = (StartTrappingDelegate)Delegate.CreateDelegate(typeof(StartTrappingDelegate), inputContext, inputContext.GetType().GetMethod("StartTrapping"), true);
+			StartTrappingKeys = (StartTrappingDelegate)Delegate.CreateDelegate(typeof(StartTrappingDelegate), inputContext, inputContext.GetType().GetMethod("StartTrapping"), true);*/
+		}
+#pragma warning restore CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
 
-			var inputContextOnGameButtonProp = inputContext.GetType().GetProperty("OnGameButton", BindingFlags.Instance | BindingFlags.Public);
-
-			var actionsArgsTypes = inputContextOnGameButtonProp.PropertyType.GenericTypeArguments;
-
-			//we make a new runtime type because with a DynamicMethod, sbox's hotloading system complains about the method not having a declaring type
-			var reActionHookAssemblyName = new AssemblyName("ReAction.Hooking");
-
-			var reActionHookAssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(reActionHookAssemblyName, AssemblyBuilderAccess.Run);
-
-			var reActionHookModuleBuilder = reActionHookAssemblyBuilder.DefineDynamicModule("ReAction.Hooking");
-
-			var ignoreAccessChecksAttribute = typeof(DispatchProxy).Assembly.GetType("System.Reflection.Emit.IgnoreAccessChecksToAttributeBuilder").GetMethod("AddToModule", BindingFlags.Public | BindingFlags.Static).Invoke(null, [reActionHookModuleBuilder]) as ConstructorInfo;
-
-			reActionHookAssemblyBuilder.SetCustomAttribute(new CustomAttributeBuilder(ignoreAccessChecksAttribute, [reActionHookAssemblyBuilder.GetName().Name]));
-
-			var reActionHookTypeBuiler = reActionHookModuleBuilder.DefineType("ReActionButtonCallbackHook", TypeAttributes.Public | TypeAttributes.Class);
-
+		static void ReActionOnButtonHook(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods)
+		{
+			if (!repeat)
 			{
-				var reActionHookMethodBuilder = reActionHookTypeBuiler.DefineMethod(k_ReActionHookName, MethodAttributes.Public | MethodAttributes.Static, CallingConventions.Standard, typeof(void), actionsArgsTypes);
-
-				//sure? why not
-				reActionHookMethodBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(SkipHotloadAttribute).GetConstructor(Type.EmptyTypes), []));
-				reActionHookMethodBuilder.SetCustomAttribute(new CustomAttributeBuilder(typeof(MethodImplAttribute).GetConstructor([typeof(MethodImplOptions)]), [MethodImplOptions.AggressiveInlining]));
-
-				var ilGen = reActionHookMethodBuilder.GetILGenerator();
-
-				//public static void ReActionOnButtonHook(NativeEngine.ButtonCode scanCode, string buttonName, bool pressed)
-				//{
-				//		ReAction.OnGameButton(scanCode, buttonName, pressed);
-				//}
-
-				ilGen.Emit(OpCodes.Ldarg_0);
-				ilGen.Emit(OpCodes.Ldarg_1);
-				ilGen.Emit(OpCodes.Ldarg_2);
-
-				ilGen.EmitCall(OpCodes.Call, typeof(ReAction).GetMethod(nameof(OnGameButton), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), null);
-
-				ilGen.Emit(OpCodes.Ret);
-
-				reActionHookMethodBuilder.DefineParameter(0, ParameterAttributes.None, "scanCode");
-				reActionHookMethodBuilder.DefineParameter(1, ParameterAttributes.None, "buttonName");
-				reActionHookMethodBuilder.DefineParameter(2, ParameterAttributes.None, "pressed");
+				OnGameButton(scanButtonCode, down);
 			}
 
-			reActionHookModuleBuilder.CreateGlobalFunctions();
-
-			Type reActionHookType = reActionHookTypeBuiler.CreateType();
-
-			var createdMethod = reActionHookType.GetMethod(k_ReActionHookName, (BindingFlags)int.MaxValue);
-
-			var onInputMethod = createdMethod.CreateDelegate(typeof(Action<,,>).MakeGenericType(actionsArgsTypes));
-
-			var onGameButton = inputContextOnGameButtonProp.GetValue(inputContext) as Delegate;
-
-			inputContextOnGameButtonProp.SetValue(inputContext, Delegate.Combine(onGameButton, onInputMethod));
+			originalMethod(scanButtonCode, keyButtonCode, down, repeat, ikeymods);
 		}
 	}
 }
