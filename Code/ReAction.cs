@@ -460,6 +460,8 @@ namespace ReActionPlugin
 			ProcessAnalogLook();
 
 			ProcessAnalogMove();
+
+			ProcessControllersTouchpads();
 		}
 
 		internal static void FrameEnd()

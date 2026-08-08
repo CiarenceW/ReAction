@@ -18,7 +18,29 @@ namespace ReActionPlugin
 
 		delegate void DoubleTrouble(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods);
 
+		delegate void OnMouseDelegate(ButtonCode button, bool down, int ikeymods);
+
+		delegate void MoubleBrouble(OnMouseDelegate originalMethod, ButtonCode button, bool down, int ikeymods);
+
+		delegate void OnControllerAxisDelegate(int deviceId, Controller.ControllerAxis axis, int value);
+
+		delegate void CoubleArouble(OnControllerAxisDelegate originalMethod, int deviceId, Controller.ControllerAxis axis, int value);
+
+		delegate void OnControllerButtonDelegate(int deviceId, Controller.ControllerButton button, bool down);
+
+		delegate void CoubleBrouble(OnControllerButtonDelegate originalMethod, int deviceId, Controller.ControllerButton button, bool down);
+
+		[SkipHotload]
 		static object onKey_Hook;
+
+		[SkipHotload]
+		static object onMouse_Hook;
+
+		[SkipHotload]
+		static object onControllerAxis_Hook;
+
+		[SkipHotload]
+		static object onControllerButton_Hook;
 
 		[SkipHotload] static StartTrappingDelegate StartTrappingKeys;
 
@@ -38,6 +60,18 @@ namespace ReActionPlugin
 
 			onKey_Hook = Activator.CreateInstance(hookType, [inputRouter_OnKey_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<DoubleTrouble>()]);
 
+			var inputRouter_OnMouseButton_MethodBase = inputRouterType.GetMethod("OnMouseButton", BindingFlags.NonPublic | BindingFlags.Static);
+
+			onMouse_Hook = Activator.CreateInstance(hookType, [inputRouter_OnMouseButton_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnMouseButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<MoubleBrouble>()]);
+
+			var inputRouter_OnGameControllerAxis_MethodBase = inputRouterType.GetMethod("OnGameControllerAxis", BindingFlags.NonPublic | BindingFlags.Static);
+
+			onControllerAxis_Hook = Activator.CreateInstance(hookType, [inputRouter_OnGameControllerAxis_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnControllerAxisHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<CoubleArouble>()]);
+
+			var inputRouter_OnGameControllerButton_MethodBase = inputRouterType.GetMethod("OnGameControllerButton", BindingFlags.NonPublic | BindingFlags.Static);
+
+			onControllerButton_Hook = Activator.CreateInstance(hookType, [inputRouter_OnGameControllerButton_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnControllerButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<CoubleBrouble>()]);
+
 			/*var globalContextType = typeof(WorldInput).Assembly.GetType("Sandbox.Engine.GlobalContext");
 
 			var currentContext = globalContextType.GetProperty("Current", BindingFlags.Static | BindingFlags.Public).GetValue(null);
@@ -56,6 +90,23 @@ namespace ReActionPlugin
 			}
 
 			originalMethod(scanButtonCode, keyButtonCode, down, repeat, ikeymods);
+		}
+
+		static void ReActionOnMouseButtonHook(OnMouseDelegate originalMethod, ButtonCode button, bool down, int ikeymods)
+		{
+			OnGameButton(button, down);
+
+			originalMethod(button, down, ikeymods);
+		}
+
+		static void ReActionOnControllerAxisHook(OnControllerAxisDelegate originalMethod, int deviceId, Controller.ControllerAxis axis, int value)
+		{
+			originalMethod(deviceId, axis, value);
+		}
+
+		static void ReActionOnControllerButtonHook(OnControllerButtonDelegate originalMethod, int deviceId, Controller.ControllerButton button, bool down)
+		{
+			originalMethod(deviceId, button, down);
 		}
 	}
 }
