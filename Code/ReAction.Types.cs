@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace ReActionPlugin
 {
@@ -55,8 +56,7 @@ namespace ReActionPlugin
 			}
 		}
 
-		[Hide]
-		internal Bind m_Primary;
+		[Hide] internal Bind m_Primary;
 
 		[InlineEditor, Title("Secondary Bind")]
 		public Bind Secondary
@@ -72,8 +72,22 @@ namespace ReActionPlugin
 			}
 		}
 
-		[Hide]
-		internal Bind m_Secondary;
+		[Hide] internal Bind m_Secondary;
+
+		public ControllerBind Gamepad
+		{
+			get
+			{
+				return m_ControllerBind;
+			}
+
+			set
+			{
+				m_ControllerBind = value;
+			}
+		}
+
+		[Hide] internal ControllerBind m_ControllerBind;
 
 		public Conditional AllowedConditionals { get; set; } = Conditional.All;
 
@@ -111,22 +125,173 @@ namespace ReActionPlugin
 
 		public struct ControllerBind
 		{
-			//need 6bits for this
-			public GamepadCode GamepadCode { get; set; }
-
-			public bool isCoolAnalogLol;
-
-			public bool isPosAnalog;
-
-			public float Analog
+			public ControllerBind(ControllerButton button, Conditional conditional, Modifiers modifiers = Modifiers.None, float timeout = 0.5f)
 			{
-				get
+				Button = button;
+				Conditional = conditional;
+				Modifiers = modifiers;
+				TimeOut = (Half)timeout;
+			}
+
+			//need 6bits for this
+			public ControllerButton Button
+			{
+				readonly get
 				{
-					return 0;
+					return (ControllerButton)(m_InternalBitmask & k_ControllerButtonMask);
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_ControllerButtonMask) | (uint)value;
 				}
 			}
 
-			public Half analogThreshold;
+			//These two are 8 bits each, combined, that's 16, but these are only used for digital buttons, so we could use the bits for the deadzone
+			[HideIf(nameof(Button), ControllerButton.None)]
+			public Modifiers Modifiers
+			{
+				readonly get
+				{
+					return (Modifiers)((m_InternalBitmask & k_ModifiersMask) >> k_ModifiersBitOffset);
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_ModifiersMask) | ((uint)value << k_ModifiersBitOffset);
+				}
+			}
+
+			[HideIf(nameof(Button), ControllerButton.None)]
+			public Conditional Conditional
+			{
+				readonly get
+				{
+					return (Conditional)((m_InternalBitmask & k_ConditionalMask) >> k_ConditionalBitOffset);
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_ConditionalMask) | ((uint)value << k_ConditionalBitOffset);
+				}
+			}
+
+			//need the whole 16 bits for this
+			[ShowIf(nameof(Button), ControllerButton.None)]
+			public Half Deadzone
+			{
+				readonly get
+				{
+					return Unsafe.BitCast<ushort, Half>((ushort)((m_InternalBitmask & k_DeadzoneMask) >> k_DeadzoneBitOffset));
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_DeadzoneMask) | ((uint)Unsafe.BitCast<Half, ushort>(value) << k_DeadzoneBitOffset);
+				}
+			}
+
+			[JsonIgnore, Hide]
+			internal bool DoubleTapped
+			{
+				readonly get
+				{
+					return (m_InternalBitmask & k_DoubleTappedMask) != 0;
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_DoubleTappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_DoubleTappedBitOffset);
+				}
+			}
+
+			[JsonIgnore, Hide]
+			internal bool CountTappedTime
+			{
+				readonly get
+				{
+					return (m_InternalBitmask & k_TappedMask) != 0;
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_TappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_TappedBitOffset);
+				}
+			}
+
+			[JsonIgnore, Hide]
+			internal bool LongPressed
+			{
+				readonly get
+				{
+					return (m_InternalBitmask & k_LongPressedMask) != 0;
+				}
+
+				set
+				{
+					m_InternalBitmask = (m_InternalBitmask & ~k_LongPressedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_LongPressedBitOffset);
+				}
+			}
+
+#if DEBUG
+			[JsonIgnore, Title("Time Out")]
+			//The inspector can't show Half values, lol, do this for simplicity
+			float TimeOutF
+			{
+				readonly get => (float)TimeOut;
+				set => TimeOut = (Half)value;
+			}
+#endif
+
+			Half TimeOut
+			{
+				get; set;
+			}
+
+			Half TappedFor
+			{
+				get; set;
+			}
+
+			//b: controller button bits
+			//m: modifier bits
+			//c: conditional bits
+			//t: tapped bits
+			//l: long pressed bits
+			//d: double tapped bits
+			//x: unused bits
+			//z: deadzone bits (replaces modifier and conditional bits if the bind's button is analog)
+			//          ZZZZZZ_ZZZZZZZZ_ZZ
+			//DLTXXXXX_XXCCCCCC_CCMMMMMM_MMBBBBBB
+			uint m_InternalBitmask;
+
+			const uint k_ControllerButtonMask = 0b00000000_00000000_00000000_00111111u;
+
+			const uint k_ModifiersMask = 0b00000000_00000000_00111111_110000000u;
+			const int k_ModifiersBitOffset = 6;
+
+			const uint k_ConditionalMask = 0b00000000_00111111_11000000_00000000u;
+			const int k_ConditionalBitOffset = 14;
+
+			const uint k_DeadzoneMask = k_ConditionalMask | k_ModifiersMask;
+			const int k_DeadzoneBitOffset = k_ModifiersBitOffset;
+
+			const uint k_TappedMask = 0b00100000_00000000_00000000_00000000u;
+			const int k_TappedBitOffset = 29;
+
+			const uint k_LongPressedMask = 0b01000000_00000000_00000000_00000000u;
+			const int k_LongPressedBitOffset = 30;
+
+			const uint k_DoubleTappedMask = 0b10000000_00000000_00000000_00000000u;
+			const int k_DoubleTappedBitOffset = 31;
+
+			public readonly float Analog
+			{
+				get
+				{
+					return (Button is > ControllerButton.MAX and not ControllerButton.None) ? ReAction.
+				}
+			}
 		}
 
 		public struct Bind
@@ -137,7 +302,7 @@ namespace ReActionPlugin
 				this.Modifiers = modifiers;
 				this.Conditional = conditional;
 #if USE_32BIT_FLOATS_FOR_TIME
-					this.TimeOut = timeOut;
+				this.TimeOut = timeOut;
 #else
 				this.TimeOut = (Half)timeOut;
 #endif
@@ -161,12 +326,12 @@ namespace ReActionPlugin
 			{
 				readonly get
 				{
-					return (Modifiers)((m_InternalBitmask & k_ModifierMask) >> k_ModifiersBitOffset);
+					return (Modifiers)((m_InternalBitmask & k_ModifiersMask) >> k_ModifiersBitOffset);
 				}
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_ModifierMask) | ((uint)value << k_ModifiersBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_ModifiersMask) | ((uint)value << k_ModifiersBitOffset);
 				}
 			}
 
@@ -240,7 +405,7 @@ namespace ReActionPlugin
 			//The inspector can't show Half values, lol, do this for simplicity
 			float TimeOutF
 			{
-				get => (float)TimeOut;
+				readonly get => (float)TimeOut;
 				set => TimeOut = (Half)value;
 			}
 #endif
@@ -266,7 +431,7 @@ namespace ReActionPlugin
 			const uint k_KeyMask = 0b00000000_00000000_00000001_11111111u;
 
 			const int k_ModifiersBitOffset = 9;
-			const uint k_ModifierMask = 0b00000000_00000001_11111110_00000000u;
+			const uint k_ModifiersMask = 0b00000000_00000001_11111110_00000000u;
 
 			const int k_ConditionalBitOffset = 17;
 			const uint k_ConditionalMask = 0b00000001_11111110_00000000_00000000u;
@@ -285,6 +450,214 @@ namespace ReActionPlugin
 				return HashCode.Combine(TappedFor, TimeOut, m_InternalBitmask);
 			}
 		}
+	}
+
+	//Stub of Controller, this type has the same fields and offsets as the internal type, which lets use Unsafe.As<Controller> without issues
+	public class Controller
+	{
+#pragma warning disable IDE0060 // Remove unused parameter
+#pragma warning disable CA1822 // Mark members as static
+		internal Controller()
+		{
+		}
+
+		static readonly MethodInfo m_CurrentController = typeof(Input).GetProperty("CurrentController", (BindingFlags)int.MaxValue).GetMethod;
+
+		public static Controller GetCurrentController()
+		{
+			//epic!!!
+			return Unsafe.As<Controller>(m_CurrentController.Invoke(null, null));
+		}
+
+		static readonly MethodInfo m_AllControllers = m_CurrentController.ReturnType.GetProperty("All", (BindingFlags)int.MaxValue).GetMethod;
+
+		public static HashSet<Controller> All => Unsafe.As<HashSet<Controller>>(m_AllControllers.Invoke(null, null));
+
+		public static Controller GetController(int index)
+		{
+			return All.ElementAt(index);
+		}
+
+		/// <summary>
+		/// Get an axis
+		/// </summary>
+		/// <param name="axis"></param>
+		/// <param name="defaultValue"></param>
+		/// <returns></returns>
+		public float GetAxis(ControllerAxis axis, float defaultValue = 0f) => 0f /*Stub*/;
+
+		/// <summary>
+		/// Rumbles the controller.
+		/// </summary>
+		/// <param name="leftMotor">The speed of the left motor, between 0 and 0xFFFF</param>
+		/// <param name="rightMotor">The speed of the right motor, between 0 and 0xFFFF</param>
+		/// <param name="duration">The duration of the vibration in ms</param>
+		public void Rumble(int leftMotor, int rightMotor, int duration) { /*Stub*/ }
+
+		/// <summary>
+		/// Rumbles the controller's triggers (if supported)
+		/// </summary>
+		/// <param name="leftTrigger">The speed of the left trigger motor, between 0 and 0xFFFF</param>
+		/// <param name="rightTrigger">The speed of the right trigger motor, between 0 and 0xFFFF</param>
+		/// <param name="duration">The duration of the vibration in ms</param>
+		public void RumbleTriggers(int leftTrigger, int rightTrigger, int duration) { /*Stub*/ }
+
+		/// <summary>
+		/// Stops all rumble and haptic events on this controller.
+		/// </summary>
+		public void StopAllHaptics() { /*Stub*/ }
+
+		/// <summary>
+		/// Stop all vibration events on this controller.
+		/// </summary>
+		public void StopAllVibrations() { /*Stub*/ }
+
+		/// <summary>
+		/// Trigger a vibration based on a predefined <see cref="T:Sandbox.HapticPattern" />.
+		/// All <see cref="T:Sandbox.HapticPattern" />s are normalized (start at 0, peak at 1).
+		/// </summary>
+		/// <param name="effect">The pattern to use</param>
+		/// <param name="lengthScale">The amount to scale the pattern's length by.</param>
+		/// <param name="frequencyScale">The amount to scale the pattern's frequency by.</param>
+		/// <param name="amplitudeScale">The amount to scale the pattern's amplitude by.</param>
+		public void TriggerHapticEffect(HapticEffect effect, float lengthScale = 1, float frequencyScale = 1f, float amplitudeScale = 1f) { /*Stub*/ }
+
+		public int GetTouchpadCount() => ReAction.SDL_GetNumGamepadTouchpads(ReAction.SDL_GetGamepadFromID(SDLHandle));
+
+		public int GetMaxTouchpadFingers(int touchpad) => ReAction.SDL_GetNumGamepadTouchpadFingers(ReAction.SDL_GetGamepadFromID(SDLHandle), touchpad);
+
+		public TouchpadData GetTouchpadData(int touchpad, int finger) => ReAction.extraPerControllerData[ReAction.GetControllexIndexForDeviceId(DeviceId)].touchpadData[touchpad][finger];
+
+		/// <summary>
+		/// Gets a sensor reading from the device's accelerometer (if it has one)
+		/// </summary>
+		public Vector3 Accelerometer => Vector3.Zero;
+
+		/// <summary>
+		/// Gets a sensor reading from the device's gyroscope (if it has one)
+		/// </summary>
+		public Angles Gyroscope => Angles.Zero;
+
+		/// <summary>
+		/// Which glyph folder to use for this controller.
+		/// Derived from the controller's glyph set.
+		/// </summary>
+		public string GlyphVendor => string.Empty;
+
+		readonly object ControllerColors; //: Color[]
+
+		public int SDLHandle { get; set; }
+
+		public int DeviceId { get; set; }
+
+		/// <summary>
+		/// The glyph set for this controller, used for icon/prompt selection.
+		/// </summary>
+		public ControllerGlyphSet GlyphSet { get; set; }
+
+		/// <summary>
+		/// Sets the color of the gamepad if supported
+		/// </summary>
+		public Color32 LEDColor { get; set; }
+
+		/// <summary>
+		/// The name of this controller (e.g. "Xbox Wireless Controller", "Steam Controller")
+		/// </summary>
+		public string Name { get; set; }
+
+		readonly object ActiveHapticEffect; //: Color[]
+
+		readonly object InputContext; //: Input.Context
+
+		readonly object ControllerAxes; //: List<Controller.InputAxis>
+#pragma warning restore CA1822 // Mark members as static
+#pragma warning restore IDE0060 // Remove unused parameter
+	}
+
+	//slightly modified version of GamepadCode with SDL3 SDL_GamepadButton values, and LeftTrigger + RightTrigger added
+	public enum ControllerButton
+	{
+		//this is 63 because 63 is six 1s, this is like -1 but i don't have to bother with all the bull shit
+		None = 63,
+		A = 0,
+		Cross = A,
+		B,
+		Circle = B,
+		X,
+		Square = X,
+		Y,
+		Triangle = Y,
+		Back,
+		Guide,
+		Start,
+		LeftAnalogStick,
+		RightAnalogStick,
+		LeftShoulder,
+		RightShoulder,
+		DPadUp,
+		DPadDown,
+		DPadLeft,
+		DPadRight,
+		Misc1,
+		RightPaddle1,
+		LeftPaddle1,
+		RightPaddle2,
+		LeftPaddle2,
+		Touchpad,
+		Misc2,
+		Misc3,
+		Misc4,
+		Misc5,
+		Misc6,
+		[Hide] MAX = Misc6,
+		LeftStickX,
+		LeftStickY,
+		RightStickX,
+		RightStickY,
+		LeftTrigger,
+		RightTrigger,
+		[Hide] AnalogStart = LeftStickX,
+		[Hide] AnalogEnd = RightTrigger
+	}
+
+	public enum ControllerAxis
+	{
+		Invalid = -1,
+		LeftX,
+		LeftY,
+		RightX,
+		RightY,
+		TriggerLeft,
+		TriggerRight,
+		MAX
+	}
+
+	public enum ControllerGlyphSet
+	{
+		Unknown,
+		Xbox,
+		PlayStation,
+		Switch,
+		Steam
+	}
+
+	//extra per controller bullshit, wow!
+	internal struct ExtraControllerData
+	{
+		public int deviceId;
+		public TouchpadData[][] touchpadData;
+		public ControllerButtonState[] buttonState;
+		public ControllerAnalogState[] analogState;
+	}
+
+	public readonly struct TouchpadData(bool down, float x, float deltaX, float y, float deltaY, float pressure)
+	{
+		public readonly bool down = down;
+		public readonly float x = x;
+		public readonly float deltaX = deltaX;
+		public readonly float y = y;
+		public readonly float deltaY = deltaY;
+		public readonly float pressure = pressure;
 	}
 
 	/// <summary>
@@ -360,89 +733,6 @@ namespace ReActionPlugin
 		RCtrl = 1 << 6,
 		RShift = 1 << 7,
 		None = 0,
-	}
-
-	// Taken and extended from Sandbox.GamepadCode
-	public enum GamepadCode
-	{
-		None = -1,
-		A,
-		B,
-		X,
-		Y,
-		/// <summary>
-		/// Normally the small button on the left side of a gamepad
-		/// </summary>
-		[Title("Back")]
-		SwitchLeftMenu,
-		/// <summary>
-		/// The big button in the middle of a gamepad, usually with the logo on it
-		/// </summary>
-		Guide,
-		/// <summary>
-		/// This is automatically used as the escape key in all games
-		/// </summary>
-		SwitchRightMenu,
-		/// <summary>
-		/// The button when you press down on the stick
-		/// </summary>
-		[Title("Left Analog Stick")]
-		LeftJoystickButton,
-		/// <summary>
-		/// The button when you press down on the stick
-		/// </summary>
-		[Title("Right Analog Stick")]
-		RightJoystickButton,
-		/// <summary>
-		/// Also known as the left bumper, or LB, or L1
-		/// </summary>
-		[Title("Left Shoulder")]
-		SwitchLeftBumper,
-		/// <summary>
-		/// Also known as the right bumper, or RB, or R1
-		/// </summary>
-		[Title("Right Shoulder")]
-		SwitchRightBumper,
-		[Title("D-Pad Up")]
-		[Icon("arrow_circle_up")]
-		DpadNorth,
-		[Title("D-Pad Down")]
-		[Icon("arrow_circle_down")]
-		DpadSouth,
-		[Title("D-Pad Left")]
-		[Icon("arrow_circle_left")]
-		DpadWest,
-		[Title("D-Pad Right")]
-		[Icon("arrow_circle_right")]
-		DpadEast,
-		/// <summary>
-		/// This is a button that doesn't have a specific name, like the share button on some controllers
-		/// </summary>
-		[Title("Misc")]
-		Misc1,
-		/// <summary>
-		/// Extra button on the back of some gamepads, like the Xbox Elite
-		/// </summary>
-		Paddle1,
-		/// <summary>
-		/// Extra button on the back of some gamepads, like the Xbox Elite
-		/// </summary>
-		Paddle2,
-		/// <summary>
-		/// Extra button on the back of some gamepads, like the Xbox Elite
-		/// </summary>
-		Paddle3,
-		/// <summary>
-		/// Extra button on the back of some gamepads, like the Xbox Elite
-		/// </summary>
-		Paddle4,
-		Touchpad,
-
-		//analog stuff here
-		LeftTrigger,
-		RightTrigger,
-		LeftJoystick,
-		RightJoystick
 	}
 
 	public enum ButtonCode
@@ -781,7 +1071,7 @@ namespace ReActionPlugin
 		MouseWheelUp,
 		MouseWheelDown,
 		[Hide]
-		MOUSE_LAST = 320,
+		MOUSE_LAST = MouseWheelDown,
 		[Hide]
 		MOUSE_COUNT = 7,
 		[Hide]
@@ -1054,5 +1344,93 @@ namespace ReActionPlugin
 
 		const uint k_HalfClearMask = 0b00000000_00000000_01111111_11111111u;
 #endif
+	}
+
+	internal struct ControllerButtonState
+	{
+		public Half ReleasedFor
+		{
+			readonly get
+			{
+				return Unsafe.BitCast<ushort, Half>((ushort)((m_InternalBitmask >> k_ReleasedTimeBitOffset) & k_HalfClearMask));
+			}
+
+			set
+			{
+				m_InternalBitmask = (m_InternalBitmask & ~k_ReleasedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>(value) & k_HalfClearMask) << k_ReleasedTimeBitOffset);
+			}
+		}
+
+		public Half PressedFor
+		{
+			readonly get
+			{
+				return Unsafe.BitCast<ushort, Half>((ushort)((m_InternalBitmask >> k_PressedTimeBitOffset) & k_HalfClearMask));
+			}
+
+			set
+			{
+				m_InternalBitmask = (m_InternalBitmask & ~k_PressedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>(value) & k_HalfClearMask) << k_PressedTimeBitOffset);
+			}
+		}
+
+		public bool StateChanged
+		{
+			readonly get
+			{
+				return (m_InternalBitmask & k_JustChangedFlagMask) != 0;
+			}
+
+			set
+			{
+				m_InternalBitmask = (m_InternalBitmask & ~k_JustChangedFlagMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_JustChangedFlagBitOffset);
+			}
+		}
+
+		public bool Down
+		{
+			readonly get
+			{
+				return (m_InternalBitmask & k_DownFlagMask) != 0;
+			}
+
+			set
+			{
+				m_InternalBitmask = (m_InternalBitmask & ~k_DownFlagMask) | ((uint)Unsafe.BitCast<bool, byte>(value));
+			}
+		}
+
+		public readonly bool Pressed => Down && StateChanged;
+
+		public readonly bool Released => !Down && StateChanged;
+
+		//super cool bitmask, how original
+		//R: released time bits
+		//P: pressed time bits
+		//D: down bits
+		//S: state changed bits
+		//PPPPPPPP_PPPPPPPR_RRRRRRRR_RRRRRRSD
+		uint m_InternalBitmask;
+
+		const uint k_DownFlagMask = 0b00000000_00000000_00000000_00000001u;
+
+		const uint k_JustChangedFlagMask = 0b00000000_00000000_00000000_00000010u;
+		const int k_JustChangedFlagBitOffset = 1;
+
+		//we only need 2 store 15 bits, we can discard the sign bit, because we know it'll be positive (0)
+		const uint k_ReleasedTimeMask = 0b00000000_00000001_11111111_11111100u;
+		const int k_ReleasedTimeBitOffset = 2;
+
+		const uint k_PressedTimeMask = 0b11111111_11111110_00000000_00000000u;
+		const int k_PressedTimeBitOffset = 9;
+
+		const uint k_HalfClearMask = 0b00000000_00000000_01111111_11111111u;
+	}
+
+	internal struct ControllerAnalogState
+	{
+		//is it worth storing as a float? idk :)
+		public float value;
+		public float delta;
 	}
 }

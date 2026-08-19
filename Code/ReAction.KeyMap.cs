@@ -8,17 +8,17 @@ namespace ReActionPlugin
 	public static partial class ReAction
 	{
 		static KeyState[] keyStates;
-
 		const ButtonCode k_ButtonCodeLength = ButtonCode.MOUSE_LAST + 1;
 
 		static void InitialiseKeyMap()
 		{
 			keyStates = new KeyState[(int)k_ButtonCodeLength];
 
-			for (int i = (int)ButtonCode.BUTTON_CODE_FIRST; i < (int)k_ButtonCodeLength; i++)
+			//why?
+			/*for (int i = (int)ButtonCode.BUTTON_CODE_FIRST; i < (int)k_ButtonCodeLength; i++)
 			{
 				keyStates[i] = new();
-			}
+			}*/
 		}
 
 		static void ReinitialiseKeyStates()
@@ -41,6 +41,17 @@ namespace ReActionPlugin
 				key.ReleasedFor += (Half)Time.Delta;
 #endif
 			}
+		}
+
+		internal static ExtraControllerData[] extraPerControllerData = Array.Empty<ExtraControllerData>();
+		const ControllerButton k_ControllerButtonLength = ControllerButton.MAX + 1;
+		const ControllerButton k_ControllerAnalogLength = (ControllerButton)((int)(ControllerButton.AnalogEnd - ControllerButton.AnalogStart) + 1);
+
+		static void InitialiseControllerButtonState(int controllerIndex)
+		{
+			extraPerControllerData[controllerIndex].buttonState = new ControllerButtonState[(int)k_ControllerButtonLength];
+
+			extraPerControllerData[controllerIndex].analogState = new ControllerAnalogState[(int)k_ControllerAnalogLength];
 		}
 	}
 }

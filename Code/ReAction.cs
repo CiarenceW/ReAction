@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ReActionPlugin
 {
@@ -177,6 +178,68 @@ namespace ReActionPlugin
 			}
 		}
 
+		static void OnControllerAxis(int deviceId, ControllerAxis axis, float value)
+		{
+			int controllerIndex = GetControllexIndexForDeviceId(deviceId);
+
+			ref var analogState = ref extraPerControllerData[controllerIndex].analogState[(int)axis];
+
+			analogState.delta = value - analogState.value;
+			analogState.value = value;
+		}
+
+		static void OnControllerButton(int deviceId, ControllerButton button, bool down)
+		{
+			extraPerControllerData[GetControllexIndexForDeviceId(deviceId)].buttonState[(int)button].Down = down;
+
+			if (down)
+			{
+				foreach (var action in m_EnabledActions)
+				{
+					if (action.Gamepad.Button == button)
+					{
+						action.ConditionalsState |= Conditional.Press;
+						action.ConditionalsState |= Conditional.Continuous;
+					}
+				}
+			}
+			else
+			{
+
+			}
+		}
+
+		static void OnControllerConnected(int joystickId, int deviceId)
+		{
+			Array.Resize(ref extraPerControllerData, controllerCount + 1);
+
+			extraPerControllerData[controllerCount++].deviceId = deviceId;
+		}
+
+		static void OnControllerDisconnected(int joystickId)
+		{
+			int deviceId = 0;
+
+			//most controllers have the same joystickId and deviceId but for the sake of being "thorough", do this
+			foreach (var controller in Controller.All)
+			{
+				if (controller.SDLHandle == joystickId)
+				{
+					deviceId = controller.DeviceId;
+				}
+			}
+
+			for (int i = 0; i < extraPerControllerData.Length; i++)
+			{
+				if (extraPerControllerData[i].deviceId == deviceId)
+				{
+					Array.Copy(extraPerControllerData, i + 1, extraPerControllerData, i, extraPerControllerData.Length - i);
+				}
+			}
+
+			controllerCount--;
+		}
+
 		static void RegisterButtonAction(ButtonAction buttonAction)
 		{
 			foreach (var action in m_AllActions)
@@ -323,16 +386,28 @@ namespace ReActionPlugin
 			return action;
 		}
 
+		/// <summary>
+		/// Gets every registered <see cref="ButtonAction"/>.
+		/// </summary>
+		/// <returns>Every registered <see cref="ButtonAction"/>. Don't store this.</returns>
 		public static ButtonAction[] GetAllActions()
 		{
 			return m_AllActions.ToArray();
 		}
 
+		/// <summary>
+		/// Gets every currently enabled actions <see cref="ButtonAction"/>.
+		/// </summary>
+		/// <returns>Every enabled <see cref="ButtonAction"/>. Don't store this.</returns>
 		public static ButtonAction[] GetEnabledActions()
 		{
 			return m_EnabledActions.ToArray();
 		}
 
+		/// <summary>
+		/// Gets every currently active set of <see cref="ButtonAction"/>.
+		/// </summary>
+		/// <returns>Every active <see cref="ButtonAction"/> sets. Don't store this.</returns>
 		public static string[] GetActiveSets()
 		{
 			return m_ActiveSets.ToArray();
@@ -448,6 +523,55 @@ namespace ReActionPlugin
 				action.Active =
 					(((action.ConditionalsState & action.Primary.Conditional) != Conditional.None) && (action.Primary.Modifiers == Modifiers.None || (ActiveModifiers & action.Primary.Modifiers) != Modifiers.None)) ||
 					(((action.ConditionalsState & action.Secondary.Conditional) != Conditional.None) && (action.Secondary.Modifiers == Modifiers.None || (ActiveModifiers & action.Secondary.Modifiers) != Modifiers.None));
+			}
+		}
+
+		static void ProcessControllersTouchpads()
+		{
+			foreach (var controller in Controller.All)
+			{
+				var touchpadCount = controller.GetTouchpadCount();
+
+				int controllerIndex = GetControllexIndexForDeviceId(controller.DeviceId);
+
+				//initialise arrays
+				if (extraPerControllerData[controllerIndex].touchpadData == null)
+				{
+					var touchpadData_Array = new TouchpadData[touchpadCount][];
+
+					for (int touchpadIndex = 0; touchpadIndex < touchpadCount; touchpadIndex++)
+					{
+						touchpadData_Array[touchpadIndex] = new TouchpadData[controller.GetMaxTouchpadFingers(touchpadIndex)];
+					}
+
+					extraPerControllerData[controllerIndex].touchpadData = touchpadData_Array;
+				}
+
+				if (touchpadCount > 0)
+				{
+					for (int touchpadIndex = 0; touchpadIndex < touchpadCount; touchpadIndex++)
+					{
+						//each controller's touchpad has a max number of simultaneous fingers it can track
+						var fingerCount = controller.GetMaxTouchpadFingers(touchpadIndex);
+
+						for (int fingerIndex = 0; fingerIndex < fingerCount; fingerIndex++)
+						{
+							unsafe
+							{
+								bool down = false;
+								float x = 0, y = 0, pressure = 0;
+
+								if (SDL_GetGamepadTouchpadFinger(SDL_GetGamepadFromID(controller.DeviceId), touchpadIndex, fingerIndex, &down, &x, &y, &pressure))
+								{
+									//lmao
+									ref var touchpadData = ref extraPerControllerData[controllerIndex].touchpadData[touchpadIndex][fingerIndex];
+
+									touchpadData = new TouchpadData(down, x, x - touchpadData.x, y, y - touchpadData.y, pressure);
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
