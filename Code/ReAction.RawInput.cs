@@ -23,19 +23,19 @@ namespace ReActionPlugin
 		}
 
 		//REALLY not raw input but ummmmmmmmmmmmmmmmmmm :)
-		public static bool ControllerButtonPressed(int deviceId, Controller.ControllerButton button)
+		public static bool ControllerButtonPressed(int deviceId, ControllerButton button)
 		{
-			return controllerButtonStates[GetControllexIndexForDeviceId(deviceId)][(int)button].Pressed;
+			return ReAction.extraPerControllerData[GetControllexIndexForDeviceId(deviceId)].buttonState[(int)button].Pressed;
 		}
 
-		public static bool ControllerButtonDown(int deviceId, Controller.ControllerButton button)
+		public static bool ControllerButtonDown(int deviceId, ControllerButton button)
 		{
-			return controllerButtonStates[GetControllexIndexForDeviceId(deviceId)][(int)button].Down;
+			return ReAction.extraPerControllerData[GetControllexIndexForDeviceId(deviceId)].buttonState[(int)button].Down;
 		}
 
-		public static bool ControllerButtonReleased(int deviceId, Controller.ControllerButton button)
+		public static bool ControllerButtonReleased(int deviceId, ControllerButton button)
 		{
-			return controllerButtonStates[GetControllexIndexForDeviceId(deviceId)][(int)button].Released;
+			return ReAction.extraPerControllerData[GetControllexIndexForDeviceId(deviceId)].buttonState[(int)button].Released;
 		}
 	}
 }

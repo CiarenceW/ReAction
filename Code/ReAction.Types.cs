@@ -261,7 +261,7 @@ namespace ReActionPlugin
 			//d: double tapped bits
 			//x: unused bits
 			//z: deadzone bits (replaces modifier and conditional bits if the bind's button is analog)
-			//          ZZZZZZ_ZZZZZZZZ_ZZ
+			//           ZZZZZZ_ZZZZZZZZ_ZZ
 			//DLTXXXXX_XXCCCCCC_CCMMMMMM_MMBBBBBB
 			uint m_InternalBitmask;
 
@@ -289,7 +289,8 @@ namespace ReActionPlugin
 			{
 				get
 				{
-					return (Button is > ControllerButton.MAX and not ControllerButton.None) ? ReAction.
+					//return (Button is > ControllerButton.MAX and not ControllerButton.None) ? ReAction.
+					return 0f;
 				}
 			}
 		}

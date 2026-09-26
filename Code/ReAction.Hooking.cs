@@ -14,13 +14,13 @@ namespace ReActionPlugin
 
 		delegate void StartTrappingDelegate(Action<string[]> onTrappedKeysCallback);
 
-		delegate void OnKeyDelegate(ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods);
+		delegate void OnKeyDelegate(ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat);
 
-		delegate void DoubleTrouble(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods);
+		delegate void DoubleTrouble(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat);
 
-		delegate void OnMouseDelegate(ButtonCode button, bool down, int ikeymods);
+		delegate void OnMouseDelegate(ButtonCode button, bool down);
 
-		delegate void MoubleBrouble(OnMouseDelegate originalMethod, ButtonCode button, bool down, int ikeymods);
+		delegate void MoubleBrouble(OnMouseDelegate originalMethod, ButtonCode button, bool down);
 
 		delegate void OnControllerAxisDelegate(int deviceId, ControllerAxis axis, int value);
 
@@ -30,9 +30,9 @@ namespace ReActionPlugin
 
 		delegate void CoubleBrouble(OnControllerButtonDelegate originalMethod, int deviceId, ControllerButton button, bool down);
 
-		delegate void OnControllerConnectedDelegate(int joystickId, int deviceId);
+		delegate void OnControllerConnectedDelegate(int deviceId);
 
-		delegate void ICanCallThisAnythingAndItWontMatterLolExclamationPointSmile(OnControllerConnectedDelegate originalMethod, int joystickId, int deviceId);
+		delegate void ICanCallThisAnythingAndItWontMatterLolExclamationPointSmile(OnControllerConnectedDelegate originalMethod, int deviceId);
 
 		delegate void OnControllerDisconnectedDelegate(int joystickId);
 
@@ -108,21 +108,21 @@ namespace ReActionPlugin
 		}
 #pragma warning restore CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
 
-		static void ReActionOnButtonHook(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat, int ikeymods)
+		static void ReActionOnButtonHook(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat)
 		{
 			if (!repeat)
 			{
 				OnGameButton(scanButtonCode, down);
 			}
 
-			originalMethod(scanButtonCode, keyButtonCode, down, repeat, ikeymods);
+			originalMethod(scanButtonCode, keyButtonCode, down, repeat);
 		}
 
-		static void ReActionOnMouseButtonHook(OnMouseDelegate originalMethod, ButtonCode button, bool down, int ikeymods)
+		static void ReActionOnMouseButtonHook(OnMouseDelegate originalMethod, ButtonCode button, bool down)
 		{
 			OnGameButton(button, down);
 
-			originalMethod(button, down, ikeymods);
+			originalMethod(button, down);
 		}
 
 		static void ReActionOnControllerAxisHook(OnControllerAxisDelegate originalMethod, int deviceId, ControllerAxis axis, int value)
@@ -143,11 +143,11 @@ namespace ReActionPlugin
 			originalMethod(deviceId, button, down);
 		}
 
-		static void ReActionOnControllerConnected(OnControllerConnectedDelegate originalMethod, int joystickId, int deviceId)
+		static void ReActionOnControllerConnected(OnControllerConnectedDelegate originalMethod, int deviceId)
 		{
-			OnControllerConnected(joystickId, deviceId);
+			OnControllerConnected(deviceId);
 
-			originalMethod(joystickId, deviceId);
+			originalMethod(deviceId);
 		}
 
 		static void ReActionOnControllerDisconnected(OnControllerDisconnectedDelegate originalMethod, int joystickId)

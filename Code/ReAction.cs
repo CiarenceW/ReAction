@@ -209,7 +209,7 @@ namespace ReActionPlugin
 			}
 		}
 
-		static void OnControllerConnected(int joystickId, int deviceId)
+		static void OnControllerConnected(int deviceId)
 		{
 			Array.Resize(ref extraPerControllerData, controllerCount + 1);
 

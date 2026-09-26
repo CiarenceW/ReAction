@@ -9,9 +9,9 @@ namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
-		[SkipHotload] static readonly CodeToStringDelegate CodeToString = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("CodeToString", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<CodeToStringDelegate>();
-		[SkipHotload] static readonly GetKeyDisplayNameDelegate GetKeyDisplayName = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("GetKeyDisplayName", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<GetKeyDisplayNameDelegate>();
-		[SkipHotload] static readonly StringToCodeDelegate StringToCode = typeof(Input).Assembly.GetType("NativeEngine.InputSystem").GetMethod("StringToButtonCode", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<StringToCodeDelegate>();
+		[SkipHotload] static readonly CodeToStringDelegate CodeToString = typeof(Input).Assembly.GetType("Sandbox.Engine.KeyTranslation").GetMethod("CodeToString", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<CodeToStringDelegate>();
+		[SkipHotload] static readonly GetKeyDisplayNameDelegate GetKeyDisplayName = typeof(Input).Assembly.GetType("Sandbox.Engine.KeyTranslation").GetMethod("GetKeyDisplayName", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<GetKeyDisplayNameDelegate>();
+		[SkipHotload] static readonly StringToCodeDelegate StringToCode = typeof(Input).Assembly.GetType("Sandbox.Engine.KeyTranslation").GetMethod("StringToButtonCode", BindingFlags.Static | BindingFlags.NonPublic).CreateDelegate<StringToCodeDelegate>();
 
 		/// <summary>
 		/// Gets the internal engine name for the key
