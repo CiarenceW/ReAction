@@ -19,7 +19,7 @@
 				{
 					sw.AutoFlush = false;
 
-					sw.WriteLine("namespace ReActionPlugin.Consts.String");
+					sw.WriteLine("namespace ReActionPlugin.Consts");
 					sw.WriteLine("{");
 					sw.WriteLine("\tpublic static class ReActionConsts");
 					sw.WriteLine("\t{");
