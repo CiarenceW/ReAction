@@ -5,14 +5,16 @@ using System.Reflection;
 using System.Text;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ReActionPlugin
 {
 	[CustomEditor(typeof(ReActionPlugin.ButtonCode))]
 	class ButtonCodeCustomEditor : ControlWidget
 	{
-		readonly static MethodInfo VirtualKeyToButtonCodeMethod = typeof(Sandbox.Input).Assembly.GetType("NativeEngine.InputSystem", true).GetMethod("VirtualKeyToButtonCode", BindingFlags.Static | BindingFlags.NonPublic);
+		readonly static MethodInfo VirtualKeyToButtonCodeMethod = typeof(Sandbox.Input).Assembly.GetType("Sandbox.Engine.KeyTranslation", true).GetMethod("VirtualKeyToButtonCode", BindingFlags.Static | BindingFlags.NonPublic);
+		readonly static MethodInfo KeyCodeToButtonCodeMethod = typeof( Sandbox.Input ).Assembly.GetType( "Sandbox.Engine.KeyTranslation", true ).GetMethod( "KeyCodeToButtonCode", BindingFlags.Static | BindingFlags.NonPublic );
+		readonly static MethodInfo ButtonCodeToScanCode = typeof( Sandbox.Input ).Assembly.GetType( "Sandbox.Engine.KeyTranslation", true ).GetMethod( "ButtonCodeToScanCode", BindingFlags.Static | BindingFlags.NonPublic );
+		readonly static MethodInfo SDLGetKeyFromScancode = typeof( Sandbox.Input ).Assembly.GetType( "NativeEngine.Sdl", true ).GetMethod( "GetKeyFromScancode", BindingFlags.Static | BindingFlags.NonPublic );
 
 		bool isTrapping;
 
@@ -58,9 +60,16 @@ namespace ReActionPlugin
 				Log.Info("fuck you");
 		}
 
-		protected override void OnKeyRelease(KeyEvent e)
+		protected override void OnKeyPress( KeyEvent e )
 		{
-			OnBindPressed((ButtonCode)VirtualKeyToButtonCodeMethod.Invoke(null, [(int)e.NativeKeyCode]));
+			if ( isTrapping )
+			{
+				e.Accepted = false;
+				//Qt VirtualKey -> (Locale) ButtonCode -> SDL KeyCode -> (Unlocale) ButtonCode
+				//Why? We can get the original (good) Key very easily, problem is, s&box "automatically" translates the Locale version of the key to the non Locale one
+				//so if I input "A" with an Azerty keyboard, while the Qt key will be Key.A, and the ButtonCode will be ButtonCode.A, s&box will "correct" it to Q
+				OnBindPressed( (ButtonCode)KeyCodeToButtonCodeMethod.Invoke( null, [(uint)SDLGetKeyFromScancode.Invoke( null, [ButtonCodeToScanCode.Invoke( null, [(ButtonCode)VirtualKeyToButtonCodeMethod.Invoke( null, [(int)e.Key] )] ), 0u, true] )] ) );
+			}
 		}
 
 		void OnBindPressed(ButtonCode button)
