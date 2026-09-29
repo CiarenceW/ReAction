@@ -109,11 +109,6 @@ namespace ReActionPlugin
 			return (ConditionalsState & conditional) != Conditional.None;
 		}
 
-		public override int GetHashCode()
-		{
-			return HashCode.Combine(m_Primary, m_Secondary, Set, AllowedConditionals);
-		}
-
 		public override string ToString()
 		{
 			return this.Name;
