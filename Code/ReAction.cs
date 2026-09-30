@@ -224,7 +224,7 @@ namespace ReActionPlugin
 			//most controllers have the same joystickId and deviceId but for the sake of being "thorough", do this
 			foreach (var controller in Controller.All)
 			{
-				if (controller.SDLHandle == joystickId)
+				if (controller.GamepadHandle == joystickId)
 				{
 					deviceId = controller.DeviceId;
 				}
@@ -562,7 +562,7 @@ namespace ReActionPlugin
 								bool down = false;
 								float x = 0, y = 0, pressure = 0;
 
-								if (SDL_GetGamepadTouchpadFinger(SDL_GetGamepadFromID(controller.DeviceId), touchpadIndex, fingerIndex, &down, &x, &y, &pressure))
+								if (SDL_GetGamepadTouchpadFinger(controller.GamepadHandle, touchpadIndex, fingerIndex, &down, &x, &y, &pressure))
 								{
 									//lmao
 									ref var touchpadData = ref extraPerControllerData[controllerIndex].touchpadData[touchpadIndex][fingerIndex];

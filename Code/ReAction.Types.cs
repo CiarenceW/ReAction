@@ -519,9 +519,9 @@ namespace ReActionPlugin
 		/// <param name="amplitudeScale">The amount to scale the pattern's amplitude by.</param>
 		public void TriggerHapticEffect(HapticEffect effect, float lengthScale = 1, float frequencyScale = 1f, float amplitudeScale = 1f) { /*Stub*/ }
 
-		public int GetTouchpadCount() => ReAction.SDL_GetNumGamepadTouchpads(ReAction.SDL_GetGamepadFromID(SDLHandle));
+		public int GetTouchpadCount() => ReAction.SDL_GetNumGamepadTouchpads(GamepadHandle);
 
-		public int GetMaxTouchpadFingers(int touchpad) => ReAction.SDL_GetNumGamepadTouchpadFingers(ReAction.SDL_GetGamepadFromID(SDLHandle), touchpad);
+		public int GetMaxTouchpadFingers(int touchpad) => ReAction.SDL_GetNumGamepadTouchpadFingers(GamepadHandle, touchpad);
 
 		public TouchpadData GetTouchpadData(int touchpad, int finger) => ReAction.extraPerControllerData[ReAction.GetControllexIndexForDeviceId(DeviceId)].touchpadData[touchpad][finger];
 
@@ -541,9 +541,10 @@ namespace ReActionPlugin
 		/// </summary>
 		public string GlyphVendor => string.Empty;
 
-		readonly object ControllerColors; //: Color[]
-
-		public int SDLHandle { get; set; }
+		/// <summary>
+		/// A pointer to the SDL Gamepad
+		/// </summary>
+		public nint GamepadHandle => nint.Zero;
 
 		public int DeviceId { get; set; }
 
@@ -562,7 +563,7 @@ namespace ReActionPlugin
 		/// </summary>
 		public string Name { get; set; }
 
-		readonly object ActiveHapticEffect; //: Color[]
+		readonly object ActiveHapticEffect; //: HapticEffect
 
 		readonly object InputContext; //: Input.Context
 

@@ -72,7 +72,7 @@ namespace ReActionPlugin
 		{
 			foreach (var controller in Controller.All)
 			{
-				ReActionLogger.Info($"{controller.Name} - id: {SDL_GetGamepadFromID(controller.SDLHandle)}");
+				ReActionLogger.Info($"{controller.Name} - id: {controller.DeviceId}");
 				ReActionLogger.Info($"touchpads: {controller.GetTouchpadCount()}");
 
 				for (int touchpadIndex = 0; touchpadIndex < controller.GetTouchpadCount(); touchpadIndex++)
@@ -111,14 +111,6 @@ namespace ReActionPlugin
 			return SDL_GetGamepadTouchpadFingerDelegate(gamepad, touchpad, finger, down, x, y, pressure);
 		}
 
-		internal static nint SDL_GetGamepadFromID(int instance_id)
-		{
-			unsafe
-			{
-				return SDL_GetGamepadFromIDDelegate(instance_id);
-			}
-		}
-
 		static int controllerCount = 0;
 
 		//SDL controllers all have device ids that start above 0 (with 0 being an invalid device)
@@ -129,13 +121,13 @@ namespace ReActionPlugin
 			{
 				if (extraPerControllerData[i].deviceId == deviceId)
 				{
-					return extraPerControllerData[i].deviceId;
+					return i;
 				}
 			}
 
 			//0 means a handle is invalid
 #if DEBUG
-			ReActionLogger.Error($"GetControllerIndexForDeviceId: DeviceID {deviceId} was invalid");
+			throw new Exception( $"GetControllerIndexForDeviceId: DeviceID {deviceId} was invalid" );
 #endif
 
 			return 0;
