@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 
@@ -64,7 +65,8 @@ namespace ReActionPlugin
 			//this runs everytime ReAction is hotloaded, but hotloading our hook objects will cause s&box to crash (sorry!), the hooks do persist, so we can just keep track of whether or not we've already initialised with a bool
 			if (!m_Initialised)
 			{
-				var runtimeDetourAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault((asm) => asm.FullName.Contains("MonoMod.RuntimeDetour"));
+				//If you build sbox, for some reason MonoMod.RuntimeDetour.dll won't be loaded when you launch the editor, so we have to do it ourselves, lol!
+				var runtimeDetourAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault( ( asm ) => asm.FullName.Contains( "MonoMod.RuntimeDetour" ) ) ?? Assembly.Load("MonoMod.RuntimeDetour");
 
 				var hookType = runtimeDetourAssembly.GetType("MonoMod.RuntimeDetour.Hook");
 
