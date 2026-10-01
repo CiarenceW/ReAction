@@ -128,9 +128,9 @@ namespace ReActionPlugin
 			//0 means a handle is invalid
 #if DEBUG
 			throw new Exception( $"GetControllerIndexForDeviceId: DeviceID {deviceId} was invalid" );
-#endif
-
+#else
 			return 0;
+#endif
 		}
 	}
 }
