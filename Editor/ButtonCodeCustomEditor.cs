@@ -8,10 +8,10 @@ using System.Runtime.Intrinsics.X86;
 
 namespace ReActionPlugin
 {
-	[CustomEditor(typeof(ReActionPlugin.ButtonCode))]
+	[CustomEditor( typeof( ReActionPlugin.ButtonCode ) )]
 	class ButtonCodeCustomEditor : ControlWidget
 	{
-		readonly static MethodInfo VirtualKeyToButtonCodeMethod = typeof(Sandbox.Input).Assembly.GetType("Sandbox.Engine.KeyTranslation", true).GetMethod("VirtualKeyToButtonCode", BindingFlags.Static | BindingFlags.NonPublic);
+		readonly static MethodInfo VirtualKeyToButtonCodeMethod = typeof( Sandbox.Input ).Assembly.GetType( "Sandbox.Engine.KeyTranslation", true ).GetMethod( "VirtualKeyToButtonCode", BindingFlags.Static | BindingFlags.NonPublic );
 		readonly static MethodInfo KeyCodeToButtonCodeMethod = typeof( Sandbox.Input ).Assembly.GetType( "Sandbox.Engine.KeyTranslation", true ).GetMethod( "KeyCodeToButtonCode", BindingFlags.Static | BindingFlags.NonPublic );
 		readonly static MethodInfo ButtonCodeToScanCode = typeof( Sandbox.Input ).Assembly.GetType( "Sandbox.Engine.KeyTranslation", true ).GetMethod( "ButtonCodeToScanCode", BindingFlags.Static | BindingFlags.NonPublic );
 		readonly static MethodInfo SDLGetKeyFromScancode = typeof( Sandbox.Input ).Assembly.GetType( "NativeEngine.Sdl", true ).GetMethod( "GetKeyFromScancode", BindingFlags.Static | BindingFlags.NonPublic );
@@ -20,24 +20,24 @@ namespace ReActionPlugin
 
 		Button coolAssButton;
 
-		public ButtonCodeCustomEditor(SerializedProperty property) : base(property)
+		public ButtonCodeCustomEditor( SerializedProperty property ) : base( property )
 		{
 			base.Layout = Layout.Column();
 			base.Layout.Spacing = 2;
 
-			coolAssButton = new Button(((ButtonCode)property.As.Int).GetString(), "input");
+			coolAssButton = new Button( ((ButtonCode)property.As.Int).GetString(), "input" );
 
 			coolAssButton.MouseClick += OnMouse;
 
-			Layout.Add(coolAssButton);
+			Layout.Add( coolAssButton );
 		}
 
 		void OnMouse()
 		{
-			if (isTrapping)
+			if ( isTrapping )
 			{
 				//gets ignored otherwise :(
-				OnBindPressed(ButtonCode.MouseLeft);
+				OnBindPressed( ButtonCode.MouseLeft );
 			}
 			else
 			{
@@ -47,17 +47,17 @@ namespace ReActionPlugin
 			}
 		}
 
-		protected override void OnMouseReleased(MouseEvent e)
+		protected override void OnMouseReleased( MouseEvent e )
 		{
 			//fucking ARM
 			//e.Button is a bitmask, however, the values are in the same order as the mouse codes in ButtonCode, so we can do some epic friggin intrinsincs!! epic win
-			if (Bmi1.IsSupported)
-				OnBindPressed((ButtonCode)(Bmi1.TrailingZeroCount((uint)e.Button) + (uint)ButtonCode.MOUSE_FIRST));
+			if ( Bmi1.IsSupported )
+				OnBindPressed( (ButtonCode)(Bmi1.TrailingZeroCount( (uint)e.Button ) + (uint)ButtonCode.MOUSE_FIRST) );
 			else
-			if (ArmBase.IsSupported)
-				OnBindPressed((ButtonCode)(31u - (ArmBase.LeadingZeroCount((int)e.Button)) + (int)ButtonCode.MOUSE_FIRST));
-			else
-				Log.Info("fuck you");
+				if ( ArmBase.IsSupported )
+					OnBindPressed( (ButtonCode)(31u - (ArmBase.LeadingZeroCount( (int)e.Button )) + (int)ButtonCode.MOUSE_FIRST) );
+				else
+					Log.Info( "fuck you" );
 		}
 
 		protected override void OnKeyPress( KeyEvent e )
@@ -72,12 +72,12 @@ namespace ReActionPlugin
 			}
 		}
 
-		void OnBindPressed(ButtonCode button)
+		void OnBindPressed( ButtonCode button )
 		{
-			if (isTrapping)
+			if ( isTrapping )
 			{
 				//force the bind to be assigned to the thing. doesn't actually apply the key otherwise and I can't be bothered to find out why
-				if (SerializedProperty.Parent.IsValid() && SerializedProperty.Parent.ParentProperty.Parent.IsValid())
+				if ( SerializedProperty.Parent.IsValid() && SerializedProperty.Parent.ParentProperty.Parent.IsValid() )
 				{
 					bool isPrimaryBind = SerializedProperty.Parent.ParentProperty.Name == "Primary";
 
@@ -88,7 +88,7 @@ namespace ReActionPlugin
 
 					coolAssButton.Text = button.GetString();
 
-					if (isPrimaryBind)
+					if ( isPrimaryBind )
 					{
 						action.Primary = bind;
 					}
@@ -103,10 +103,10 @@ namespace ReActionPlugin
 		}
 
 		//gets the engine display string which in turns ""localises"" the key for your layout, otherwise shows blanks if you input keys that aren't alphanumeric
-		static string ConvolutedAssNativeButtonCodeToString(int nativeKeyCode)
+		static string ConvolutedAssNativeButtonCodeToString( int nativeKeyCode )
 		{
 			//I don't want this shit in the non-editor stuff
-			return ((ButtonCode)VirtualKeyToButtonCodeMethod.Invoke(null, [nativeKeyCode])).GetString();
+			return ((ButtonCode)VirtualKeyToButtonCodeMethod.Invoke( null, [nativeKeyCode] )).GetString();
 		}
 	}
 }

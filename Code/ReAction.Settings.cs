@@ -11,11 +11,11 @@ namespace ReActionPlugin
 		/// </summary>
 		public static void LoadDefaultActions()
 		{
-			var settins = ProjectSettings.Get<ReActionSettings>("ReAction/defaultActions.json");
+			var settins = ProjectSettings.Get<ReActionSettings>( "ReAction/defaultActions.json" );
 
-			foreach (var action in settins.Actions)
+			foreach ( var action in settins.Actions )
 			{
-				RegisterButtonAction(action);
+				RegisterButtonAction( action );
 			}
 		}
 
@@ -24,13 +24,13 @@ namespace ReActionPlugin
 		/// Use this for loading the user's saved actions
 		/// </summary>
 		/// <param name="loadFunction"></param>
-		public static void LoadUserSettings(Func<ReActionSettings> loadFunction)
+		public static void LoadUserSettings( Func<ReActionSettings> loadFunction )
 		{
 			var settings = loadFunction();
 
-			foreach (var action in settings.Actions)
+			foreach ( var action in settings.Actions )
 			{
-				RegisterButtonAction(action);
+				RegisterButtonAction( action );
 			}
 		}
 	}
@@ -40,7 +40,7 @@ namespace ReActionPlugin
 		//this gets skipped when deserialised
 		public ReActionSettings()
 		{
-			Actions = 
+			Actions =
 			 new(
 				[
 					new ("Forward", new ButtonAction.Bind(ButtonCode.KEY_W, Conditional.Continuous), default, "Movement"),

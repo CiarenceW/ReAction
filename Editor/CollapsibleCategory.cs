@@ -16,29 +16,29 @@ internal partial class CollapsibleCategory : Widget
 		get => _stateCookieName;
 		set
 		{
-			if (_stateCookieName == value)
+			if ( _stateCookieName == value )
 				return;
 			_stateCookieName = value;
 
-			var state = EditorCookie.Get(_stateCookieName, Header.IsExpanded);
-			SetState(state);
+			var state = EditorCookie.Get( _stateCookieName, Header.IsExpanded );
+			SetState( state );
 		}
 	}
 
-	public void SetState(bool s)
+	public void SetState( bool s )
 	{
 		Header.IsExpanded = s;
 
-		using var su = SuspendUpdates.For(this);
+		using var su = SuspendUpdates.For( this );
 
-		if (!s)
+		if ( !s )
 			Container.Hide();
 		else
 			Container.Show();
 
-		if (!string.IsNullOrEmpty(StateCookieName))
+		if ( !string.IsNullOrEmpty( StateCookieName ) )
 		{
-			EditorCookie.Set(StateCookieName, s);
+			EditorCookie.Set( StateCookieName, s );
 		}
 	}
 
@@ -52,17 +52,17 @@ internal partial class CollapsibleCategory : Widget
 
 	internal void Refresh()
 	{
-		if (!Header.IsExpanded)
+		if ( !Header.IsExpanded )
 			Container.Hide();
 		else
 			Container.Show();
 	}
 
-	public CollapsibleCategory(Widget parent = null, string categoryName = "My Category", string icon = null) : base(parent)
+	public CollapsibleCategory( Widget parent = null, string categoryName = "My Category", string icon = null ) : base( parent )
 	{
 		Layout = Layout.Column();
 
-		Header = Layout.Add(new CollapsibleHeader(this));
+		Header = Layout.Add( new CollapsibleHeader( this ) );
 		Header.Icon = icon;
 		Header.Title = categoryName;
 		Header.Color = Theme.Blue;
@@ -70,11 +70,11 @@ internal partial class CollapsibleCategory : Widget
 		Header.IsExpanded = true;
 		Header.BuildUI();
 
-		Container = new Widget(null);
+		Container = new Widget( null );
 		Container.Layout = Layout.Column();
-		Container.Layout.Margin = new(4, 4);
+		Container.Layout.Margin = new( 4, 4 );
 
-		Layout.Add(Container);
+		Layout.Add( Container );
 
 		Refresh();
 	}
@@ -86,14 +86,14 @@ internal partial class CollapsibleCategory : Widget
 			get; set;
 		}
 
-		public CollapsibleHeader(CollapsibleCategory owner)
+		public CollapsibleHeader( CollapsibleCategory owner )
 		{
 			Owner = owner;
 		}
 
 		protected override void OnExpandChanged()
 		{
-			Owner?.SetState(IsExpanded);
+			Owner?.SetState( IsExpanded );
 		}
 	}
 }

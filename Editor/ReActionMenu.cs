@@ -11,39 +11,39 @@
 	{
 		public static void ExportIndexToFile()
 		{
-			string path = Path.Combine(Project.Current.GetCodePath(), "ReActionConsts.cs");
+			string path = Path.Combine( Project.Current.GetCodePath(), "ReActionConsts.cs" );
 
-			using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+			using ( FileStream fs = new FileStream( path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite ) )
 			{
-				using (StreamWriter sw = new StreamWriter(fs))
+				using ( StreamWriter sw = new StreamWriter( fs ) )
 				{
 					sw.AutoFlush = false;
 
-					sw.WriteLine("namespace ReActionPlugin.Consts");
-					sw.WriteLine("{");
-					sw.WriteLine("\tpublic static class ReActionConsts");
-					sw.WriteLine("\t{");
+					sw.WriteLine( "namespace ReActionPlugin.Consts" );
+					sw.WriteLine( "{" );
+					sw.WriteLine( "\tpublic static class ReActionConsts" );
+					sw.WriteLine( "\t{" );
 
-					foreach (var action in ReAction.GetAllActions())
+					foreach ( var action in ReAction.GetAllActions() )
 					{
 						string stringLine;
 						string stringDeclaration;
-						if (ReActionActionsWidget.exportAsConsts.Value)
+						if ( ReActionActionsWidget.exportAsConsts.Value )
 						{
-							stringDeclaration = $"public const string {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
+							stringDeclaration = $"public const string {string.Concat( action.Name.Split( ' ', StringSplitOptions.RemoveEmptyEntries ) )}";
 						}
 						else
 						{
-							stringDeclaration = $"public static readonly string {string.Concat(action.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries))}";
+							stringDeclaration = $"public static readonly string {string.Concat( action.Name.Split( ' ', StringSplitOptions.RemoveEmptyEntries ) )}";
 						}
 
 						stringLine = $"\t\t{stringDeclaration} = \"{action.Name}\";";
 
-						sw.WriteLine(stringLine);
+						sw.WriteLine( stringLine );
 					}
 
-					sw.WriteLine("\t}");
-					sw.Write("}");
+					sw.WriteLine( "\t}" );
+					sw.Write( "}" );
 					sw.Flush();
 				}
 			}

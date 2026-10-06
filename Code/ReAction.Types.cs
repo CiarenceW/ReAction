@@ -15,7 +15,7 @@ namespace ReActionPlugin
 		/// <param name="enabled">Whether or not the action is enabled, meaning <see cref="ButtonAction.Active"/> will always return false</param>
 		/// <param name="allowedConditionals">Which <see cref="Conditional"/>s are allowed to be set, this doesn't do anything on its own, use it to limit which conditionals the user can set</param>
 		[JsonConstructor]
-		internal ButtonAction(string name, Bind primary, Bind secondary, string set = "General", bool enabled = true, Conditional allowedConditionals = Conditional.All)
+		internal ButtonAction( string name, Bind primary, Bind secondary, string set = "General", bool enabled = true, Conditional allowedConditionals = Conditional.All )
 		{
 			this.Name = name;
 			this.m_Primary = primary;
@@ -32,18 +32,18 @@ namespace ReActionPlugin
 
 		public string Set { get; init; } = "general";
 
-		public bool Enabled 
-		{ 
-			get; 
+		public bool Enabled
+		{
+			get;
 
 			set
 			{
 				field = value;
-				ReAction.UpdateActionEnabled(this);
-			} 
+				ReAction.UpdateActionEnabled( this );
+			}
 		}
 
-		[InlineEditor, Title("Primary Bind")]
+		[InlineEditor, Title( "Primary Bind" )]
 		public Bind Primary
 		{
 			get
@@ -59,7 +59,7 @@ namespace ReActionPlugin
 
 		[Hide] internal Bind m_Primary;
 
-		[InlineEditor, Title("Secondary Bind")]
+		[InlineEditor, Title( "Secondary Bind" )]
 		public Bind Secondary
 		{
 			get
@@ -93,18 +93,18 @@ namespace ReActionPlugin
 		public Conditional AllowedConditionals { get; set; } = Conditional.All;
 
 		[JsonIgnore, Hide]
-		public bool Active 
+		public bool Active
 		{
 			//still get Enabled, because it might be disabled in between frames
-			get 
-			{ 
-				return Enabled && field; 
-			} 
+			get
+			{
+				return Enabled && field;
+			}
 
-			internal set; 
+			internal set;
 		}
 
-		public bool GetConditionState(Conditional conditional)
+		public bool GetConditionState( Conditional conditional )
 		{
 			return (ConditionalsState & conditional) != Conditional.None;
 		}
@@ -114,14 +114,14 @@ namespace ReActionPlugin
 			return this.Name;
 		}
 
-		public static implicit operator bool(ButtonAction action)
+		public static implicit operator bool( ButtonAction action )
 		{
 			return action.Active;
 		}
 
 		public struct ControllerBind
 		{
-			public ControllerBind(ControllerButton button, Conditional conditional, Modifiers modifiers = Modifiers.None, float timeout = 0.5f)
+			public ControllerBind( ControllerButton button, Conditional conditional, Modifiers modifiers = Modifiers.None, float timeout = 0.5f )
 			{
 				Button = button;
 				Conditional = conditional;
@@ -144,7 +144,7 @@ namespace ReActionPlugin
 			}
 
 			//These two are 8 bits each, combined, that's 16, but these are only used for digital buttons, so we could use the bits for the deadzone
-			[HideIf(nameof(Button), ControllerButton.None)]
+			[HideIf( nameof( Button ), ControllerButton.None )]
 			public Modifiers Modifiers
 			{
 				readonly get
@@ -158,7 +158,7 @@ namespace ReActionPlugin
 				}
 			}
 
-			[HideIf(nameof(Button), ControllerButton.None)]
+			[HideIf( nameof( Button ), ControllerButton.None )]
 			public Conditional Conditional
 			{
 				readonly get
@@ -173,17 +173,17 @@ namespace ReActionPlugin
 			}
 
 			//need the whole 16 bits for this
-			[ShowIf(nameof(Button), ControllerButton.None)]
+			[ShowIf( nameof( Button ), ControllerButton.None )]
 			public Half Deadzone
 			{
 				readonly get
 				{
-					return Unsafe.BitCast<ushort, Half>((ushort)((m_InternalBitmask & k_DeadzoneMask) >> k_DeadzoneBitOffset));
+					return Unsafe.BitCast<ushort, Half>( (ushort)((m_InternalBitmask & k_DeadzoneMask) >> k_DeadzoneBitOffset) );
 				}
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_DeadzoneMask) | ((uint)Unsafe.BitCast<Half, ushort>(value) << k_DeadzoneBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_DeadzoneMask) | ((uint)Unsafe.BitCast<Half, ushort>( value ) << k_DeadzoneBitOffset);
 				}
 			}
 
@@ -197,7 +197,7 @@ namespace ReActionPlugin
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_DoubleTappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_DoubleTappedBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_DoubleTappedMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_DoubleTappedBitOffset);
 				}
 			}
 
@@ -211,7 +211,7 @@ namespace ReActionPlugin
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_TappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_TappedBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_TappedMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_TappedBitOffset);
 				}
 			}
 
@@ -225,12 +225,12 @@ namespace ReActionPlugin
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_LongPressedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_LongPressedBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_LongPressedMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_LongPressedBitOffset);
 				}
 			}
 
 #if DEBUG
-			[JsonIgnore, Title("Time Out")]
+			[JsonIgnore, Title( "Time Out" )]
 			//The inspector can't show Half values, lol, do this for simplicity
 			float TimeOutF
 			{
@@ -293,7 +293,7 @@ namespace ReActionPlugin
 
 		public struct Bind
 		{
-			public Bind(ButtonCode key, Conditional conditional, Modifiers modifiers = Modifiers.None, float timeOut = .5f)
+			public Bind( ButtonCode key, Conditional conditional, Modifiers modifiers = Modifiers.None, float timeOut = .5f )
 			{
 				this.Key = key;
 				this.Modifiers = modifiers;
@@ -318,7 +318,7 @@ namespace ReActionPlugin
 				}
 			}
 
-			[HideIf(nameof(Key), ButtonCode.BUTTON_CODE_NONE)]
+			[HideIf( nameof( Key ), ButtonCode.BUTTON_CODE_NONE )]
 			public Modifiers Modifiers
 			{
 				readonly get
@@ -332,7 +332,7 @@ namespace ReActionPlugin
 				}
 			}
 
-			[HideIf(nameof(Key), ButtonCode.BUTTON_CODE_NONE)]
+			[HideIf( nameof( Key ), ButtonCode.BUTTON_CODE_NONE )]
 			public Conditional Conditional
 			{
 				readonly get
@@ -357,7 +357,7 @@ namespace ReActionPlugin
 				set
 				{
 					//crazy performance improvement, saves 2 (two(!)) instructions
-					m_InternalBitmask = (m_InternalBitmask & ~k_DoubleTappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_DoubleTappedBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_DoubleTappedMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_DoubleTappedBitOffset);
 				}
 			}
 
@@ -371,7 +371,7 @@ namespace ReActionPlugin
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_TappedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_TappedBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_TappedMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_TappedBitOffset);
 				}
 			}
 
@@ -385,7 +385,7 @@ namespace ReActionPlugin
 
 				set
 				{
-					m_InternalBitmask = (m_InternalBitmask & ~k_LongPressedMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_LongPressedBitOffset);
+					m_InternalBitmask = (m_InternalBitmask & ~k_LongPressedMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_LongPressedBitOffset);
 				}
 			}
 
@@ -398,7 +398,7 @@ namespace ReActionPlugin
 			public Half TimeOut { readonly get; set; }
 
 #if DEBUG
-			[JsonIgnore, Title("Time Out")]
+			[JsonIgnore, Title( "Time Out" )]
 			//The inspector can't show Half values, lol, do this for simplicity
 			float TimeOutF
 			{
@@ -444,7 +444,7 @@ namespace ReActionPlugin
 
 			public readonly override int GetHashCode()
 			{
-				return HashCode.Combine(TappedFor, TimeOut, m_InternalBitmask);
+				return HashCode.Combine( TappedFor, TimeOut, m_InternalBitmask );
 			}
 		}
 	}
@@ -458,21 +458,21 @@ namespace ReActionPlugin
 		{
 		}
 
-		static readonly MethodInfo m_CurrentController = typeof(Input).GetProperty("CurrentController", (BindingFlags)int.MaxValue).GetMethod;
+		static readonly MethodInfo m_CurrentController = typeof( Input ).GetProperty( "CurrentController", (BindingFlags)int.MaxValue ).GetMethod;
 
 		public static Controller GetCurrentController()
 		{
 			//epic!!!
-			return Unsafe.As<Controller>(m_CurrentController.Invoke(null, null));
+			return Unsafe.As<Controller>( m_CurrentController.Invoke( null, null ) );
 		}
 
-		static readonly MethodInfo m_AllControllers = m_CurrentController.ReturnType.GetProperty("All", (BindingFlags)int.MaxValue).GetMethod;
+		static readonly MethodInfo m_AllControllers = m_CurrentController.ReturnType.GetProperty( "All", (BindingFlags)int.MaxValue ).GetMethod;
 
-		public static HashSet<Controller> All => Unsafe.As<HashSet<Controller>>(m_AllControllers.Invoke(null, null));
+		public static HashSet<Controller> All => Unsafe.As<HashSet<Controller>>( m_AllControllers.Invoke( null, null ) );
 
-		public static Controller GetController(int index)
+		public static Controller GetController( int index )
 		{
-			return All.ElementAt(index);
+			return All.ElementAt( index );
 		}
 
 		/// <summary>
@@ -481,7 +481,7 @@ namespace ReActionPlugin
 		/// <param name="axis"></param>
 		/// <param name="defaultValue"></param>
 		/// <returns></returns>
-		public float GetAxis(ControllerAxis axis, float defaultValue = 0f) => 0f /*Stub*/;
+		public float GetAxis( ControllerAxis axis, float defaultValue = 0f ) => 0f /*Stub*/;
 
 		/// <summary>
 		/// Rumbles the controller.
@@ -489,7 +489,7 @@ namespace ReActionPlugin
 		/// <param name="leftMotor">The speed of the left motor, between 0 and 0xFFFF</param>
 		/// <param name="rightMotor">The speed of the right motor, between 0 and 0xFFFF</param>
 		/// <param name="duration">The duration of the vibration in ms</param>
-		public void Rumble(int leftMotor, int rightMotor, int duration) { /*Stub*/ }
+		public void Rumble( int leftMotor, int rightMotor, int duration ) { /*Stub*/ }
 
 		/// <summary>
 		/// Rumbles the controller's triggers (if supported)
@@ -497,7 +497,7 @@ namespace ReActionPlugin
 		/// <param name="leftTrigger">The speed of the left trigger motor, between 0 and 0xFFFF</param>
 		/// <param name="rightTrigger">The speed of the right trigger motor, between 0 and 0xFFFF</param>
 		/// <param name="duration">The duration of the vibration in ms</param>
-		public void RumbleTriggers(int leftTrigger, int rightTrigger, int duration) { /*Stub*/ }
+		public void RumbleTriggers( int leftTrigger, int rightTrigger, int duration ) { /*Stub*/ }
 
 		/// <summary>
 		/// Stops all rumble and haptic events on this controller.
@@ -517,13 +517,13 @@ namespace ReActionPlugin
 		/// <param name="lengthScale">The amount to scale the pattern's length by.</param>
 		/// <param name="frequencyScale">The amount to scale the pattern's frequency by.</param>
 		/// <param name="amplitudeScale">The amount to scale the pattern's amplitude by.</param>
-		public void TriggerHapticEffect(HapticEffect effect, float lengthScale = 1, float frequencyScale = 1f, float amplitudeScale = 1f) { /*Stub*/ }
+		public void TriggerHapticEffect( HapticEffect effect, float lengthScale = 1, float frequencyScale = 1f, float amplitudeScale = 1f ) { /*Stub*/ }
 
-		public int GetTouchpadCount() => ReAction.SDL_GetNumGamepadTouchpads(GamepadHandle);
+		public int GetTouchpadCount() => ReAction.SDL_GetNumGamepadTouchpads( GamepadHandle );
 
-		public int GetMaxTouchpadFingers(int touchpad) => ReAction.SDL_GetNumGamepadTouchpadFingers(GamepadHandle, touchpad);
+		public int GetMaxTouchpadFingers( int touchpad ) => ReAction.SDL_GetNumGamepadTouchpadFingers( GamepadHandle, touchpad );
 
-		public TouchpadData GetTouchpadData(int touchpad, int finger) => ReAction.extraPerControllerData[ReAction.GetControllexIndexForDeviceId(DeviceId)].touchpadData[touchpad][finger];
+		public TouchpadData GetTouchpadData( int touchpad, int finger ) => ReAction.extraPerControllerData[ReAction.GetControllexIndexForDeviceId( DeviceId )].touchpadData[touchpad][finger];
 
 		/// <summary>
 		/// Gets a sensor reading from the device's accelerometer (if it has one)
@@ -648,7 +648,7 @@ namespace ReActionPlugin
 		public ControllerAnalogState[] analogState;
 	}
 
-	public readonly struct TouchpadData(bool down, float x, float deltaX, float y, float deltaY, float pressure)
+	public readonly struct TouchpadData( bool down, float x, float deltaX, float y, float deltaY, float pressure )
 	{
 		public readonly bool down = down;
 		public readonly float x = x;
@@ -1265,12 +1265,12 @@ namespace ReActionPlugin
 		{
 			readonly get
 			{
-				return Unsafe.BitCast<ushort, Half>((ushort)((m_Shitmask >> k_ReleasedTimeBitOffset) & k_HalfClearMask));
+				return Unsafe.BitCast<ushort, Half>( (ushort)((m_Shitmask >> k_ReleasedTimeBitOffset) & k_HalfClearMask) );
 			}
 
 			set
 			{
-				m_Shitmask = (m_Shitmask & ~k_ReleasedTimeMask) | ((uint)Unsafe.BitCast<Half, ushort>(value) & k_HalfClearMask) << k_ReleasedTimeBitOffset;
+				m_Shitmask = (m_Shitmask & ~k_ReleasedTimeMask) | ((uint)Unsafe.BitCast<Half, ushort>( value ) & k_HalfClearMask) << k_ReleasedTimeBitOffset;
 			}
 		}
 
@@ -1278,12 +1278,12 @@ namespace ReActionPlugin
 		{
 			readonly get
 			{
-				return Unsafe.BitCast<ushort, Half>((ushort)((m_Shitmask >> k_PressedTimeBitOffset) & k_HalfClearMask));
+				return Unsafe.BitCast<ushort, Half>( (ushort)((m_Shitmask >> k_PressedTimeBitOffset) & k_HalfClearMask) );
 			}
 
 			set
 			{
-				m_Shitmask = (m_Shitmask & ~k_PressedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>(value) & k_HalfClearMask) << k_PressedTimeBitOffset);
+				m_Shitmask = (m_Shitmask & ~k_PressedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>( value ) & k_HalfClearMask) << k_PressedTimeBitOffset);
 			}
 		}
 
@@ -1298,7 +1298,7 @@ namespace ReActionPlugin
 			{
 				var last = Down;
 
-				m_Shitmask = ((m_Shitmask & ~k_DownFlagMask) | (Convert.ToUInt32(value)));
+				m_Shitmask = ((m_Shitmask & ~k_DownFlagMask) | (Convert.ToUInt32( value )));
 
 				StateChanged |= (last ^ Down);
 			}
@@ -1313,7 +1313,7 @@ namespace ReActionPlugin
 
 			set
 			{
-				m_Shitmask = ((m_Shitmask & ~k_JustChangedFlagMask) | (Convert.ToUInt32(value) << k_JustChangedFlagBitOffset));
+				m_Shitmask = ((m_Shitmask & ~k_JustChangedFlagMask) | (Convert.ToUInt32( value ) << k_JustChangedFlagBitOffset));
 			}
 		}
 
@@ -1350,12 +1350,12 @@ namespace ReActionPlugin
 		{
 			readonly get
 			{
-				return Unsafe.BitCast<ushort, Half>((ushort)((m_InternalBitmask >> k_ReleasedTimeBitOffset) & k_HalfClearMask));
+				return Unsafe.BitCast<ushort, Half>( (ushort)((m_InternalBitmask >> k_ReleasedTimeBitOffset) & k_HalfClearMask) );
 			}
 
 			set
 			{
-				m_InternalBitmask = (m_InternalBitmask & ~k_ReleasedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>(value) & k_HalfClearMask) << k_ReleasedTimeBitOffset);
+				m_InternalBitmask = (m_InternalBitmask & ~k_ReleasedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>( value ) & k_HalfClearMask) << k_ReleasedTimeBitOffset);
 			}
 		}
 
@@ -1363,12 +1363,12 @@ namespace ReActionPlugin
 		{
 			readonly get
 			{
-				return Unsafe.BitCast<ushort, Half>((ushort)((m_InternalBitmask >> k_PressedTimeBitOffset) & k_HalfClearMask));
+				return Unsafe.BitCast<ushort, Half>( (ushort)((m_InternalBitmask >> k_PressedTimeBitOffset) & k_HalfClearMask) );
 			}
 
 			set
 			{
-				m_InternalBitmask = (m_InternalBitmask & ~k_PressedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>(value) & k_HalfClearMask) << k_PressedTimeBitOffset);
+				m_InternalBitmask = (m_InternalBitmask & ~k_PressedTimeMask) | (((uint)Unsafe.BitCast<Half, ushort>( value ) & k_HalfClearMask) << k_PressedTimeBitOffset);
 			}
 		}
 
@@ -1381,7 +1381,7 @@ namespace ReActionPlugin
 
 			set
 			{
-				m_InternalBitmask = (m_InternalBitmask & ~k_JustChangedFlagMask) | ((uint)Unsafe.BitCast<bool, byte>(value) << k_JustChangedFlagBitOffset);
+				m_InternalBitmask = (m_InternalBitmask & ~k_JustChangedFlagMask) | ((uint)Unsafe.BitCast<bool, byte>( value ) << k_JustChangedFlagBitOffset);
 			}
 		}
 
@@ -1394,7 +1394,7 @@ namespace ReActionPlugin
 
 			set
 			{
-				m_InternalBitmask = (m_InternalBitmask & ~k_DownFlagMask) | ((uint)Unsafe.BitCast<bool, byte>(value));
+				m_InternalBitmask = (m_InternalBitmask & ~k_DownFlagMask) | ((uint)Unsafe.BitCast<bool, byte>( value ));
 			}
 		}
 

@@ -6,9 +6,9 @@ namespace ReActionPlugin
 {
 	public static partial class ReAction
 	{
-		public static void StartTrappingInput(Action<string[]> keyCallback)
+		public static void StartTrappingInput( Action<string[]> keyCallback )
 		{
-			StartTrappingKeys(keyCallback);
+			StartTrappingKeys( keyCallback );
 		}
 	}
 }

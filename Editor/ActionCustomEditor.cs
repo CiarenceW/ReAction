@@ -2,17 +2,17 @@
 
 namespace ReActionPlugin.Editor
 {
-	[CustomEditor(typeof(ButtonAction))]
+	[CustomEditor( typeof( ButtonAction ) )]
 	public class ActionCustomEditor : ControlObjectWidget
 	{
-		public ActionCustomEditor(SerializedProperty property) : base(property, false)
+		public ActionCustomEditor( SerializedProperty property ) : base( property, false )
 		{
 			Layout = Layout.Row();
 			Layout.Spacing = 4;
 
-			var piss = new Label("Yeah don't do that LOL");
+			var piss = new Label( "Yeah don't do that LOL" );
 
-			Layout.Add(piss);
+			Layout.Add( piss );
 		}
 	}
 }

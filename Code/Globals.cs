@@ -2,4 +2,4 @@
 global using ReActionPlugin;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("ReActionPlugin.Editor"), InternalsVisibleTo("ReAction.Hooking")]
+[assembly: InternalsVisibleTo( "ReActionPlugin.Editor" ), InternalsVisibleTo( "ReAction.Hooking" )]

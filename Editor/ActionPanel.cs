@@ -12,7 +12,7 @@ partial class ActionPanel : Widget
 
 	int Index { get; set; } = -1;
 
-	public ActionPanel(ButtonAction action, ReActionActionsWidget page) : base(null)
+	public ActionPanel( ButtonAction action, ReActionActionsWidget page ) : base( null )
 	{
 		Page = page;
 		Action = action;
@@ -20,10 +20,10 @@ partial class ActionPanel : Widget
 		Cursor = CursorShape.Finger;
 	}
 
-	private string GetFriendlyGamepadCode(GamepadCode value)
+	private string GetFriendlyGamepadCode( GamepadCode value )
 	{
 		return DisplayInfo.ForEnumValues<GamepadCode>()
-			.FirstOrDefault(x => x.value.Equals(value))
+			.FirstOrDefault( x => x.value.Equals( value ) )
 			.info.Name;
 	}
 
@@ -34,28 +34,28 @@ partial class ActionPanel : Widget
 			.info.Name;
 	}*/
 
-	private float DrawTextWithIcon(Rect r, string text, string icon, int iconSize = 14)
+	private float DrawTextWithIcon( Rect r, string text, string icon, int iconSize = 14 )
 	{
-		var textRect = Paint.DrawText(r, text, TextFlag.RightCenter);
+		var textRect = Paint.DrawText( r, text, TextFlag.RightCenter );
 
 		r.Right -= textRect.Width + 4;
 
-		var iconRect = Paint.DrawIcon(r, icon, iconSize, TextFlag.RightCenter);
+		var iconRect = Paint.DrawIcon( r, icon, iconSize, TextFlag.RightCenter );
 
 		return textRect.Width + iconRect.Width + 24;
 	}
 
 	protected override void OnPaint()
 	{
-		if (Index == -1)
-			Index = Parent?.Children?.ToList()?.IndexOf(this) ?? -1;
+		if ( Index == -1 )
+			Index = Parent?.Children?.ToList()?.IndexOf( this ) ?? -1;
 
 		Paint.ClearPen();
 
-		if (Index % 2 == 0)
+		if ( Index % 2 == 0 )
 		{
-			Paint.SetBrush(Color.Black.WithAlpha(0.05f));
-			Paint.DrawRect(LocalRect);
+			Paint.SetBrush( Color.Black.WithAlpha( 0.05f ) );
+			Paint.DrawRect( LocalRect );
 		}
 
 		Paint.Antialiasing = true;
@@ -64,36 +64,36 @@ partial class ActionPanel : Widget
 
 		Paint.ClearPen();
 		Paint.ClearBrush();
-		Paint.SetPen(Theme.Text.WithAlpha(Paint.HasMouseOver ? 1f : 0.7f));
+		Paint.SetPen( Theme.Text.WithAlpha( Paint.HasMouseOver ? 1f : 0.7f ) );
 
-		if (Paint.HasMouseOver)
+		if ( Paint.HasMouseOver )
 		{
-			Paint.DrawIcon(r, "edit", 14, TextFlag.LeftCenter);
+			Paint.DrawIcon( r, "edit", 14, TextFlag.LeftCenter );
 			r.Left += 20;
 		}
 
-		var name = !string.IsNullOrEmpty(Action.Name) ? Action.Name : "no name lol";
-		var nameRect = Paint.DrawText(r, name, TextFlag.LeftCenter);
+		var name = !string.IsNullOrEmpty( Action.Name ) ? Action.Name : "no name lol";
+		var nameRect = Paint.DrawText( r, name, TextFlag.LeftCenter );
 
 		float width = 0f;
 
 		r.Right -= 10;
 
-		if (Action.Primary.Key != ButtonCode.BUTTON_CODE_NONE)
+		if ( Action.Primary.Key != ButtonCode.BUTTON_CODE_NONE )
 		{
-			DrawBindTextAndIcon(Action.Primary);
+			DrawBindTextAndIcon( Action.Primary );
 		}
 
-		if (Action.Secondary.Key != ButtonCode.BUTTON_CODE_NONE)
+		if ( Action.Secondary.Key != ButtonCode.BUTTON_CODE_NONE )
 		{
-			DrawBindTextAndIcon(Action.Secondary);
+			DrawBindTextAndIcon( Action.Secondary );
 		}
 
-		void DrawBindTextAndIcon(ButtonAction.Bind bind)
+		void DrawBindTextAndIcon( ButtonAction.Bind bind )
 		{
-			if (bind.Key != ButtonCode.BUTTON_CODE_NONE)
+			if ( bind.Key != ButtonCode.BUTTON_CODE_NONE )
 			{
-				width = DrawTextWithIcon(r, $"{ReAction.FormatModifiersString(bind.Modifiers)} {(string.IsNullOrWhiteSpace(bind.Key.GetKeyDisplay()) ? bind.Key.GetEngineString() : bind.Key.GetKeyDisplay())}", "keyboard");
+				width = DrawTextWithIcon( r, $"{ReAction.FormatModifiersString( bind.Modifiers )} {(string.IsNullOrWhiteSpace( bind.Key.GetKeyDisplay() ) ? bind.Key.GetEngineString() : bind.Key.GetKeyDisplay())}", "keyboard" );
 				r.Right -= width - 8;
 			}
 
@@ -103,7 +103,7 @@ partial class ActionPanel : Widget
 				r.Right -= width - 8;
 			}*/
 
-			width = DrawTextWithIcon(r, bind.Conditional.ToString(), "article");
+			width = DrawTextWithIcon( r, bind.Conditional.ToString(), "article" );
 			r.Right -= width - 8;
 
 			/*if (Action.GamepadInput != ReAction.GamepadInput.None)
@@ -114,27 +114,27 @@ partial class ActionPanel : Widget
 		}
 	}
 
-	protected override void OnMouseReleased(MouseEvent e)
+	protected override void OnMouseReleased( MouseEvent e )
 	{
-		if (e.LeftMouseButton)
+		if ( e.LeftMouseButton )
 		{
 			ShowModal();
 		}
 
-		if (e.RightMouseButton)
+		if ( e.RightMouseButton )
 		{
-			var m = new ContextMenu(this);
-			m.AddOption("Edit", "edit", ShowModal);
+			var m = new ContextMenu( this );
+			m.AddOption( "Edit", "edit", ShowModal );
 
 			/*m.AddOption("Duplicate", "file_copy", () =>
 			{
 				Page.AddAction(Activator.CreateInstance(typeof(ButtonAction), Action) as ButtonAction);
 			});*/
 
-			m.AddOption("Delete", "delete", () =>
+			m.AddOption( "Delete", "delete", () =>
 			{
-				Page.RemoveAction(Action);
-			});
+				Page.RemoveAction( Action );
+			} );
 
 			m.OpenAtCursor();
 		}
@@ -145,24 +145,27 @@ partial class ActionPanel : Widget
 	/// </summary>
 	void ShowModal()
 	{
-		var d = new Dialog(Page);
+		//fuck it lol
+		ReActionActionsWidget.SetActionsNeedSaving( true );
+
+		var d = new Dialog( Page );
 		d.DeleteOnClose = true;
 		d.Layout = Layout.Column();
 		d.WindowTitle = Action.Name;
 		d.Name = Action.Name;
 		d.Layout.Margin = 16;
-		d.Window.Size = new(400, 270);
+		d.Window.Size = new( 400, 270 );
 
 		var sheet = new ControlSheet();
-		sheet.AddObject(Action.GetSerialized());
-		d.Layout.Add(sheet);
-		d.Layout.AddStretchCell(1);
+		sheet.AddObject( Action.GetSerialized() );
+		d.Layout.Add( sheet );
+		d.Layout.AddStretchCell( 1 );
 
 		var row = d.Layout.AddRow();
 		row.Spacing = 8;
 		row.AddStretchCell();
-		row.Add(new Button("Delete", "delete") { Clicked = () => { Page.RemoveAction(Action); d.Close(); } });
-		row.Add(new Button.Primary("Done", "done") { MouseClick = () => { Page.UpdateActionList(); d.Close(); } });
+		row.Add( new Button( "Delete", "delete" ) { Clicked = () => { Page.RemoveAction( Action ); d.Close(); } } );
+		row.Add( new Button.Primary( "Done", "done" ) { MouseClick = () => { Page.UpdateActionList(); d.Close(); } } );
 
 		d.Show();
 	}

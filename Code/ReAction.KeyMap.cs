@@ -23,7 +23,7 @@ namespace ReActionPlugin
 
 		static void ReinitialiseKeyStates()
 		{
-			for (int i = 0; i < (int)k_ButtonCodeLength; i++)
+			for ( int i = 0; i < (int)k_ButtonCodeLength; i++ )
 			{
 				var key = keyStates[i];
 
@@ -47,7 +47,7 @@ namespace ReActionPlugin
 		const ControllerButton k_ControllerButtonLength = ControllerButton.MAX + 1;
 		const ControllerButton k_ControllerAnalogLength = (ControllerButton)((int)(ControllerButton.AnalogEnd - ControllerButton.AnalogStart) + 1);
 
-		static void InitialiseControllerButtonState(int controllerIndex)
+		static void InitialiseControllerButtonState( int controllerIndex )
 		{
 			extraPerControllerData[controllerIndex].buttonState = new ControllerButtonState[(int)k_ControllerButtonLength];
 

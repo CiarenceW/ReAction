@@ -10,35 +10,35 @@ namespace ReActionPlugin
 	{
 		const string k_ReActionHookName = "ReActionOnButtonHook";
 
-		delegate string GetKeyDisplayNameDelegate(ButtonCode buttonCode);
-		delegate string CodeToStringDelegate(ButtonCode buttonCode);
-		delegate ButtonCode StringToCodeDelegate(string pString);
+		delegate string GetKeyDisplayNameDelegate( ButtonCode buttonCode );
+		delegate string CodeToStringDelegate( ButtonCode buttonCode );
+		delegate ButtonCode StringToCodeDelegate( string pString );
 
-		delegate void StartTrappingDelegate(Action<string[]> onTrappedKeysCallback);
+		delegate void StartTrappingDelegate( Action<string[]> onTrappedKeysCallback );
 
-		delegate void OnKeyDelegate(ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat);
+		delegate void OnKeyDelegate( ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat );
 
-		delegate void DoubleTrouble(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat);
+		delegate void DoubleTrouble( OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat );
 
-		delegate void OnMouseDelegate(ButtonCode button, bool down);
+		delegate void OnMouseDelegate( ButtonCode button, bool down );
 
-		delegate void MoubleBrouble(OnMouseDelegate originalMethod, ButtonCode button, bool down);
+		delegate void MoubleBrouble( OnMouseDelegate originalMethod, ButtonCode button, bool down );
 
-		delegate void OnControllerAxisDelegate(int deviceId, ControllerAxis axis, int value);
+		delegate void OnControllerAxisDelegate( int deviceId, ControllerAxis axis, int value );
 
-		delegate void CoubleArouble(OnControllerAxisDelegate originalMethod, int deviceId, ControllerAxis axis, int value);
+		delegate void CoubleArouble( OnControllerAxisDelegate originalMethod, int deviceId, ControllerAxis axis, int value );
 
-		delegate void OnControllerButtonDelegate(int deviceId, ControllerButton button, bool down);
+		delegate void OnControllerButtonDelegate( int deviceId, ControllerButton button, bool down );
 
-		delegate void CoubleBrouble(OnControllerButtonDelegate originalMethod, int deviceId, ControllerButton button, bool down);
+		delegate void CoubleBrouble( OnControllerButtonDelegate originalMethod, int deviceId, ControllerButton button, bool down );
 
-		delegate void OnControllerConnectedDelegate(int deviceId);
+		delegate void OnControllerConnectedDelegate( int deviceId );
 
-		delegate void ICanCallThisAnythingAndItWontMatterLolExclamationPointSmile(OnControllerConnectedDelegate originalMethod, int deviceId);
+		delegate void ICanCallThisAnythingAndItWontMatterLolExclamationPointSmile( OnControllerConnectedDelegate originalMethod, int deviceId );
 
-		delegate void OnControllerDisconnectedDelegate(int joystickId);
+		delegate void OnControllerDisconnectedDelegate( int joystickId );
 
-		delegate void SuperAwesomeReallyDescriptDelegateName(OnControllerDisconnectedDelegate originalMethod, int joystickId);
+		delegate void SuperAwesomeReallyDescriptDelegateName( OnControllerDisconnectedDelegate originalMethod, int joystickId );
 
 		[SkipHotload] static object onKey_Hook;
 
@@ -63,40 +63,40 @@ namespace ReActionPlugin
 		internal static void Main()
 		{
 			//this runs everytime ReAction is hotloaded, but hotloading our hook objects will cause s&box to crash (sorry!), the hooks do persist, so we can just keep track of whether or not we've already initialised with a bool
-			if (!m_Initialised)
+			if ( !m_Initialised )
 			{
 				//If you build sbox, for some reason MonoMod.RuntimeDetour.dll won't be loaded when you launch the editor, so we have to do it ourselves, lol!
-				var runtimeDetourAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault( ( asm ) => asm.FullName.Contains( "MonoMod.RuntimeDetour" ) ) ?? Assembly.Load("MonoMod.RuntimeDetour");
+				var runtimeDetourAssembly = AssemblyLoadContext.Default.Assemblies.FirstOrDefault( ( asm ) => asm.FullName.Contains( "MonoMod.RuntimeDetour" ) ) ?? Assembly.Load( "MonoMod.RuntimeDetour" );
 
-				var hookType = runtimeDetourAssembly.GetType("MonoMod.RuntimeDetour.Hook");
+				var hookType = runtimeDetourAssembly.GetType( "MonoMod.RuntimeDetour.Hook" );
 
-				var inputRouterType = Assembly.GetAssembly(typeof(Input)).GetType("Sandbox.Engine.InputRouter");
+				var inputRouterType = Assembly.GetAssembly( typeof( Input ) ).GetType( "Sandbox.Engine.InputRouter" );
 
-				var inputRouter_OnKey_MethodBase = inputRouterType.GetMethod("OnKey", BindingFlags.NonPublic | BindingFlags.Static);
+				var inputRouter_OnKey_MethodBase = inputRouterType.GetMethod( "OnKey", BindingFlags.NonPublic | BindingFlags.Static );
 
 				//new Hook(MethodBase from, MethodInfo to);
 
-				onKey_Hook = Activator.CreateInstance(hookType, [inputRouter_OnKey_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<DoubleTrouble>()]);
+				onKey_Hook = Activator.CreateInstance( hookType, [inputRouter_OnKey_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnButtonHook ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<DoubleTrouble>()] );
 
-				var inputRouter_OnMouseButton_MethodBase = inputRouterType.GetMethod("OnMouseButton", BindingFlags.NonPublic | BindingFlags.Static);
+				var inputRouter_OnMouseButton_MethodBase = inputRouterType.GetMethod( "OnMouseButton", BindingFlags.NonPublic | BindingFlags.Static );
 
-				onMouse_Hook = Activator.CreateInstance(hookType, [inputRouter_OnMouseButton_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnMouseButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<MoubleBrouble>()]);
+				onMouse_Hook = Activator.CreateInstance( hookType, [inputRouter_OnMouseButton_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnMouseButtonHook ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<MoubleBrouble>()] );
 
-				var inputRouter_OnGameControllerAxis_MethodBase = inputRouterType.GetMethod("OnGameControllerAxis", BindingFlags.NonPublic | BindingFlags.Static);
+				var inputRouter_OnGameControllerAxis_MethodBase = inputRouterType.GetMethod( "OnGameControllerAxis", BindingFlags.NonPublic | BindingFlags.Static );
 
-				onControllerAxis_Hook = Activator.CreateInstance(hookType, [inputRouter_OnGameControllerAxis_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnControllerAxisHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<CoubleArouble>()]);
+				onControllerAxis_Hook = Activator.CreateInstance( hookType, [inputRouter_OnGameControllerAxis_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnControllerAxisHook ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<CoubleArouble>()] );
 
-				var inputRouter_OnGameControllerButton_MethodBase = inputRouterType.GetMethod("OnGameControllerButton", BindingFlags.NonPublic | BindingFlags.Static);
+				var inputRouter_OnGameControllerButton_MethodBase = inputRouterType.GetMethod( "OnGameControllerButton", BindingFlags.NonPublic | BindingFlags.Static );
 
-				onControllerButton_Hook = Activator.CreateInstance(hookType, [inputRouter_OnGameControllerButton_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnControllerButtonHook), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<CoubleBrouble>()]);
+				onControllerButton_Hook = Activator.CreateInstance( hookType, [inputRouter_OnGameControllerButton_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnControllerButtonHook ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<CoubleBrouble>()] );
 
-				var inputRouter_OnGameControllerConnected_MethodBase = inputRouterType.GetMethod("OnGameControllerConnected", BindingFlags.NonPublic | BindingFlags.Static);
+				var inputRouter_OnGameControllerConnected_MethodBase = inputRouterType.GetMethod( "OnGameControllerConnected", BindingFlags.NonPublic | BindingFlags.Static );
 
-				onControllerConnected_Hook = Activator.CreateInstance(hookType, [inputRouter_OnGameControllerConnected_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnControllerConnected), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<ICanCallThisAnythingAndItWontMatterLolExclamationPointSmile>()]);
+				onControllerConnected_Hook = Activator.CreateInstance( hookType, [inputRouter_OnGameControllerConnected_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnControllerConnected ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<ICanCallThisAnythingAndItWontMatterLolExclamationPointSmile>()] );
 
-				var inputRouter_OnGameControllerDisconnected_MethodBase = inputRouterType.GetMethod("OnGameControllerDisconnected", BindingFlags.NonPublic | BindingFlags.Static);
+				var inputRouter_OnGameControllerDisconnected_MethodBase = inputRouterType.GetMethod( "OnGameControllerDisconnected", BindingFlags.NonPublic | BindingFlags.Static );
 
-				onControllerDisconnected_Hook = Activator.CreateInstance(hookType, [inputRouter_OnGameControllerDisconnected_MethodBase, typeof(ReAction).GetMethod(nameof(ReActionOnControllerDisconnected), BindingFlags.NonPublic | BindingFlags.Static).CreateDelegate<SuperAwesomeReallyDescriptDelegateName>()]);
+				onControllerDisconnected_Hook = Activator.CreateInstance( hookType, [inputRouter_OnGameControllerDisconnected_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnControllerDisconnected ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<SuperAwesomeReallyDescriptDelegateName>()] );
 			}
 
 			m_Initialised = true;
@@ -111,53 +111,53 @@ namespace ReActionPlugin
 		}
 #pragma warning restore CA2255 // The 'ModuleInitializer' attribute should not be used in libraries
 
-		static void ReActionOnButtonHook(OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat)
+		static void ReActionOnButtonHook( OnKeyDelegate originalMethod, ButtonCode scanButtonCode, ButtonCode keyButtonCode, bool down, bool repeat )
 		{
-			if (!repeat)
+			if ( !repeat )
 			{
-				OnGameButton(scanButtonCode, down);
+				OnGameButton( scanButtonCode, down );
 			}
 
-			originalMethod(scanButtonCode, keyButtonCode, down, repeat);
+			originalMethod( scanButtonCode, keyButtonCode, down, repeat );
 		}
 
-		static void ReActionOnMouseButtonHook(OnMouseDelegate originalMethod, ButtonCode button, bool down)
+		static void ReActionOnMouseButtonHook( OnMouseDelegate originalMethod, ButtonCode button, bool down )
 		{
-			OnGameButton(button, down);
+			OnGameButton( button, down );
 
-			originalMethod(button, down);
+			originalMethod( button, down );
 		}
 
-		static void ReActionOnControllerAxisHook(OnControllerAxisDelegate originalMethod, int deviceId, ControllerAxis axis, int value)
+		static void ReActionOnControllerAxisHook( OnControllerAxisDelegate originalMethod, int deviceId, ControllerAxis axis, int value )
 		{
 			//thumbstick axis values range from -32768 to 32767, while trigger axis values range from 0 to 32767, cheeky branchless epicsauce awesomeness!!!!!!!!! I almost feel like a real programmer.......
-			float remappedAxisValue = MathX.LerpInverse(value, k_JoystickAxisMin * Unsafe.BitCast<bool, byte>(axis < ControllerAxis.TriggerLeft), k_JoystickAxisMax);
+			float remappedAxisValue = MathX.LerpInverse( value, k_JoystickAxisMin * Unsafe.BitCast<bool, byte>( axis < ControllerAxis.TriggerLeft ), k_JoystickAxisMax );
 
 			//i packed the ControllerAxis stuff into the ControllerButton enum, so that you can select in menus and stuff
-			OnControllerAxis(deviceId, axis, remappedAxisValue);
+			OnControllerAxis( deviceId, axis, remappedAxisValue );
 
-			originalMethod(deviceId, axis, value);
+			originalMethod( deviceId, axis, value );
 		}
 
-		static void ReActionOnControllerButtonHook(OnControllerButtonDelegate originalMethod, int deviceId, ControllerButton button, bool down)
+		static void ReActionOnControllerButtonHook( OnControllerButtonDelegate originalMethod, int deviceId, ControllerButton button, bool down )
 		{
-			OnControllerButton(deviceId, button, down);
+			OnControllerButton( deviceId, button, down );
 
-			originalMethod(deviceId, button, down);
+			originalMethod( deviceId, button, down );
 		}
 
-		static void ReActionOnControllerConnected(OnControllerConnectedDelegate originalMethod, int deviceId)
+		static void ReActionOnControllerConnected( OnControllerConnectedDelegate originalMethod, int deviceId )
 		{
-			OnControllerConnected(deviceId);
+			OnControllerConnected( deviceId );
 
-			originalMethod(deviceId);
+			originalMethod( deviceId );
 		}
 
-		static void ReActionOnControllerDisconnected(OnControllerDisconnectedDelegate originalMethod, int joystickId)
+		static void ReActionOnControllerDisconnected( OnControllerDisconnectedDelegate originalMethod, int joystickId )
 		{
-			OnControllerDisconnected(joystickId);
+			OnControllerDisconnected( joystickId );
 
-			originalMethod(joystickId);
+			originalMethod( joystickId );
 		}
 	}
 }

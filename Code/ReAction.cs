@@ -9,6 +9,8 @@ namespace ReActionPlugin
 		static ReAction()
 		{
 			InitialiseKeyMap();
+
+			EnsureExtraDataCreated();
 		}
 
 		static readonly HashSet<ButtonAction> m_AllActions = new();
@@ -27,20 +29,20 @@ namespace ReActionPlugin
 
 		public static Modifiers ActiveModifiers { get; private set; }
 
-		static ButtonAction MissingAction { get; } = new ButtonAction("missing", default, default, null, false, Conditional.None);
+		static ButtonAction MissingAction { get; } = new ButtonAction( "missing", default, default, null, false, Conditional.None );
 
 		/// <summary>
 		/// Formats the modifiers' strings, like the following: <code>LShift + LMeta + </code>
 		/// </summary>
 		/// <param name="modifiers"></param>
 		/// <returns></returns>
-		public static string FormatModifiersString(Modifiers modifiers)
+		public static string FormatModifiersString( Modifiers modifiers )
 		{
 			string str = "";
 
-			for (byte b = 1; b > 0; b <<= 1)
+			for ( byte b = 1; b > 0; b <<= 1 )
 			{
-				if (((byte)modifiers & b) != 0)
+				if ( ((byte)modifiers & b) != 0 )
 				{
 					str += (Modifiers)b + " + ";
 				}
@@ -49,11 +51,11 @@ namespace ReActionPlugin
 			return str;
 		}
 
-		public static void OnGameButton(ButtonCode scanCode, bool pressed)
+		public static void OnGameButton( ButtonCode scanCode, bool pressed )
 		{
 			keyStates[(int)scanCode].Down = pressed;
 
-			switch (scanCode)
+			switch ( scanCode )
 			{
 				case ButtonCode.KEY_LSHIFT:
 					ActiveModifiers = pressed ? (ActiveModifiers | Modifiers.LShift) : (ActiveModifiers & ~Modifiers.LShift);
@@ -80,81 +82,81 @@ namespace ReActionPlugin
 					ActiveModifiers = pressed ? (ActiveModifiers | Modifiers.RShift) : (ActiveModifiers & ~Modifiers.RShift);
 					break;
 				default:
-				break;
+					break;
 			}
 
-			if (pressed)
+			if ( pressed )
 			{
-				foreach (var action in m_EnabledActions)
+				foreach ( var action in m_EnabledActions )
 				{
-					if (action.Primary.Key == scanCode)
+					if ( action.Primary.Key == scanCode )
 					{
-						CheckPressedKey(action, ref action.m_Primary);
+						CheckPressedKey( action, ref action.m_Primary );
 					}
 
-					if (action.Secondary.Key == scanCode)
+					if ( action.Secondary.Key == scanCode )
 					{
-						CheckPressedKey(action, ref action.m_Secondary);
+						CheckPressedKey( action, ref action.m_Secondary );
 					}
 				}
 			}
 			else
 			{
-				foreach (var action in m_EnabledActions)
+				foreach ( var action in m_EnabledActions )
 				{
-					if (action.Primary.Key == scanCode)
+					if ( action.Primary.Key == scanCode )
 					{
-						CheckReleasedKey(action, ref action.m_Primary);
+						CheckReleasedKey( action, ref action.m_Primary );
 					}
 
-					if (action.Secondary.Key == scanCode)
+					if ( action.Secondary.Key == scanCode )
 					{
-						CheckReleasedKey(action, ref action.m_Secondary);
+						CheckReleasedKey( action, ref action.m_Secondary );
 					}
 				}
 			}
 
-			static void CheckPressedKey(ButtonAction action, ref ButtonAction.Bind bind)
+			static void CheckPressedKey( ButtonAction action, ref ButtonAction.Bind bind )
 			{
 				action.ConditionalsState |= Conditional.Press;
 
 				action.ConditionalsState |= Conditional.Continuous;
 
-				if (keyStates[(int)bind.Key].ReleasedFor < bind.TimeOut)
+				if ( keyStates[(int)bind.Key].ReleasedFor < bind.TimeOut )
 				{
 					action.ConditionalsState |= Conditional.Mash;
 				}
 
-				if (!((bind.Conditional & Conditional.ReleaseToggle) == Conditional.ReleaseToggle) && !((bind.Conditional & Conditional.LongPressToggle) == Conditional.LongPressToggle) && !((bind.Conditional & Conditional.DoubleTapToggle) == Conditional.DoubleTapToggle))
+				if ( !((bind.Conditional & Conditional.ReleaseToggle) == Conditional.ReleaseToggle) && !((bind.Conditional & Conditional.LongPressToggle) == Conditional.LongPressToggle) && !((bind.Conditional & Conditional.DoubleTapToggle) == Conditional.DoubleTapToggle) )
 				{
 					action.ConditionalsState ^= Conditional.Toggle;
 				}
 			}
 
-			static void CheckReleasedKey(ButtonAction action, ref ButtonAction.Bind bind)
+			static void CheckReleasedKey( ButtonAction action, ref ButtonAction.Bind bind )
 			{
 				action.ConditionalsState |= Conditional.Release;
 
-				if ((bind.Conditional & Conditional.ReleaseToggle) == Conditional.ReleaseToggle)
+				if ( (bind.Conditional & Conditional.ReleaseToggle) == Conditional.ReleaseToggle )
 				{
 					action.ConditionalsState ^= Conditional.Toggle;
 				}
 
 				bind.LongPressed = false;
 
-				if (keyStates[(int)bind.Key].PressedFor < bind.TimeOut)
+				if ( keyStates[(int)bind.Key].PressedFor < bind.TimeOut )
 				{
 					action.ConditionalsState |= Conditional.Tap;
 
 					bind.CountTappedTime = true;
 
-					if (bind.TappedFor < bind.TimeOut && !bind.DoubleTapped)
+					if ( bind.TappedFor < bind.TimeOut && !bind.DoubleTapped )
 					{
 						action.ConditionalsState |= Conditional.DoubleTap;
 
 						bind.DoubleTapped = true;
 
-						if ((bind.Conditional & Conditional.DoubleTapToggle) == Conditional.DoubleTapToggle)
+						if ( (bind.Conditional & Conditional.DoubleTapToggle) == Conditional.DoubleTapToggle )
 						{
 							action.ConditionalsState ^= Conditional.Toggle;
 						}
@@ -179,9 +181,9 @@ namespace ReActionPlugin
 			}
 		}
 
-		static void OnControllerAxis(int deviceId, ControllerAxis axis, float value)
+		static void OnControllerAxis( int deviceId, ControllerAxis axis, float value )
 		{
-			int controllerIndex = GetControllexIndexForDeviceId(deviceId);
+			int controllerIndex = GetControllexIndexForDeviceId( deviceId );
 
 			ref var analogState = ref extraPerControllerData[controllerIndex].analogState[(int)axis];
 
@@ -189,15 +191,15 @@ namespace ReActionPlugin
 			analogState.value = value;
 		}
 
-		static void OnControllerButton(int deviceId, ControllerButton button, bool down)
+		static void OnControllerButton( int deviceId, ControllerButton button, bool down )
 		{
-			extraPerControllerData[GetControllexIndexForDeviceId(deviceId)].buttonState[(int)button].Down = down;
+			extraPerControllerData[GetControllexIndexForDeviceId( deviceId )].buttonState[(int)button].Down = down;
 
-			if (down)
+			if ( down )
 			{
-				foreach (var action in m_EnabledActions)
+				foreach ( var action in m_EnabledActions )
 				{
-					if (action.Gamepad.Button == button)
+					if ( action.Gamepad.Button == button )
 					{
 						action.ConditionalsState |= Conditional.Press;
 						action.ConditionalsState |= Conditional.Continuous;
@@ -210,91 +212,91 @@ namespace ReActionPlugin
 			}
 		}
 
-		static void OnControllerConnected(int deviceId)
+		static void OnControllerConnected( int deviceId )
 		{
-			Array.Resize(ref extraPerControllerData, controllerCount + 1);
+			Array.Resize( ref extraPerControllerData, controllerCount + 1 );
 
 			extraPerControllerData[controllerCount++].deviceId = deviceId;
 		}
 
-		static void OnControllerDisconnected(int joystickId)
+		static void OnControllerDisconnected( int joystickId )
 		{
 			int deviceId = 0;
 
 			//most controllers have the same joystickId and deviceId but for the sake of being "thorough", do this
-			foreach (var controller in Controller.All)
+			foreach ( var controller in Controller.All )
 			{
-				if (controller.GamepadHandle == joystickId)
+				if ( controller.GamepadHandle == joystickId )
 				{
 					deviceId = controller.DeviceId;
 				}
 			}
 
-			for (int i = 0; i < extraPerControllerData.Length; i++)
+			for ( int i = 0; i < extraPerControllerData.Length; i++ )
 			{
-				if (extraPerControllerData[i].deviceId == deviceId)
+				if ( extraPerControllerData[i].deviceId == deviceId )
 				{
-					Array.Copy(extraPerControllerData, i + 1, extraPerControllerData, i, extraPerControllerData.Length - i);
+					Array.Copy( extraPerControllerData, i + 1, extraPerControllerData, i, extraPerControllerData.Length - i );
 				}
 			}
 
 			controllerCount--;
 		}
 
-		static void RegisterButtonAction(ButtonAction buttonAction)
+		static void RegisterButtonAction( ButtonAction buttonAction )
 		{
-			foreach (var action in m_AllActions)
+			foreach ( var action in m_AllActions )
 			{
-				if (buttonAction.Name == action.Name)
+				if ( buttonAction.Name == action.Name )
 				{
 					return;
 				}
 			}
 
-			m_AllActions.Add(buttonAction);
+			m_AllActions.Add( buttonAction );
 
-			UpdateActionEnabled(buttonAction);
+			UpdateActionEnabled( buttonAction );
 		}
 
 		/// <summary>
 		/// Removes an action, you should stop using it
 		/// </summary>
 		/// <param name="buttonAction"></param>
-		public static void UnregisterButtonAction(ButtonAction buttonAction)
+		public static void UnregisterButtonAction( ButtonAction buttonAction )
 		{
 			//in case an action with the same name is present but not the same exact action, for some reason *cough cough* fuck ass editor piss of shit *cough cough*
 
-			var action = GetAction(buttonAction.Name);
+			var action = GetAction( buttonAction.Name );
 
-			m_AllActions.Remove(action);
-			m_EnabledActions.Remove(action);
+			m_AllActions.Remove( action );
+			m_EnabledActions.Remove( action );
 		}
 
-		internal static void UpdateActionEnabled(ButtonAction buttonAction)
+		internal static void UpdateActionEnabled( ButtonAction buttonAction )
 		{
-			if (buttonAction.Enabled)
+			if ( buttonAction.Enabled )
 			{
-				if (m_ActiveSets.Contains(buttonAction.Set))
+				if ( m_ActiveSets.Contains( buttonAction.Set ) )
 				{
-					m_EnabledActions.Add(buttonAction);
+					m_EnabledActions.Add( buttonAction );
 				}
 			}
 			else
 			{
-				m_EnabledActions.Remove(buttonAction);
+				m_EnabledActions.Remove( buttonAction );
 
 				buttonAction.ConditionalsState = Conditional.None;
 			}
 		}
 
-		public static void TrapKeys(Action<string> onKeysTrappedCallback)
+		public static void TrapKeys( Action<string> onKeysTrappedCallback )
 		{
-			
+
 		}
 
 		static void RefreshActionLists()
 		{
-			foreach (var action in m_EnabledActions)
+			foreach ( var action in m_EnabledActions )
 			{
 				action.ConditionalsState &= ~Conditional.Press;
 
@@ -306,7 +308,7 @@ namespace ReActionPlugin
 
 				action.ConditionalsState &= ~Conditional.DoubleTap;
 
-				if (action.m_Primary.CountTappedTime)
+				if ( action.m_Primary.CountTappedTime )
 				{
 #if USE_32BIT_FLOATS_FOR_TIME
 					action.m_Primary.TappedFor += Time.Delta;
@@ -315,7 +317,7 @@ namespace ReActionPlugin
 #endif
 				}
 
-				if (action.m_Secondary.CountTappedTime)
+				if ( action.m_Secondary.CountTappedTime )
 				{
 #if USE_32BIT_FLOATS_FOR_TIME
 					action.m_Secondary.TappedFor += Time.Delta;
@@ -324,49 +326,49 @@ namespace ReActionPlugin
 #endif
 				}
 
-				CheckMash(action, ref action.m_Primary);
-				CheckMash(action, ref action.m_Secondary);
+				CheckMash( action, ref action.m_Primary );
+				CheckMash( action, ref action.m_Secondary );
 
-				CheckLongPress(action, ref action.m_Primary);
-				CheckLongPress(action, ref action.m_Secondary);
+				CheckLongPress( action, ref action.m_Primary );
+				CheckLongPress( action, ref action.m_Secondary );
 			}
 
-			static void CheckLongPress(ButtonAction action, ref ButtonAction.Bind bind)
+			static void CheckLongPress( ButtonAction action, ref ButtonAction.Bind bind )
 			{
 #if USE_32BIT_FLOATS_FOR_TIME
 				if (bind.TimeOut == 0f)
 #else
-				if (bind.TimeOut == Half.Zero)
+				if ( bind.TimeOut == Half.Zero )
 #endif
 				{
 					return;
 				}
 
-				if (keyStates[(int)bind.Key].PressedFor >= bind.TimeOut && !bind.LongPressed)
+				if ( keyStates[(int)bind.Key].PressedFor >= bind.TimeOut && !bind.LongPressed )
 				{
 					action.ConditionalsState |= Conditional.LongPress;
 
 					bind.LongPressed = true;
 
-					if ((bind.Conditional & Conditional.LongPressToggle) == Conditional.LongPressToggle)
+					if ( (bind.Conditional & Conditional.LongPressToggle) == Conditional.LongPressToggle )
 					{
 						bind.Conditional ^= Conditional.Toggle;
 					}
 				}
 			}
 
-			static void CheckMash(ButtonAction action, ref ButtonAction.Bind bind)
+			static void CheckMash( ButtonAction action, ref ButtonAction.Bind bind )
 			{
 #if USE_32BIT_FLOATS_FOR_TIME
 				if (bind.TimeOut == 0f)
 #else
-				if (bind.TimeOut == Half.Zero)
+				if ( bind.TimeOut == Half.Zero )
 #endif
 				{
 					return;
 				}
 
-				if (keyStates[(int)bind.Key].ChangedStateFor >= bind.TimeOut)
+				if ( keyStates[(int)bind.Key].ChangedStateFor >= bind.TimeOut )
 				{
 					action.ConditionalsState &= ~Conditional.Mash;
 				}
@@ -379,10 +381,10 @@ namespace ReActionPlugin
 		/// </summary>
 		/// <inheritdoc cref="ButtonAction(string, ButtonAction.Bind, ButtonAction.Bind, string, bool, Conditional)"/>
 		/// <returns>The newly created <see cref="ButtonAction"/></returns>
-		public static ButtonAction CreateAction(string name, ButtonAction.Bind primary, ButtonAction.Bind secondary, string set = "General", bool enabled = true, Conditional allowedConditionals = Conditional.All)
+		public static ButtonAction CreateAction( string name, ButtonAction.Bind primary, ButtonAction.Bind secondary, string set = "General", bool enabled = true, Conditional allowedConditionals = Conditional.All )
 		{
-			ButtonAction action = new(name, primary, secondary, set, enabled, allowedConditionals);
-			RegisterButtonAction(action);
+			ButtonAction action = new( name, primary, secondary, set, enabled, allowedConditionals );
+			RegisterButtonAction( action );
 
 			return action;
 		}
@@ -414,49 +416,49 @@ namespace ReActionPlugin
 			return m_ActiveSets.ToArray();
 		}
 
-		public static ButtonAction GetAction(string actionName, bool complainOnMissing = false)
+		public static ButtonAction GetAction( string actionName, bool complainOnMissing = false )
 		{
-			foreach (var action in m_AllActions)
+			foreach ( var action in m_AllActions )
 			{
-				if (action.Name == actionName)
+				if ( action.Name == actionName )
 				{
 					return action;
 				}
 			}
 
-			if (complainOnMissing)
+			if ( complainOnMissing )
 			{
-				ReActionLogger.Warning($"{actionName} does not exists, lmao");
+				ReActionLogger.Warning( $"{actionName} does not exists, lmao" );
 			}
 
 			return MissingAction;
 		}
 
-		public static void SetActionSetActive(string setName, bool active)
+		public static void SetActionSetActive( string setName, bool active )
 		{
-			if (setName != "General")
+			if ( setName != "General" )
 			{
-				if (active)
+				if ( active )
 				{
-					m_ActiveSets.Add(setName);
+					m_ActiveSets.Add( setName );
 
-					foreach (var action in m_AllActions)
+					foreach ( var action in m_AllActions )
 					{
-						if (action.Set == setName)
+						if ( action.Set == setName )
 						{
-							m_EnabledActions.Add(action);
+							m_EnabledActions.Add( action );
 						}
 					}
 				}
 				else
 				{
-					m_ActiveSets.Remove(setName);
+					m_ActiveSets.Remove( setName );
 
-					foreach (var action in m_AllActions)
+					foreach ( var action in m_AllActions )
 					{
-						if (action.Set == setName)
+						if ( action.Set == setName )
 						{
-							m_EnabledActions.Remove(action);
+							m_EnabledActions.Remove( action );
 						}
 					}
 				}
@@ -467,25 +469,25 @@ namespace ReActionPlugin
 		{
 			m_AnalogLook = default;
 
-			if (!Input.MouseCursorVisible)
+			if ( !Input.MouseCursorVisible )
 			{
-				if (Input.GetAnalog(InputAnalog.RightStickX) == 0 && Input.GetAnalog(InputAnalog.RightStickY) == 0)
+				if ( Input.GetAnalog( InputAnalog.RightStickX ) == 0 && Input.GetAnalog( InputAnalog.RightStickY ) == 0 )
 				{
-					m_AnalogLook = new Angles(Input.MouseDelta.y * Preferences.Sensitivity, -Input.MouseDelta.x * Preferences.Sensitivity, 0f);
+					m_AnalogLook = new Angles( Input.MouseDelta.y * Preferences.Sensitivity, -Input.MouseDelta.x * Preferences.Sensitivity, 0f );
 
-					if (Preferences.InvertMousePitch)
+					if ( Preferences.InvertMousePitch )
 					{
 						m_AnalogLook.pitch = -m_AnalogLook.pitch;
 					}
 
-					if (Preferences.InvertMouseYaw)
+					if ( Preferences.InvertMouseYaw )
 					{
 						m_AnalogLook.yaw = -m_AnalogLook.yaw;
 					}
 				}
 				else
 				{
-					m_AnalogLook = new Angles(Input.GetAnalog(InputAnalog.RightStickY) * Time.Delta * Preferences.ControllerLookPitchSpeed, -(Input.GetAnalog(InputAnalog.RightStickX) * Time.Delta * Preferences.ControllerLookYawSpeed), 0f);
+					m_AnalogLook = new Angles( Input.GetAnalog( InputAnalog.RightStickY ) * Time.Delta * Preferences.ControllerLookPitchSpeed, -(Input.GetAnalog( InputAnalog.RightStickX ) * Time.Delta * Preferences.ControllerLookYawSpeed), 0f );
 				}
 			}
 		}
@@ -494,22 +496,22 @@ namespace ReActionPlugin
 		{
 			var move = Vector3.Zero;
 
-			if (GetAction("Forward"))
+			if ( GetAction( "Forward" ) )
 			{
 				move += Vector3.Forward;
 			}
 
-			if (GetAction("Backward"))
+			if ( GetAction( "Backward" ) )
 			{
 				move += Vector3.Backward;
 			}
 
-			if (GetAction("Left"))
+			if ( GetAction( "Left" ) )
 			{
 				move += Vector3.Left;
 			}
 
-			if (GetAction("Right"))
+			if ( GetAction( "Right" ) )
 			{
 				move += Vector3.Right;
 			}
@@ -519,7 +521,7 @@ namespace ReActionPlugin
 
 		static void UpdateButtonActions()
 		{
-			foreach (var action in m_EnabledActions)
+			foreach ( var action in m_EnabledActions )
 			{
 				action.Active =
 					(((action.ConditionalsState & action.Primary.Conditional) != Conditional.None) && (action.Primary.Modifiers == Modifiers.None || (ActiveModifiers & action.Primary.Modifiers) != Modifiers.None)) ||
@@ -529,49 +531,63 @@ namespace ReActionPlugin
 
 		static void ProcessControllersTouchpads()
 		{
-			foreach (var controller in Controller.All)
+			foreach ( var controller in Controller.All )
 			{
 				var touchpadCount = controller.GetTouchpadCount();
 
-				int controllerIndex = GetControllexIndexForDeviceId(controller.DeviceId);
+				int controllerIndex = GetControllexIndexForDeviceId( controller.DeviceId );
 
 				//initialise arrays
-				if (extraPerControllerData[controllerIndex].touchpadData == null)
+				if ( extraPerControllerData[controllerIndex].touchpadData == null )
 				{
 					var touchpadData_Array = new TouchpadData[touchpadCount][];
 
-					for (int touchpadIndex = 0; touchpadIndex < touchpadCount; touchpadIndex++)
+					for ( int touchpadIndex = 0; touchpadIndex < touchpadCount; touchpadIndex++ )
 					{
-						touchpadData_Array[touchpadIndex] = new TouchpadData[controller.GetMaxTouchpadFingers(touchpadIndex)];
+						touchpadData_Array[touchpadIndex] = new TouchpadData[controller.GetMaxTouchpadFingers( touchpadIndex )];
 					}
 
 					extraPerControllerData[controllerIndex].touchpadData = touchpadData_Array;
 				}
 
-				if (touchpadCount > 0)
+				if ( touchpadCount > 0 )
 				{
-					for (int touchpadIndex = 0; touchpadIndex < touchpadCount; touchpadIndex++)
+					for ( int touchpadIndex = 0; touchpadIndex < touchpadCount; touchpadIndex++ )
 					{
 						//each controller's touchpad has a max number of simultaneous fingers it can track
-						var fingerCount = controller.GetMaxTouchpadFingers(touchpadIndex);
+						var fingerCount = controller.GetMaxTouchpadFingers( touchpadIndex );
 
-						for (int fingerIndex = 0; fingerIndex < fingerCount; fingerIndex++)
+						for ( int fingerIndex = 0; fingerIndex < fingerCount; fingerIndex++ )
 						{
 							unsafe
 							{
 								bool down = false;
 								float x = 0, y = 0, pressure = 0;
 
-								if (SDL_GetGamepadTouchpadFinger(controller.GamepadHandle, touchpadIndex, fingerIndex, &down, &x, &y, &pressure))
+								if ( SDL_GetGamepadTouchpadFinger( controller.GamepadHandle, touchpadIndex, fingerIndex, &down, &x, &y, &pressure ) )
 								{
 									//lmao
 									ref var touchpadData = ref extraPerControllerData[controllerIndex].touchpadData[touchpadIndex][fingerIndex];
 
-									touchpadData = new TouchpadData(down, x, x - touchpadData.x, y, y - touchpadData.y, pressure);
+									touchpadData = new TouchpadData( down, x, x - touchpadData.x, y, y - touchpadData.y, pressure );
 								}
 							}
 						}
 					}
+				}
+			}
+		}
+
+		//the OnControllerConnected method might not fire for us before we start, but the game might actually have a registered controller
+		static void EnsureExtraDataCreated()
+		{
+			extraPerControllerData ??= [];
+
+			if ( extraPerControllerData.Length == 0 )
+			{
+				foreach ( var controller in Controller.All )
+				{
+					OnControllerConnected( controller.DeviceId );
 				}
 			}
 		}
