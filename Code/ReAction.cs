@@ -594,8 +594,6 @@ namespace ReActionPlugin
 
 		internal static void Frame()
 		{
-			ReinitialiseKeyStates();
-
 			UpdateButtonActions();
 
 			ProcessAnalogLook();
@@ -607,7 +605,9 @@ namespace ReActionPlugin
 
 		internal static void FrameEnd()
 		{
-			RefreshActionLists();
+			RefreshActionLists(); 
+
+			ReinitialiseKeyStates();
 		}
 	}
 }
