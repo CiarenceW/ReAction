@@ -53,6 +53,11 @@ namespace ReActionPlugin
 
 		public static void OnGameButton( ButtonCode scanCode, bool pressed )
 		{
+			//s&box doesn't have the full array of key codes that SDL has, so, instead of adding some more, they're just setting them to ButtonCode.BUTTON_CODE_NONE, so we have to deal with that :(
+			//TODO: maybe hook SdlEvents.Dispatch(Sdl.Event) instead? we could have the whole ass array of keys and there'll be no processing from s&box, free from big and oppressive Facepunch
+			if ( scanCode <= ButtonCode.BUTTON_CODE_NONE )
+				return;
+
 			keyStates[(int)scanCode].Down = pressed;
 
 			switch ( scanCode )
@@ -605,7 +610,7 @@ namespace ReActionPlugin
 
 		internal static void FrameEnd()
 		{
-			RefreshActionLists(); 
+			RefreshActionLists();
 
 			ReinitialiseKeyStates();
 		}
