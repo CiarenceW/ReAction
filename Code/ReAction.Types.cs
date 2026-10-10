@@ -1300,7 +1300,9 @@ namespace ReActionPlugin
 
 				m_Shitmask = ((m_Shitmask & ~k_DownFlagMask) | (Convert.ToUInt32( value )));
 
-				StateChanged |= (last ^ Down);
+				//if Down was true, and is now false, then state has changed, and vice versa
+				//turns out, we need this, for some reason s&box decides to send repeats of LShift and RShift, lol!
+				StateChanged |= (Down ^ last);
 			}
 		}
 

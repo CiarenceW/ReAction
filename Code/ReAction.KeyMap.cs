@@ -25,7 +25,7 @@ namespace ReActionPlugin
 		{
 			for ( int i = 0; i < (int)k_ButtonCodeLength; i++ )
 			{
-				var key = keyStates[i];
+				ref var key = ref keyStates[i];
 
 				key.StateChanged = false;
 
