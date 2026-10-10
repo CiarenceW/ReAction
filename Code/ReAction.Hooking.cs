@@ -40,6 +40,10 @@ namespace ReActionPlugin
 
 		delegate void SuperAwesomeReallyDescriptDelegateName( OnControllerDisconnectedDelegate originalMethod, int joystickId );
 
+		delegate void OnMouseWheelDelegate( float x, float y );
+
+		delegate void OnMouseBallIGuessYeahBecauseItWasAWheelNowItsABallItMakesSenseIThink( OnMouseWheelDelegate originalMethod, float x, float y );
+
 		[SkipHotload] static object onKey_Hook;
 
 		[SkipHotload] static object onMouse_Hook;
@@ -51,6 +55,8 @@ namespace ReActionPlugin
 		[SkipHotload] static object onControllerConnected_Hook;
 
 		[SkipHotload] static object onControllerDisconnected_Hook;
+
+		[SkipHotload] static object onMouseWheel_Hook;
 
 		[SkipHotload] static StartTrappingDelegate StartTrappingKeys;
 
@@ -97,6 +103,10 @@ namespace ReActionPlugin
 				var inputRouter_OnGameControllerDisconnected_MethodBase = inputRouterType.GetMethod( "OnGameControllerDisconnected", BindingFlags.NonPublic | BindingFlags.Static );
 
 				onControllerDisconnected_Hook = Activator.CreateInstance( hookType, [inputRouter_OnGameControllerDisconnected_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnControllerDisconnected ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<SuperAwesomeReallyDescriptDelegateName>()] );
+
+				var inputRouter_OnMouseWheel_MethodBase = inputRouterType.GetMethod( "OnMouseWheel", BindingFlags.NonPublic | BindingFlags.Static );
+
+				onMouseWheel_Hook = Activator.CreateInstance( hookType, [inputRouter_OnMouseWheel_MethodBase, typeof( ReAction ).GetMethod( nameof( ReActionOnMouseWheelHook ), BindingFlags.NonPublic | BindingFlags.Static ).CreateDelegate<OnMouseBallIGuessYeahBecauseItWasAWheelNowItsABallItMakesSenseIThink>()] );
 			}
 
 			m_Initialised = true;
@@ -126,6 +136,46 @@ namespace ReActionPlugin
 			OnGameButton( button, down );
 
 			originalMethod( button, down );
+		}
+
+		static void ReActionOnMouseWheelHook( OnMouseWheelDelegate originalMethod, float x, float y )
+		{
+			if ( y != 0 )
+			{
+				//idk why I do this to myself
+				OnGameButton( ButtonCode.MouseWheelUp + (int)Unsafe.BitCast<bool, byte>( y < 0 ), true );
+				OnGameButton( ButtonCode.MouseWheelUp + (int)Unsafe.BitCast<bool, byte>( y < 0 ), false );
+
+				/*if ( y < 0 )
+				{
+					OnGameButton( ButtonCode.MouseWheelDown, true );
+					OnGameButton( ButtonCode.MouseWheelDown, false );
+				}
+				else
+				{
+					OnGameButton( ButtonCode.MouseWheelUp, true );
+					OnGameButton( ButtonCode.MouseWheelUp, false );
+				}*/
+			}
+
+			if ( x != 0 )
+			{
+				OnGameButton( ButtonCode.MouseWheelLeft + (int)Unsafe.BitCast<bool, byte>( x > 0 ), true );
+				OnGameButton( ButtonCode.MouseWheelLeft + (int)Unsafe.BitCast<bool, byte>( x > 0 ), false );
+
+				/*if ( x < 0 )
+				{
+					OnGameButton( ButtonCode.MouseWheelLeft, true );
+					OnGameButton( ButtonCode.MouseWheelLeft, false );
+				}
+				else
+				{
+					OnGameButton( ButtonCode.MouseWheelRight, true );
+					OnGameButton( ButtonCode.MouseWheelRight, false );
+				}*/
+			}
+
+			originalMethod( x, y );
 		}
 
 		static void ReActionOnControllerAxisHook( OnControllerAxisDelegate originalMethod, int deviceId, ControllerAxis axis, int value )

@@ -735,14 +735,10 @@ namespace ReActionPlugin
 
 	public enum ButtonCode
 	{
-		[Hide]
-		BUTTON_CODE_INVALID = -1,
-		[Hide]
-		BUTTON_CODE_NONE,
-		[Hide]
-		BUTTON_CODE_FIRST = 0,
-		[Hide]
-		KEY_FIRST = 0,
+		[Hide] BUTTON_CODE_INVALID = -1,
+		[Hide] BUTTON_CODE_NONE,
+		[Hide] BUTTON_CODE_FIRST = 0,
+		[Hide] KEY_FIRST = 0,
 		KEY_NONE = 0,
 		KEY_0,
 		KEY_1,
@@ -1057,10 +1053,8 @@ namespace ReActionPlugin
 		KEY_CYRILLIC_IO,
 		KEY_CYRILLIC_ZHE,
 		KEY_CYRILLIC_BE,
-		[Hide]
-		KEY_LAST = 313,
-		[Hide]
-		MOUSE_FIRST,
+		[Hide] KEY_LAST = 313,
+		[Hide] MOUSE_FIRST,
 		MouseLeft = 314,
 		MouseRight,
 		MouseMiddle,
@@ -1068,80 +1062,10 @@ namespace ReActionPlugin
 		MouseForward,
 		MouseWheelUp,
 		MouseWheelDown,
-		[Hide]
-		MOUSE_LAST = MouseWheelDown,
-		[Hide]
-		MOUSE_COUNT = 7,
-		[Hide]
-		JOYSTICK_FIRST = 321,
-		[Hide]
-		JOYSTICK_FIRST_BUTTON = 321,
-		[Hide]
-		JOYSTICK_LAST_BUTTON = 448,
-		[Hide]
-		JOYSTICK_FIRST_POV_BUTTON,
-		[Hide]
-		JOYSTICK_LAST_POV_BUTTON = 464,
-		[Hide]
-		JOYSTICK_FIRST_AXIS_BUTTON,
-		[Hide]
-		JOYSTICK_LAST_AXIS_BUTTON = 512,
-		[Hide]
-		JOYSTICK_LAST = 512,
-		[Hide]
-		BUTTON_CODE_COUNT,
-		[Hide]
-		BUTTON_CODE_LAST = 512,
-		[Hide]
-		KEY_XBUTTON_UP = 449,
-		[Hide]
-		KEY_XBUTTON_RIGHT,
-		[Hide]
-		KEY_XBUTTON_DOWN,
-		[Hide]
-		KEY_XBUTTON_LEFT,
-		[Hide]
-		KEY_XBUTTON_A = 321,
-		[Hide]
-		KEY_XBUTTON_B,
-		[Hide]
-		KEY_XBUTTON_X,
-		[Hide]
-		KEY_XBUTTON_Y,
-		[Hide]
-		KEY_XBUTTON_LEFT_SHOULDER,
-		[Hide]
-		KEY_XBUTTON_RIGHT_SHOULDER,
-		[Hide]
-		KEY_XBUTTON_BACK,
-		[Hide]
-		KEY_XBUTTON_START,
-		[Hide]
-		KEY_XBUTTON_STICK1,
-		[Hide]
-		KEY_XBUTTON_STICK2,
-		[Hide]
-		KEY_XBUTTON_INACTIVE_START,
-		[Hide]
-		KEY_XSTICK1_RIGHT = 465,
-		[Hide]
-		KEY_XSTICK1_LEFT,
-		[Hide]
-		KEY_XSTICK1_DOWN,
-		[Hide]
-		KEY_XSTICK1_UP,
-		[Hide]
-		KEY_XBUTTON_LTRIGGER,
-		[Hide]
-		KEY_XBUTTON_RTRIGGER,
-		[Hide]
-		KEY_XSTICK2_RIGHT,
-		[Hide]
-		KEY_XSTICK2_LEFT,
-		[Hide]
-		KEY_XSTICK2_DOWN,
-		[Hide]
-		KEY_XSTICK2_UP
+		MouseWheelLeft,
+		MouseWheelRight,
+		[Hide] MOUSE_LAST = MouseWheelRight,
+		[Hide] MOUSE_COUNT = 9
 	}
 
 	internal struct KeyState()
