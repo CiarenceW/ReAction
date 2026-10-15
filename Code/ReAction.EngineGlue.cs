@@ -37,13 +37,14 @@ namespace ReActionPlugin
 		const short k_JoystickAxisMin = short.MinValue;
 		const short k_JoystickAxisMax = short.MaxValue;
 
-		unsafe static delegate* unmanaged< nint, int > SDL_GetNumGamepadTouchpadsDelegate = (delegate* unmanaged< nint, int >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetNumGamepadTouchpads" );
+		unsafe static delegate* unmanaged< nint, int > SDL_GetNumGamepadTouchpadsDelegate;
+		// = (delegate* unmanaged< nint, int >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetNumGamepadTouchpads" );
 
-		unsafe static delegate* unmanaged< nint, int, int > SDL_GetNumGamepadTouchpadFingerDelegate = (delegate* unmanaged< nint, int, int >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetNumGamepadTouchpadFingers" );
+		unsafe static delegate* unmanaged< nint, int, int > SDL_GetNumGamepadTouchpadFingerDelegate;
+		// = (delegate* unmanaged< nint, int, int >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetNumGamepadTouchpadFingers" );
 
-		unsafe static delegate* unmanaged< nint, int, int, bool*, float*, float*, float*, bool > SDL_GetGamepadTouchpadFingerDelegate = (delegate* unmanaged< nint, int, int, bool*, float*, float*, float*, bool >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetGamepadTouchpadFinger" );
-
-		unsafe static delegate* unmanaged< int, nint > SDL_GetGamepadFromIDDelegate = (delegate* unmanaged< int, nint >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetGamepadFromID" );
+		unsafe static delegate* unmanaged< nint, int, int, bool*, float*, float*, float*, bool > SDL_GetGamepadTouchpadFingerDelegate;
+		// = (delegate* unmanaged< nint, int, int, bool*, float*, float*, float*, bool >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetGamepadTouchpadFinger" );
 
 		static nint GetSDLLibraryHandle()
 		{
@@ -90,10 +91,13 @@ namespace ReActionPlugin
 		}
 #pragma warning restore IDE1006 // Naming Styles
 
+
 		internal static int SDL_GetNumGamepadTouchpads( nint gamepad )
 		{
 			unsafe
 			{
+				EnsureExportsHaveBeenImported();
+
 				return SDL_GetNumGamepadTouchpadsDelegate( gamepad );
 			}
 		}
@@ -102,13 +106,35 @@ namespace ReActionPlugin
 		{
 			unsafe
 			{
+				EnsureExportsHaveBeenImported();
+
 				return SDL_GetNumGamepadTouchpadFingerDelegate( gamepad, touchpad );
 			}
 		}
 
-		internal static unsafe bool SDL_GetGamepadTouchpadFinger( nint gamepad, int touchpad, int finger, bool* down, float* x, float* y, float* pressure )
+		internal unsafe static bool SDL_GetGamepadTouchpadFinger( nint gamepad, int touchpad, int finger, bool* down, float* x, float* y, float* pressure )
 		{
+			EnsureExportsHaveBeenImported();
+
 			return SDL_GetGamepadTouchpadFingerDelegate( gamepad, touchpad, finger, down, x, y, pressure );
+		}
+
+		static unsafe void EnsureExportsHaveBeenImported()
+		{
+			if ((nint)SDL_GetNumGamepadTouchpadsDelegate == 0 )
+			{
+				SDL_GetNumGamepadTouchpadsDelegate = (delegate* unmanaged< nint, int >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetNumGamepadTouchpads" );
+			}
+
+			if ((nint)SDL_GetNumGamepadTouchpadFingerDelegate == 0 )
+			{
+				SDL_GetNumGamepadTouchpadFingerDelegate = (delegate* unmanaged< nint, int, int >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetNumGamepadTouchpadFingers" );	
+			}
+
+			if ((nint)SDL_GetGamepadTouchpadFingerDelegate == 0 )
+			{
+				SDL_GetGamepadTouchpadFingerDelegate = (delegate* unmanaged< nint, int, int, bool*, float*, float*, float*, bool >)NativeLibrary.GetExport( GetSDLLibraryHandle(), "SDL_GetGamepadTouchpadFinger" );
+			}
 		}
 
 		static int controllerCount = 0;
