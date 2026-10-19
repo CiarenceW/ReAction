@@ -104,6 +104,11 @@ namespace ReActionPlugin
 			internal set;
 		}
 
+
+		/// <summary>
+		/// Has the action's Active state changed since last frame?
+		/// </summary>
+		[JsonIgnore, Hide] public bool StateChanged { get; internal set; }
 		public bool GetConditionState( Conditional conditional )
 		{
 			return (ConditionalsState & conditional) != Conditional.None;

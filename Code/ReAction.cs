@@ -528,9 +528,13 @@ namespace ReActionPlugin
 		{
 			foreach ( var action in m_EnabledActions )
 			{
+				bool lastActive = action.Active;
+
 				action.Active =
 					(((action.ConditionalsState & action.Primary.Conditional) != Conditional.None) && (action.Primary.Modifiers == Modifiers.None || (ActiveModifiers & action.Primary.Modifiers) != Modifiers.None)) ||
 					(((action.ConditionalsState & action.Secondary.Conditional) != Conditional.None) && (action.Secondary.Modifiers == Modifiers.None || (ActiveModifiers & action.Secondary.Modifiers) != Modifiers.None));
+
+				action.StateChanged ^= lastActive;
 			}
 		}
 
