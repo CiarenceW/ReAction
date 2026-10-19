@@ -92,10 +92,13 @@ namespace ReActionPlugin
 
 		public Conditional AllowedConditionals { get; set; } = Conditional.All;
 
-		[JsonIgnore, Hide]
-		public bool Active
+		/// <summary>
+		/// Is the action active? <br/>
+		/// You can set its state to false, if you so desire, with <see cref="ClearActive"/>.
+		/// </summary>
+		[JsonIgnore, Hide] public bool Active
 		{
-			//still get Enabled, because it might be disabled in between frames
+			//still check Enabled, because it might be disabled in between frames
 			get
 			{
 				return Enabled && field;
@@ -104,11 +107,22 @@ namespace ReActionPlugin
 			internal set;
 		}
 
+		/// <summary>
+		/// Sets the active state of this action to false.
+		/// </summary>
+		public void ClearActive()
+		{
+			Active = false;
+		}
 
 		/// <summary>
 		/// Has the action's Active state changed since last frame?
 		/// </summary>
 		[JsonIgnore, Hide] public bool StateChanged { get; internal set; }
+
+		/// <summary>
+		/// Would the action be active if it had this Conditional?
+		/// </summary>
 		public bool GetConditionState( Conditional conditional )
 		{
 			return (ConditionalsState & conditional) != Conditional.None;
